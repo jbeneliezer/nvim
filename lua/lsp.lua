@@ -82,20 +82,27 @@ local apply_settings = function()
 			},
 		},
 	})
-	lspconfig["clangd"].setup({})
-	lspconfig["bashls"].setup({})
+	lspconfig["clangd"].setup({
+		on_attach = on_attach,
+	})
+	lspconfig["bashls"].setup({
+		on_attach = on_attach,
+	})
+	lspconfig["rust_analyzer"].setup({
+		on_attach = on_attach,
+	})
 end
 
 
 M.setup = function()
-	local lspconfig = require("lspconfig")
-	local lsp_defaults = lspconfig.util.default_config
+	-- local lspconfig = require("lspconfig")
+	-- local lsp_defaults = lspconfig.util.default_config
 
 	-- lsp_defaults.capabilites = vim.tbl_deep_extend(
-	--	"force",
-	--	lsp_defaults.capabilites,
-	--	require("cmp_nvim_lsp").default_capabilities()
-	--)
+	-- 	"force",
+	-- 	lsp_defaults.capabilites,
+	-- 	require("cmp_nvim_lsp").default_capabilities()
+	-- )
 	local signs = {
 		{ name = "DiagnosticSignError", text = "" },
 		{ name = "DiagnosticSignWarn",  text = "" },

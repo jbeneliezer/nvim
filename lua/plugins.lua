@@ -50,7 +50,7 @@ local plugins = {
 		end,
 		config = function()
 			require("nvim-treesitter.configs").setup({
-				ensure_installed = { "c", "lua", "vim", "help", "query" },
+				ensure_installed = { "c", "rust", "lua", "vim", "help", "query" },
 				auto_install = true,
 				highlight = { enable = true, }
 			})
@@ -284,7 +284,7 @@ local plugins = {
 				local gs = package.loaded.gitsigns
 
 				local keymap = function(mode, lhs, rhs, opts, description)
-					local local_opts = opts or {noremap = true, silent = true, buffer = bufnr}
+					local local_opts = opts or { noremap = true, silent = true, buffer = bufnr }
 					local_opts["desc"] = description or "which_key_ignore"
 					vim.keymap.set(mode, lhs, rhs, local_opts)
 					-- end
@@ -310,18 +310,18 @@ local plugins = {
 				wk.register({
 					g = {
 						name = "Gitsigns",
-						s = { '<cmd>Gitsigns stage_hunk<cr>', 'Stage Hunk', mode = {"n", "v"}},
-						r = { 'Gitsigns reset_hunk<CR>', 'Reset Hunk', mode = {"n", "v"}},
-						S = { gs.stage_buffer, 'Stage Buffer'},
-						u = { gs.undo_stage_hunk, 'Undo Stage Hunk'},
-						R = { gs.reset_buffer, 'Reset Buffer'},
-						p = { gs.preview_hunk, 'Preview Hunk'},
-						b = { gs.toggle_current_line_blame, 'Toggle Blame'},
-						d = { gs.diffthis, 'Diff'},
-						D = { function() gs.diffthis('~') end, 'Diff with Head'},
-						x = {gs.toggle_deleted, "Toggle Deleted"},
+						s = { '<cmd>Gitsigns stage_hunk<cr>', 'Stage Hunk', mode = { "n", "v" } },
+						r = { 'Gitsigns reset_hunk<CR>', 'Reset Hunk', mode = { "n", "v" } },
+						S = { gs.stage_buffer, 'Stage Buffer' },
+						u = { gs.undo_stage_hunk, 'Undo Stage Hunk' },
+						R = { gs.reset_buffer, 'Reset Buffer' },
+						p = { gs.preview_hunk, 'Preview Hunk' },
+						b = { gs.toggle_current_line_blame, 'Toggle Blame' },
+						d = { gs.diffthis, 'Diff' },
+						D = { function() gs.diffthis('~') end, 'Diff with Head' },
+						x = { gs.toggle_deleted, "Toggle Deleted" },
 					},
-				}, { prefix = "<leader>", buffer = bufnr})
+				}, { prefix = "<leader>", buffer = bufnr })
 			end,
 		},
 	},
@@ -347,6 +347,37 @@ local plugins = {
 				['zb']    = { 'zb', { '250' } },
 			}
 			require("neoscroll.config").set_mappings(mappings)
+		end,
+	},
+	{
+		"cbochs/grapple.nvim",
+		dependencies = { "nvim-lua/plenary.nvim" },
+	},
+	{
+		"akinsho/bufferline.nvim",
+		tag = "v3.5.0",
+		dependencies = { "nvim-tree/nvim-web-devicons" },
+		config = function()
+			require("bufferline").setup({
+				options = {
+					-- numbers = function(opts)
+					-- 	local key = require("grapple").key(opts.id)
+					-- 	if key ~= nil then
+					-- 		return string.format("%d", key)
+					-- 	else
+					-- 		return ""
+					-- 	end
+					-- end,
+					numbers = "ordinal",
+					indicator = { style = "none", },
+					diagnostics = "nvim_lsp",
+					show_buffer_close_icons = false,
+					show_close_icon = false,
+					-- separator_style = { ")", ")" },
+					-- separator_style = { "", "" },
+					separator_style = { "", "" },
+				}
+			})
 		end,
 	},
 }
