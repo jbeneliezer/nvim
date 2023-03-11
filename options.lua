@@ -2,7 +2,7 @@ local options = {
 	backup = false,
 	background = "dark",
 	cmdheight = 1,
-	completeopt = { "menuone", "noselect" },
+	completeopt = { "menu", "menuone", "noselect" },
 	conceallevel = 0,
 	colorcolumn = "80",
 	fileencoding = "utf-8",
@@ -20,16 +20,15 @@ local options = {
 	splitright = true,
 	swapfile = false,
 	termguicolors = true,
-	timeoutlen = 0,
+	timeoutlen = 100,
 	undodir = vim.fn.stdpath("config") .. "/.undo",
 	undofile = true,
 	updatetime = 300,
 	writebackup = false,
 	expandtab = false,
-	shiftwidth = 2,
-	tabstop = 2,
+	shiftwidth = 4,
+	tabstop = 4,
 	cursorline = true,
-	cursorcolumn = true,
 	number = true,
 	relativenumber = true,
 	numberwidth = 4,
@@ -46,7 +45,7 @@ end
 
 vim.opt.shortmess:append("c")
 vim.cmd("set whichwrap+=<,>,[,],h,l")
-vim.cmd([[set iskeyword+=-]])
+vim.cmd("set iskeyword+=-")
 
 -- clipboard
 vim.opt.clipboard:append("unnamedplus")
