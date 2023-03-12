@@ -5,9 +5,10 @@ return {
 	end,
 	config = function()
 		require("nvim-treesitter.configs").setup({
-			ensure_installed = { "c", "rust", "lua", "vim", "help", "query" },
+			ensure_installed = { "c", "rust", "lua", "vim", "help", "query", "python" },
 			auto_install = true,
 			highlight = { enable = true },
 		})
 	end,
 }
+
