@@ -52,10 +52,12 @@ local mappings = {
 	f = {
 		name = "Telescope",
 		f = { "<cmd>Telescope find_files<cr>", "Find Files" },
-		r = { "<cmd>Telescope oldfiles<cr>", "Find Files" },
+		r = { "<cmd>Telescope oldfiles<cr>", "Find Recent" },
 		g = { "<cmd>Telescope live_grep<cr>", "Live Grep" },
-		b = { "<cmd>Telescope buffers<cr>", "Find Buffer" },
+		b = { "<cmd>Telescope git_branches<cr>", "Find Branch" },
+		c = { "<cmd>Telescope git_commits<cr>", "Find Commit" },
 		h = { "<cmd>Telescope help_tags<cr>", "Help Tags" },
+		H = { "<cmd>Telescope highlights<cr>", "Highlights" },
 		k = { "<cmd>Telescope keymaps<cr>", "Keymaps" },
 	},
 }
