@@ -1,6 +1,5 @@
 local M = {}
 
-
 local lsp_highlight_document = function(client)
 	-- Set autocommands conditional on server_capabilities
 	if client.server_capabilities.document_highlight then
@@ -96,57 +95,85 @@ local apply_settings = function()
 	})
 end
 
+M.mason = {
+	"williamboman/mason.nvim",
+	config = true,
+}
 
-M.setup = function()
-	-- local lspconfig = require("lspconfig")
-	-- local lsp_defaults = lspconfig.util.default_config
+M.mason_lspconfig = {
+	"williamboman/mason-lspconfig.nvim",
+	config = function()
+		require("mason-lspconfig").setup({
+			ensure_installed = {
+				"lua_ls",
+				"clangd",
+				"bashls",
+				"rust_analyzer",
+				"pylsp",
+			},
+		})
+	end,
+}
 
-	-- lsp_defaults.capabilites = vim.tbl_deep_extend(
-	-- 	"force",
-	-- 	lsp_defaults.capabilites,
-	-- 	require("cmp_nvim_lsp").default_capabilities()
-	-- )
-	local signs = {
-		{ name = "DiagnosticSignError", text = "" },
-		{ name = "DiagnosticSignWarn",  text = "" },
-		{ name = "DiagnosticSignHint",  text = "" },
-		{ name = "DiagnosticSignInfo",  text = "" },
-	}
+M.toggle_lsp = {
+	"WhoIsSethDaniel/toggle-lsp-diagnostics.nvim",
+	config = function()
+		require("toggle_lsp_diagnostics").init(vim.diagnostic.config())
+	end,
+}
 
-	for _, sign in ipairs(signs) do
-		vim.fn.sign_define(sign.name, { texthl = sign.name, text = sign.text, numhl = "" })
-	end
+M.lspconfig = {
+	"neovim/nvim-lspconfig",
+	config = function()
+		-- local lspconfig = require("lspconfig")
+		-- local lsp_defaults = lspconfig.util.default_config
 
-	local config = {
-		virtual_text = true,
-		signs = {
-			active = signs,
-		},
-		update_in_insert = true,
-		underline = true,
-		severity_sort = true,
-		float = {
-			focusable = false,
-			style = "minimal",
+		-- lsp_defaults.capabilites = vim.tbl_deep_extend(
+		-- 	"force",
+		-- 	lsp_defaults.capabilites,
+		-- 	require("cmp_nvim_lsp").default_capabilities()
+		-- )
+		local signs = {
+			{ name = "DiagnosticSignError", text = "" },
+			{ name = "DiagnosticSignWarn",  text = "" },
+			{ name = "DiagnosticSignHint",  text = "" },
+			{ name = "DiagnosticSignInfo",  text = "" },
+		}
+
+		for _, sign in ipairs(signs) do
+			vim.fn.sign_define(sign.name, { texthl = sign.name, text = sign.text, numhl = "" })
+		end
+
+		local config = {
+			virtual_text = true,
+			signs = {
+				active = signs,
+			},
+			update_in_insert = true,
+			underline = true,
+			severity_sort = true,
+			float = {
+				focusable = false,
+				style = "minimal",
+				border = "rounded",
+				source = "always",
+				header = "",
+				prefix = "",
+			},
+		}
+
+		vim.diagnostic.config(config)
+
+		vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
 			border = "rounded",
-			source = "always",
-			header = "",
-			prefix = "",
-		},
-	}
+		})
 
-	vim.diagnostic.config(config)
+		vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
+			border = "rounded",
+		})
 
-	vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
-		border = "rounded",
-	})
-
-	vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
-		border = "rounded",
-	})
-
-	apply_settings()
-end
-
+		apply_settings()
+	end,
+}
 
 return M
