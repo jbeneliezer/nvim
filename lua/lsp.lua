@@ -91,6 +91,9 @@ local apply_settings = function()
 	lspconfig["rust_analyzer"].setup({
 		on_attach = on_attach,
 	})
+	lspconfig["pylsp"].setup({
+		on_attach = on_attach,
+	})
 end
 
 

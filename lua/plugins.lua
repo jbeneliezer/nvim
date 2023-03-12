@@ -52,7 +52,7 @@ local plugins = {
 			require("nvim-treesitter.configs").setup({
 				ensure_installed = { "c", "rust", "lua", "vim", "help", "query" },
 				auto_install = true,
-				highlight = { enable = true, }
+				highlight = { enable = true },
 			})
 		end,
 	},
@@ -117,7 +117,7 @@ local plugins = {
 				snippet = {
 					expand = function(args)
 						luasnip.lsp_expand(args.body)
-					end
+					end,
 				},
 				mapping = {
 					["<C-k>"] = cmp.mapping.select_prev_item(),
@@ -243,7 +243,13 @@ local plugins = {
 		"williamboman/mason-lspconfig.nvim",
 		config = function()
 			require("mason-lspconfig").setup({
-				ensure_installed = { "lua_ls", "clangd", "bashls", "rust_analyzer" }
+				ensure_installed = {
+					"lua_ls",
+					"clangd",
+					"bashls",
+					"rust_analyzer",
+					"pylsp",
+				},
 			})
 		end,
 	},
@@ -257,6 +263,26 @@ local plugins = {
 		"neovim/nvim-lspconfig",
 		config = function()
 			require("lsp").setup()
+		end,
+	},
+	{
+		"jose-elias-alvarez/null-ls.nvim",
+		config = function()
+			local null_ls = require("null-ls")
+			null_ls.setup({
+				sources = {
+					null_ls.builtins.formatting.stylua,
+					null_ls.builtins.formatting.autopep8,
+					null_ls.builtins.formatting.rustfmt,
+					null_ls.builtins.formatting.clang_format.with({
+						extra_args = { "--style={BasedOnStyle: llvm, IndentWidth: 4" },
+					}),
+					null_ls.builtins.diagnostics.flake8,
+					null_ls.builtins.diagnostics.cppcheck.with({
+						extra_args = { "--enable=warning,performance,portability", "$FILENAME" },
+					}),
+				},
+			})
 		end,
 	},
 	{
@@ -275,7 +301,7 @@ local plugins = {
 					},
 				},
 			})
-		end
+		end,
 	},
 	{
 		"lewis6991/gitsigns.nvim",
@@ -291,34 +317,47 @@ local plugins = {
 				end
 
 				-- Navigation
-				keymap('n', ']c', function()
-					if vim.wo.diff then return ']c' end
-					vim.schedule(function() gs.next_hunk() end)
-					return '<Ignore>'
+				keymap("n", "]c", function()
+					if vim.wo.diff then
+						return "]c"
+					end
+					vim.schedule(function()
+						gs.next_hunk()
+					end)
+					return "<Ignore>"
 				end, { expr = true })
 
-				keymap('n', '[c', function()
-					if vim.wo.diff then return '[c' end
-					vim.schedule(function() gs.prev_hunk() end)
-					return '<Ignore>'
+				keymap("n", "[c", function()
+					if vim.wo.diff then
+						return "[c"
+					end
+					vim.schedule(function()
+						gs.prev_hunk()
+					end)
+					return "<Ignore>"
 				end, { expr = true })
 
 				-- Text object
-				keymap({ 'o', 'x' }, 'ih', ':<C-U>Gitsigns select_hunk<CR>')
+				keymap({ "o", "x" }, "ih", ":<C-U>Gitsigns select_hunk<CR>")
 
 				local wk = require("which-key")
 				wk.register({
 					g = {
 						name = "Gitsigns",
-						s = { '<cmd>Gitsigns stage_hunk<cr>', 'Stage Hunk', mode = { "n", "v" } },
-						r = { 'Gitsigns reset_hunk<CR>', 'Reset Hunk', mode = { "n", "v" } },
-						S = { gs.stage_buffer, 'Stage Buffer' },
-						u = { gs.undo_stage_hunk, 'Undo Stage Hunk' },
-						R = { gs.reset_buffer, 'Reset Buffer' },
-						p = { gs.preview_hunk, 'Preview Hunk' },
-						b = { gs.toggle_current_line_blame, 'Toggle Blame' },
-						d = { gs.diffthis, 'Diff' },
-						D = { function() gs.diffthis('~') end, 'Diff with Head' },
+						s = { "<cmd>Gitsigns stage_hunk<cr>", "Stage Hunk", mode = { "n", "v" } },
+						r = { "Gitsigns reset_hunk<CR>", "Reset Hunk", mode = { "n", "v" } },
+						S = { gs.stage_buffer, "Stage Buffer" },
+						u = { gs.undo_stage_hunk, "Undo Stage Hunk" },
+						R = { gs.reset_buffer, "Reset Buffer" },
+						p = { gs.preview_hunk, "Preview Hunk" },
+						b = { gs.toggle_current_line_blame, "Toggle Blame" },
+						d = { gs.diffthis, "Diff" },
+						D = {
+							function()
+								gs.diffthis("~")
+							end,
+							"Diff with Head",
+						},
 						x = { gs.toggle_deleted, "Toggle Deleted" },
 					},
 				}, { prefix = "<leader>", buffer = bufnr })
@@ -334,17 +373,17 @@ local plugins = {
 			require("neoscroll").setup({ easing_function = "sine" })
 
 			local mappings = {
-				['<C-u>'] = { 'scroll', { '-vim.wo.scroll', 'true', '100' } },
-				['<C-d>'] = { 'scroll', { 'vim.wo.scroll', 'true', '100' } },
-				['K']     = { 'scroll', { '-vim.wo.scroll', 'true', '100' } },
-				['J']     = { 'scroll', { 'vim.wo.scroll', 'true', '100' } },
-				['<C-b>'] = { 'scroll', { '-vim.api.nvim_win_get_height(0)', 'true', '450' } },
-				['<C-f>'] = { 'scroll', { 'vim.api.nvim_win_get_height(0)', 'true', '450' } },
+				["<C-u>"] = { "scroll", { "-vim.wo.scroll", "true", "100" } },
+				["<C-d>"] = { "scroll", { "vim.wo.scroll", "true", "100" } },
+				["K"] = { "scroll", { "-vim.wo.scroll", "true", "100" } },
+				["J"] = { "scroll", { "vim.wo.scroll", "true", "100" } },
+				["<C-b>"] = { "scroll", { "-vim.api.nvim_win_get_height(0)", "true", "450" } },
+				["<C-f>"] = { "scroll", { "vim.api.nvim_win_get_height(0)", "true", "450" } },
 				-- ['<C-y>'] = {'scroll', {'-0.10', 'false', '100'}},
 				-- ['<C-e>'] = {'scroll', { '0.10', 'false', '100'}},
-				['zt']    = { 'zt', { '250' } },
-				['zz']    = { 'zz', { '250' } },
-				['zb']    = { 'zb', { '250' } },
+				["zt"] = { "zt", { "250" } },
+				["zz"] = { "zz", { "250" } },
+				["zb"] = { "zb", { "250" } },
 			}
 			require("neoscroll.config").set_mappings(mappings)
 		end,
@@ -360,25 +399,18 @@ local plugins = {
 		config = function()
 			require("bufferline").setup({
 				options = {
-					-- numbers = function(opts)
-					-- 	local key = require("grapple").key(opts.id)
-					-- 	if key ~= nil then
-					-- 		return string.format("%d", key)
-					-- 	else
-					-- 		return ""
-					-- 	end
-					-- end,
 					numbers = "ordinal",
-					indicator = { style = "none", },
+					indicator = { style = "none" },
 					diagnostics = "nvim_lsp",
 					show_buffer_close_icons = false,
 					show_close_icon = false,
-					-- separator_style = { ")", ")" },
-					-- separator_style = { "", "" },
 					separator_style = { "", "" },
-				}
+				},
 			})
 		end,
+	},
+	{
+		"tpope/vim-dispatch",
 	},
 }
 
