@@ -1,3 +1,7 @@
+OS = function ()
+	return vim.loop.os_uname().sysname
+end
+
 require("settings.options")
 
 -- setup plugins

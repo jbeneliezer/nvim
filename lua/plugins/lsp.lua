@@ -21,7 +21,6 @@ local lsp_highlight_document = function(client)
 	end
 end
 
-
 local lsp_keymaps = function(bufnr)
 	local default_opts = { noremap = true, silent = true, buffer = bufnr }
 	local keymap = function(mode, lhs, rhs, opts, description)
@@ -30,30 +29,37 @@ local lsp_keymaps = function(bufnr)
 		vim.keymap.set(mode, lhs, rhs, local_opts)
 		-- end
 	end
-	keymap("n", "gD", vim.lsp.buf.declaration, default_opts, "goto declaration")
-	keymap("n", "gd", vim.lsp.buf.definition, default_opts, "goto definition")
-	keymap("n", "gi", vim.lsp.buf.implementation, default_opts, "goto implementation")
-	keymap("n", "<leader>lr", vim.lsp.buf.rename, default_opts, "rename")
-	keymap("n", "gr", vim.lsp.buf.references, default_opts, "goto references")
-	-- keymap("n", "gl", vim.diagnostic.default_open_float, default_opts)
-	keymap("n", "<leader>lf", function() vim.lsp.buf.format { async = true } end, default_opts, "format")
-	keymap("n", "[d", vim.diagnostic.goto_prev, default_opts, "previous diagnostic")
-	keymap("n", "]d", vim.diagnostic.goto_next, default_opts, "next diagnostic")
-	keymap("n", "gN", vim.diagnostic.goto_prev, default_opts, "previous diagnostic")
-	keymap("n", "gn", vim.diagnostic.goto_next, default_opts, "next diagnostic")
-	vim.keymap.set("n", "<leader>lt", "<Plug>(toggle-lsp-diag-vtext)",
-	{ noremap = false, silent = true, buffer = bufnr, desc = "toggle vtext" })
-	vim.keymap.set("n", "<leader>lu", "<Plug>(toggle-lsp-diag-underline)",
-	{ noremap = false, silent = true, buffer = bufnr, desc = "toggle underline" })
-	-- keymap("n", "<leader>lq", vim.diagnostic.setloclist, opts, )
-end
+	keymap({"n", "v"}, "gD", vim.lsp.buf.declaration, default_opts, "goto declaration")
+	keymap({"n", "v"}, "gd", vim.lsp.buf.definition, default_opts, "goto definition")
+	keymap({"n", "v"}, "gi", vim.lsp.buf.implementation, default_opts, "goto implementation")
+	keymap({"n", "v"}, "gr", vim.lsp.buf.references, default_opts, "goto references")
+	keymap({"n", "v"}, "[d", vim.diagnostic.goto_prev, default_opts, "previous diagnostic")
+	keymap({"n", "v"}, "]d", vim.diagnostic.goto_next, default_opts, "next diagnostic")
+	keymap({"n", "v"}, "gN", vim.diagnostic.goto_prev, default_opts, "previous diagnostic")
+	keymap({"n", "v"}, "gn", vim.diagnostic.goto_next, default_opts, "next diagnostic")
 
+	local wk = require("which-key")
+	wk.register({
+		l = {
+			name = "Lsp",
+			i = { "<cmd>LspInfo<cr>", "Info" },
+			r = { vim.lsp.buf.rename, "Rename" },
+			f = {
+				function()
+					vim.lsp.buf.format({ async = true })
+				end,
+				"Format",
+			},
+			t = { "<Plug>(toggle-lsp-diag-vtext)", "Toggle Vtext", noremap = false },
+			u = { "<Plug>(toggle-lsp-diag-underline)", "Toggle Underline", noremap = false },
+		},
+	}, { prefix = "<leader>", mode = { "n", "v" }, buffer = bufnr })
+end
 
 local on_attach = function(client, bufnr)
 	lsp_keymaps(bufnr)
 	lsp_highlight_document(client)
 end
-
 
 local apply_settings = function()
 	local lspconfig = require("lspconfig")
@@ -63,11 +69,11 @@ local apply_settings = function()
 			Lua = {
 				runtime = {
 					-- Tell the language server which version of Lua you're using (most likely LuaJIT in the case of Neovim)
-					version = 'LuaJIT',
+					version = "LuaJIT",
 				},
 				diagnostics = {
 					-- Get the language server to recognize the `vim` global
-					globals = { 'vim' },
+					globals = { "vim" },
 				},
 				workspace = {
 					-- Make the server aware of Neovim runtime files
@@ -135,9 +141,9 @@ M.lspconfig = {
 		-- )
 		local signs = {
 			{ name = "DiagnosticSignError", text = "" },
-			{ name = "DiagnosticSignWarn",  text = "" },
-			{ name = "DiagnosticSignHint",  text = "" },
-			{ name = "DiagnosticSignInfo",  text = "" },
+			{ name = "DiagnosticSignWarn", text = "" },
+			{ name = "DiagnosticSignHint", text = "" },
+			{ name = "DiagnosticSignInfo", text = "" },
 		}
 
 		for _, sign in ipairs(signs) do

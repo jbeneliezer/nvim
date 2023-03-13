@@ -38,24 +38,24 @@ return {
 			local wk = require("which-key")
 			wk.register({
 				g = {
-					name = "Gitsigns",
-					s = { "<cmd>Gitsigns stage_hunk<cr>", "Stage Hunk", mode = { "n", "v" } },
-					r = { "Gitsigns reset_hunk<CR>", "Reset Hunk", mode = { "n", "v" } },
-					S = { gs.stage_buffer, "Stage Buffer" },
-					u = { gs.undo_stage_hunk, "Undo Stage Hunk" },
-					R = { gs.reset_buffer, "Reset Buffer" },
-					p = { gs.preview_hunk, "Preview Hunk" },
-					b = { gs.toggle_current_line_blame, "Toggle Blame" },
-					d = { gs.diffthis, "Diff" },
+					name = "Git",
+					j = { require("gitsigns").next_hunk, "Next Hunk" },
+					k = { require("gitsigns").prev_hunk, "Prev Hunk" },
+					t = { require("gitsigns").blame_line, "Blame" },
+					p = { require("gitsigns").preview_hunk, "Preview Hunk" },
+					r = { require("gitsigns").reset_hunk, "Reset Hunk" },
+					R = { require("gitsigns").reset_buffer, "Reset Buffer" },
+					s = { require("gitsigns").stage_hunk, "Stage Hunk" },
+					S = { require("gitsigns").stage_buffer, "Stage Buffer" },
+					d = { require("gitsigns").diffthis, "Diff" },
 					D = {
 						function()
-							gs.diffthis("~")
+							require("gitsigns").diffthis("~")
 						end,
 						"Diff with Head",
 					},
-					x = { gs.toggle_deleted, "Toggle Deleted" },
 				},
-			}, { prefix = "<leader>", buffer = bufnr })
+			}, { prefix = "<leader>", buffer = bufnr, mode = { "n", "v" } })
 		end,
 	},
 }

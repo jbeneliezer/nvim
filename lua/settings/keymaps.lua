@@ -18,64 +18,6 @@ end
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
-
-local ok, wk = pcall(require, "which-key")
-if not ok then
-	return
-end
-
-local wk_opts = { prefix = "<leader>" }
-local wk_vopts = { mode = "v", prefix = "<leader>" }
-local wk_topts = { mode = "t", prefix = "<leader>" }
-
-local mappings = {
-	o = { "<c-w>o", "fullscreen" },
-	e = { "<cmd>Lex 25<cr>", "Explorer" },
-	w = { "<cmd>w<cr>", "Save" },
-	q = { "<cmd>q<cr>", "Quit" },
-	c = { "<cmd>bdelete<cr>", "Close" },
-	j = { "<cmd>m .+1<cr>==", "which_key_ignore" },
-	k = { "<cmd>m .-2<cr>==", "which_key_ignore" },
-	m = { require("grapple").toggle, "Toggle Tag" },
-	["/"] = { "<Plug>(comment_toggle_linewise_current)", "Comment", noremap = false },
-	["1"] = { "<cmd>lua require('bufferline').go_to_buffer(1, true)<cr>", "which_key_ignore" },
-	["2"] = { "<cmd>lua require('bufferline').go_to_buffer(2, true)<cr>", "which_key_ignore" },
-	["3"] = { "<cmd>lua require('bufferline').go_to_buffer(3, true)<cr>", "which_key_ignore" },
-	["4"] = { "<cmd>lua require('bufferline').go_to_buffer(4, true)<cr>", "which_key_ignore" },
-	["5"] = { "<cmd>lua require('bufferline').go_to_buffer(5, true)<cr>", "which_key_ignore" },
-	["6"] = { "<cmd>lua require('bufferline').go_to_buffer(6, true)<cr>", "which_key_ignore" },
-	["7"] = { "<cmd>lua require('bufferline').go_to_buffer(7, true)<cr>", "which_key_ignore" },
-	["8"] = { "<cmd>lua require('bufferline').go_to_buffer(8, true)<cr>", "which_key_ignore" },
-	["9"] = { "<cmd>lua require('bufferline').go_to_buffer(9, true)<cr>", "which_key_ignore" },
-	L = { "<cmd>BufferLineMoveNext<cr>", "which_key_ignore" },
-	H = { "<cmd>BufferLineMovePrev<cr>", "which_key_ignore" },
-	f = {
-		name = "Telescope",
-		f = { "<cmd>Telescope find_files<cr>", "Find Files" },
-		r = { "<cmd>Telescope oldfiles<cr>", "Find Recent" },
-		g = { "<cmd>Telescope live_grep<cr>", "Live Grep" },
-		b = { "<cmd>Telescope git_branches<cr>", "Find Branch" },
-		c = { "<cmd>Telescope git_commits<cr>", "Find Commit" },
-		h = { "<cmd>Telescope help_tags<cr>", "Help Tags" },
-		H = { "<cmd>Telescope highlights<cr>", "Highlights" },
-		k = { "<cmd>Telescope keymaps<cr>", "Keymaps" },
-	},
-}
-
-local vmappings = {
-	j = { "<cmd>m '>+1<cr>gv=gv" },
-	k = { "<cmd>m '<-2<cr>gv=gv" },
-	["/"] = { "<Plug>(comment_toggle_linewise_visual)gv", "Comment", noremap = false },
-}
-
-local tmappings = {
-
-}
-
-wk.register(mappings, wk_opts)
-wk.register(vmappings, wk_vopts)
-wk.register(tmappings, wk_topts)
-
 keymap("n", "<c-n>", "J", default_opts)
 keymap("v", "<c-n>", "J", default_opts)
 
@@ -109,11 +51,135 @@ keymap("v", ">", ">gv", default_opts)
 keymap("v", "p", '"_dP', default_opts)
 
 -- Toggleterm
-keymap({ 'n', 't' }, '<c-t>', '<cmd>ToggleTerm<cr>', default_opts, 'terminal')
+keymap({ "n", "t" }, "<c-t>", "<cmd>ToggleTerm<cr>", default_opts, "terminal")
 
 local joshuto = require("toggleterm.terminal").Terminal:new({ cmd = "joshuto", dir = vim.fn.getcwd(), hidden = false })
 function _JOSHUTO_TOGGLE()
 	joshuto:toggle()
 end
 
-keymap({ 'n', 't' }, '<c-e>', "<cmd>lua _JOSHUTO_TOGGLE()<cr>", default_opts, 'explorer')
+keymap({ "n", "t" }, "<c-e>", "<cmd>lua _JOSHUTO_TOGGLE()<cr>", default_opts, "explorer")
+
+local ok, wk = pcall(require, "which-key")
+if not ok then
+	return
+end
+
+local wk_opts = { prefix = "<leader>" }
+local wk_vopts = { mode = "v", prefix = "<leader>" }
+local wk_topts = { mode = "t", prefix = "<leader>" }
+
+local mappings = {
+	o = { "<cmd>ToggleOnly<cr>", "fullscreen" },
+	e = { "<cmd>Lex 25<cr>", "Explorer" },
+	w = { "<cmd>w<cr>", "Save" },
+	q = { "<cmd>q<cr>", "Quit" },
+	c = { "<cmd>bdelete<cr>", "Close" },
+	j = { "<cmd>m .+1<cr>==", "which_key_ignore" },
+	k = { "<cmd>m .-2<cr>==", "which_key_ignore" },
+	m = { require("grapple").toggle, "Toggle Tag" },
+	t = { require("dap").toggle_breakpoint, "Breakpoint" },
+	["/"] = { "<Plug>(comment_toggle_linewise_current)", "Comment", noremap = false },
+	["1"] = {
+		function()
+			require("bufferline").go_to_buffer(1, true)
+		end,
+		"which_key_ignore",
+	},
+	["2"] = {
+		function()
+			require("bufferline").go_to_buffer(2, true)
+		end,
+		"which_key_ignore",
+	},
+	["3"] = {
+		function()
+			require("bufferline").go_to_buffer(3, true)
+		end,
+		"which_key_ignore",
+	},
+	["4"] = {
+		function()
+			require("bufferline").go_to_buffer(4, true)
+		end,
+		"which_key_ignore",
+	},
+	["5"] = {
+		function()
+			require("bufferline").go_to_buffer(5, true)
+		end,
+		"which_key_ignore",
+	},
+	["6"] = {
+		function()
+			require("bufferline").go_to_buffer(6, true)
+		end,
+		"which_key_ignore",
+	},
+	["7"] = {
+		function()
+			require("bufferline").go_to_buffer(7, true)
+		end,
+		"which_key_ignore",
+	},
+	["8"] = {
+		function()
+			require("bufferline").go_to_buffer(8, true)
+		end,
+		"which_key_ignore",
+	},
+	["9"] = {
+		function()
+			require("bufferline").go_to_buffer(9, true)
+		end,
+		"which_key_ignore",
+	},
+	L = { "<cmd>BufferLineMoveNext<cr>", "which_key_ignore" },
+	H = { "<cmd>BufferLineMovePrev<cr>", "which_key_ignore" },
+	f = {
+		name = "Telescope",
+		f = { require("telescope.builtin").find_files, "Find Files" },
+		r = { require("telescope.builtin").oldfiles, "Find Recent" },
+		g = { require("telescope.builtin").live_grep, "Live Grep" },
+		b = { require("telescope.builtin").git_branches, "Find Branch" },
+		c = { require("telescope.builtin").git_commits, "Find Commit" },
+		h = { require("telescope.builtin").help_tags, "Help Tags" },
+		H = { require("telescope.builtin").highlights, "Highlights" },
+		k = { require("telescope.builtin").keymaps, "Keymaps" },
+		p = { require("telescope").extensions.project.project, "Project" },
+	},
+	d = {
+		name = "Dap",
+		a = {
+			function()
+				require("dapui").elements.watches.add(vim.fn.input("Expression: "))
+			end,
+			"Add Watch",
+		},
+		u = { require("dapui").toggle, "UI" },
+		t = { require("dap").toggle_breakpoint, "Breakpoint" },
+		c = { require("dap").continue, "Continue" },
+		r = { require("dap").run_last, "Run Last" },
+		R = { require("dap").repl.toggle, "Repl" },
+		p = { require("dap").pause, "Pause" },
+		q = { require("dap").terminate, "Quit" },
+		s = {
+			name = "Step",
+			i = { require("dap").step_into, "Into" },
+			o = { require("dap").step_over, "Over" },
+			u = { require("dap").step_out, "Out" },
+		},
+	},
+}
+
+local vmappings = {
+	j = { "<cmd>m '>+1<cr>gv=gv" },
+	k = { "<cmd>m '<-2<cr>gv=gv" },
+	["/"] = { "<Plug>(comment_toggle_linewise_visual)gv", "Comment", noremap = false },
+}
+
+local tmappings = {}
+
+wk.register(mappings, wk_opts)
+wk.register(vmappings, wk_vopts)
+wk.register(tmappings, wk_topts)
