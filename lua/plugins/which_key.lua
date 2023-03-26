@@ -9,6 +9,9 @@ return {
 					g = false,
 				},
 			},
+			window = {
+				border = "rounded",
+			},
 		})
 	end,
 }

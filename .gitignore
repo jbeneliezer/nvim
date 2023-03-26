@@ -47,5 +47,3 @@ lazy-lock.json
 
 # lua_ls
 .luarc.json
-
-plugin/packer_compiled.lua

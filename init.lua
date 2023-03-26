@@ -1,10 +1,10 @@
-OS = function ()
+OS = function()
 	return vim.loop.os_uname().sysname
 end
 
 require("settings.options")
 
--- setup plugins
+-- get lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
 	vim.fn.system({
@@ -18,6 +18,13 @@ if not vim.loop.fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
-require("lazy").setup(require("plugins"))
+local lazy_opts = {
+	ui = {
+		border = "rounded",
+	},
+}
+
+require("lazy").setup(require("plugins"), lazy_opts)
 
 require("settings.keymaps")
+require("settings.autocmds")

@@ -176,10 +176,14 @@ return {
 			virt_lines = false,
 			virt_text_win_col = nil,
 		})
-		vim.fn.sign_define("DapBreakpoint", { text = "", texthl = "DiagnosticSignError", linehl = "", numhl = "" })
+		-- vim.fn.sign_define("DapBreakpoint", { text = "", texthl = "DiagnosticSignError", linehl = "", numhl = "" })
+		-- vim.fn.sign_define("DapBreakpoint", { text = "", texthl = "DiagnosticSignError", linehl = "", numhl = "" })
+		vim.fn.sign_define("DapBreakpoint", { text = "", texthl = "DiagnosticSignError", linehl = "", numhl = "" })
 		vim.fn.sign_define(
 			"DapStopped",
-			{ text = "", texthl = "String", linehl = "CursorLine", numhl = "CursorLine" }
+			-- { text = "", texthl = "String", linehl = "CursorLine", numhl = "CursorLine" }
+			-- { text = "", texthl = "String", linehl = "CursorLine", numhl = "CursorLine" }
+			{ text = "", texthl = "String", linehl = "CursorLine", numhl = "CursorLine" }
 		)
 
 		dap.listeners.before["event_terminated"]["my-plugin"] = function(session, body)

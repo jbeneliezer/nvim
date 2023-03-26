@@ -35,27 +35,27 @@ return {
 			-- Text object
 			keymap({ "o", "x" }, "ih", ":<C-U>Gitsigns select_hunk<CR>")
 
-			local wk = require("which-key")
-			wk.register({
-				g = {
-					name = "Git",
-					j = { require("gitsigns").next_hunk, "Next Hunk" },
-					k = { require("gitsigns").prev_hunk, "Prev Hunk" },
-					t = { require("gitsigns").blame_line, "Blame" },
-					p = { require("gitsigns").preview_hunk, "Preview Hunk" },
-					r = { require("gitsigns").reset_hunk, "Reset Hunk" },
-					R = { require("gitsigns").reset_buffer, "Reset Buffer" },
-					s = { require("gitsigns").stage_hunk, "Stage Hunk" },
-					S = { require("gitsigns").stage_buffer, "Stage Buffer" },
-					d = { require("gitsigns").diffthis, "Diff" },
-					D = {
-						function()
-							require("gitsigns").diffthis("~")
-						end,
-						"Diff with Head",
-					},
-				},
-			}, { prefix = "<leader>", buffer = bufnr, mode = { "n", "v" } })
+			-- local wk = require("which-key")
+			-- wk.register({
+			-- 	g = {
+			-- 		name = "Git",
+			-- 		j = { require("gitsigns").next_hunk, "Next Hunk" },
+			-- 		k = { require("gitsigns").prev_hunk, "Prev Hunk" },
+			-- 		t = { require("gitsigns").blame_line, "Blame" },
+			-- 		p = { require("gitsigns").preview_hunk, "Preview Hunk" },
+			-- 		r = { require("gitsigns").reset_hunk, "Reset Hunk" },
+			-- 		R = { require("gitsigns").reset_buffer, "Reset Buffer" },
+			-- 		s = { require("gitsigns").stage_hunk, "Stage Hunk" },
+			-- 		S = { require("gitsigns").stage_buffer, "Stage Buffer" },
+			-- 		d = { require("gitsigns").diffthis, "Diff" },
+			-- 		D = {
+			-- 			function()
+			-- 				require("gitsigns").diffthis("~")
+			-- 			end,
+			-- 			"Diff with Head",
+			-- 		},
+			-- 	},
+			-- }, { prefix = "<leader>", buffer = bufnr, mode = { "n", "v" } })
 		end,
 	},
 }

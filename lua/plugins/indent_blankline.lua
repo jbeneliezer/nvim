@@ -8,10 +8,9 @@ return {
 
 		vim.cmd("hi IndentBlanklineContextStart guisp=#000000 gui=nocombine")
 
-		vim.api.nvim_create_autocmd({ "Colorscheme" }, {
-			desc = "remove underline from context start",
-			command = "hi IndentBlanklineContextStart guisp=#000000 gui=nocombine",
-			group = vim.api.nvim_create_augroup("RemoveUnderline", { clear = true }),
-		})
+		-- vim.api.nvim_create_autocmd({ "Colorscheme" }, {
+		-- 	desc = "remove underline from context start",
+		-- 	command = "hi IndentBlanklineContextStart guisp=#000000 gui=nocombine",
+		-- })
 	end,
 }

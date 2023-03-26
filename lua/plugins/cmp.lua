@@ -10,6 +10,16 @@ return {
 		"hrsh7th/cmp-nvim-lua",
 		"L3MON4D3/LuaSnip",
 		"rafamadriz/friendly-snippets",
+		{
+			"zbirenbaum/copilot-cmp",
+			config = function()
+				require("copilot_cmp").setup({
+					formatters = {
+						-- insert_text = require("copilot_cmp.format").remove_existing,
+					},
+				})
+			end,
+		},
 	},
 	config = function()
 		local cmp = require("cmp")
@@ -101,8 +111,7 @@ return {
 					vim_item.kind = string.format("%s", kind_icons[vim_item.kind])
 					-- vim_item.kind = string.format('%s %s', kind_icons[vim_item.kind], vim_item.kind) -- This concatonates the icons with the name of the item kind
 					vim_item.menu = ({
-						--[[ cmp_tabnine = "Tab9", ]]
-						--[[ copilot = "Cop", ]]
+						copilot = "[Copilot]",
 						nvim_lua = "[Nvim]",
 						nvim_lsp = "[Lsp]",
 						luasnip = "[Snip]",
@@ -113,8 +122,7 @@ return {
 				end,
 			},
 			sources = {
-				--[[ { name = "cmp_tabnine" }, ]]
-				--[[ { name = "copilot" }, ]]
+				-- { name = "copilot" },
 				{ name = "nvim_lua" },
 				{ name = "nvim_lsp" },
 				{ name = "luasnip" },
@@ -127,17 +135,32 @@ return {
 			},
 			experimental = {
 				ghost_text = true,
-				native_menu = false,
 			},
 			window = {
 				completion = {
 					border = "rounded",
-					scrollbar = "|",
+					scrollbar = false,
 				},
 				documentation = {
 					border = "rounded",
 				},
 			},
+		})
+
+		cmp.setup.cmdline("/", {
+			mapping = cmp.mapping.preset.cmdline(),
+			sources = {
+				{ name = "buffer" },
+			},
+		})
+
+		cmp.setup.cmdline(":", {
+			mapping = cmp.mapping.preset.cmdline(),
+			sources = cmp.config.sources({
+				{ name = "path" },
+			}, {
+				{ name = "cmdline" },
+			}),
 		})
 	end,
 }

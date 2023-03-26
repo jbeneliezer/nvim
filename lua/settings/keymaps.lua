@@ -1,10 +1,30 @@
 local default_opts = { noremap = true, silent = true }
---[[ local term_opts = { silent = true } ]]
 local keymap = function(mode, lhs, rhs, opts, description)
 	local local_opts = opts
 	local_opts["desc"] = description or "which_key_ignore"
 	vim.keymap.set(mode, lhs, rhs, local_opts)
 	-- end
+end
+
+local toggle_source = function(source)
+	local cmp = require("cmp")
+	local toggle = false
+	local sources = cmp.get_config().sources
+
+	for i = #sources, 1, -1 do
+		if sources[i].name == source then
+			table.remove(sources, i)
+			toggle = true
+		end
+	end
+
+	if not toggle then
+		table.insert(sources, { name = source })
+	end
+
+	cmp.setup.buffer({
+		sources = sources,
+	})
 end
 
 -- Modes
@@ -51,14 +71,32 @@ keymap("v", ">", ">gv", default_opts)
 keymap("v", "p", '"_dP', default_opts)
 
 -- Toggleterm
-keymap({ "n", "t" }, "<c-t>", "<cmd>ToggleTerm<cr>", default_opts, "terminal")
+keymap({ "n", "t" }, "<c-t>", "<cmd>ToggleTerm<cr>", default_opts)
 
-local joshuto = require("toggleterm.terminal").Terminal:new({ cmd = "joshuto", dir = vim.fn.getcwd(), hidden = false })
-function _JOSHUTO_TOGGLE()
-	joshuto:toggle()
-end
+-- LF
+keymap({ "n", "v" }, "<c-e>", require("lf").start, default_opts)
 
-keymap({ "n", "t" }, "<c-e>", "<cmd>lua _JOSHUTO_TOGGLE()<cr>", default_opts, "explorer")
+-- lazygit
+local lazygit = require("toggleterm.terminal").Terminal:new({
+	cmd = "lazygit",
+	hidden = true,
+	op_open = function(_)
+		vim.cmd("startinsert!")
+	end,
+})
+
+keymap({ "n", "v", "t" }, "<c-g>", function()
+	lazygit:toggle()
+end, default_opts)
+
+-- Todo-comments
+keymap("n", "]t", function()
+	require("todo-comments").jump_next()
+end, default_opts)
+
+keymap("n", "[t", function()
+	require("todo-comments").jump_prev()
+end, default_opts)
 
 local ok, wk = pcall(require, "which-key")
 if not ok then
@@ -70,15 +108,21 @@ local wk_vopts = { mode = "v", prefix = "<leader>" }
 local wk_topts = { mode = "t", prefix = "<leader>" }
 
 local mappings = {
-	o = { "<cmd>ToggleOnly<cr>", "fullscreen" },
-	e = { "<cmd>Lex 25<cr>", "Explorer" },
-	w = { "<cmd>w<cr>", "Save" },
-	q = { "<cmd>q<cr>", "Quit" },
+	C = {
+		function()
+			toggle_source("copilot")
+		end,
+		"Toggle Copilot",
+	},
 	c = { "<cmd>bdelete<cr>", "Close" },
+	e = { "<cmd>Lex 25<cr>", "Explorer" },
 	j = { "<cmd>m .+1<cr>==", "which_key_ignore" },
 	k = { "<cmd>m .-2<cr>==", "which_key_ignore" },
 	m = { require("grapple").toggle, "Toggle Tag" },
-	t = { require("dap").toggle_breakpoint, "Breakpoint" },
+	o = { "<cmd>ToggleOnly<cr>", "fullscreen" },
+	q = { "<cmd>q<cr>", "Quit" },
+	t = { require("trouble").toggle, "Trouble" },
+	w = { "<cmd>w<cr>", "Save" },
 	["/"] = { "<Plug>(comment_toggle_linewise_current)", "Comment", noremap = false },
 	["1"] = {
 		function()
@@ -136,18 +180,6 @@ local mappings = {
 	},
 	L = { "<cmd>BufferLineMoveNext<cr>", "which_key_ignore" },
 	H = { "<cmd>BufferLineMovePrev<cr>", "which_key_ignore" },
-	f = {
-		name = "Telescope",
-		f = { require("telescope.builtin").find_files, "Find Files" },
-		r = { require("telescope.builtin").oldfiles, "Find Recent" },
-		g = { require("telescope.builtin").live_grep, "Live Grep" },
-		b = { require("telescope.builtin").git_branches, "Find Branch" },
-		c = { require("telescope.builtin").git_commits, "Find Commit" },
-		h = { require("telescope.builtin").help_tags, "Help Tags" },
-		H = { require("telescope.builtin").highlights, "Highlights" },
-		k = { require("telescope.builtin").keymaps, "Keymaps" },
-		p = { require("telescope").extensions.project.project, "Project" },
-	},
 	d = {
 		name = "Dap",
 		a = {
@@ -169,6 +201,50 @@ local mappings = {
 			o = { require("dap").step_over, "Over" },
 			u = { require("dap").step_out, "Out" },
 		},
+	},
+	f = {
+		name = "Telescope",
+		a = { require("telescope.builtin").autocommands, "Autocommands" },
+		c = { require("telescope.builtin").commands, "Commands" },
+		C = {
+			function()
+				require("telescope.builtin").colorscheme({ enable_preview = true })
+			end,
+			"Colorscheme",
+		},
+		f = { require("telescope.builtin").find_files, "Find Files" },
+		r = { require("telescope.builtin").oldfiles, "Find Recent" },
+		g = { require("telescope.builtin").live_grep, "Live Grep" },
+		h = { require("telescope.builtin").help_tags, "Help Tags" },
+		H = { require("telescope.builtin").highlights, "Highlights" },
+		k = { require("telescope.builtin").keymaps, "Keymaps" },
+		p = { require("telescope").extensions.project.project, "Project" },
+	},
+	g = {
+		name = "Git",
+		b = { require("telescope.builtin").git_branches, "Find Branch" },
+		c = { require("telescope.builtin").git_commits, "Find Commit" },
+		d = { require("gitsigns").diffthis, "Diff", mode = { "n", "v" } },
+		D = {
+			function()
+				require("gitsigns").diffthis("~")
+			end,
+			"Diff with Head",
+		},
+		j = { require("gitsigns").next_hunk, "Next Hunk", mode = { "n", "v" } },
+		k = { require("gitsigns").prev_hunk, "Prev Hunk", mode = { "n", "v" } },
+		p = { require("gitsigns").preview_hunk, "Preview Hunk", mode = { "n", "v" } },
+		r = { require("gitsigns").reset_hunk, "Reset Hunk", mode = { "n", "v" } },
+		R = { require("gitsigns").reset_buffer, "Reset Buffer", mode = { "n", "v" } },
+		t = { require("gitsigns").blame_line, "Blame", mode = { "n", "v" } },
+		s = { require("gitsigns").stage_hunk, "Stage Hunk", mode = { "n", "v" } },
+		S = { require("gitsigns").stage_buffer, "Stage Buffer", mode = { "n", "v" } },
+	},
+	["?"] = {
+		name = "ChatGPT",
+		["?"] = { require("chatgpt").openChat, "Open Chat" },
+		a = { require("chatgpt").selectAwesomePrompt, "Select Prompt" },
+		e = { require("chatgpt").edit_with_instructions, "Edit with Instructions", { mode = { "n", "v" } } },
 	},
 }
 

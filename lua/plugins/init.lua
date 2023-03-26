@@ -1,25 +1,40 @@
+-- local colorschemes = require("plugins.colorschemes")
+-- local lsp = require("plugins.lsp")
+
 return {
 	require("plugins.autopairs"),
 	require("plugins.bufferline"),
+	require("plugins.chatgpt"),
 	require("plugins.cmp"),
-	require("plugins.colorscheme"),
+	require("plugins.gruvbox"),
 	require("plugins.comment"),
+	require("plugins.copilot"),
 	require("plugins.dap"),
 	require("plugins.dispatch"),
+	require("plugins.everblush"),
 	require("plugins.fugitive"),
 	require("plugins.gitsigns"),
 	require("plugins.grapple"),
 	require("plugins.indent_blankline"),
+	require("plugins.lf"),
 	require("plugins.lsp").mason,
 	require("plugins.lsp").mason_lspconfig,
 	require("plugins.lsp").toggle_lsp,
+	require("plugins.lsp").rust_tools,
 	require("plugins.lsp").lspconfig,
 	require("plugins.maximize"),
 	require("plugins.neoscroll"),
+	require("plugins.nightfox"),
 	require("plugins.null_ls"),
 	require("plugins.project"),
 	require("plugins.telescope"),
+	require("plugins.todo_comments"),
 	require("plugins.toggleterm"),
+	require("plugins.tokyonight"),
+	require("plugins.transparent"),
+	require("plugins.trouble"),
 	require("plugins.treesitter"),
 	require("plugins.which_key"),
 }
+
+-- return vim.tbl_extend("keep", other_plugins, colorschemes, lsp)
