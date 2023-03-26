@@ -28,5 +28,15 @@ return {
 				delete_session = "d",
 			},
 		})
+
+		local wk = require("which-key")
+		wk.register({
+			["?"] = {
+				name = "ChatGPT",
+				["?"] = { require("chatgpt").openChat, "Open Chat" },
+				a = { require("chatgpt").selectAwesomePrompt, "Select Prompt" },
+				e = { require("chatgpt").edit_with_instructions, "Edit with Instructions" },
+			},
+		}, { mode = { "n", "v" }, prefix = "<leader>" })
 	end,
 }

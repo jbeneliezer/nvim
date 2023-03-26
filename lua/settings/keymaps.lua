@@ -240,12 +240,6 @@ local mappings = {
 		s = { require("gitsigns").stage_hunk, "Stage Hunk", mode = { "n", "v" } },
 		S = { require("gitsigns").stage_buffer, "Stage Buffer", mode = { "n", "v" } },
 	},
-	["?"] = {
-		name = "ChatGPT",
-		["?"] = { require("chatgpt").openChat, "Open Chat" },
-		a = { require("chatgpt").selectAwesomePrompt, "Select Prompt" },
-		e = { require("chatgpt").edit_with_instructions, "Edit with Instructions", { mode = { "n", "v" } } },
-	},
 }
 
 local vmappings = {
