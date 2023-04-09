@@ -38,13 +38,7 @@ end
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
 
-keymap("n", "<c-n>", "J", default_opts)
-keymap("v", "<c-n>", "J", default_opts)
-
-keymap("n", "<s-j>", "<c-d>zz", default_opts)
-keymap("n", "<s-k>", "<c-u>zz", default_opts)
-keymap("v", "<s-j>", "<c-d>zz", default_opts)
-keymap("v", "<s-k>", "<c-u>zz", default_opts)
+keymap({ "n", "v" }, "<c-n>", "J", default_opts)
 
 -- Windows
 keymap("n", "<c-h>", "<c-w>h", default_opts)

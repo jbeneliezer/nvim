@@ -19,13 +19,13 @@ return {
 			callback({ type = "server", host = config.host or "127.0.0.1", port = config.port or 8086 })
 		end
 
-		if OS() == "Linux" then
+		if _OS() == "Linux" then
 			dap.adapters.cppdbg = {
 				id = "cppdbg",
 				type = "executable",
 				command = "/home/jb/.local/bin/cpptools-linux/extension/debugAdapters/bin/OpenDebugAD7",
 			}
-		elseif OS() == "Windows_NT" then
+		elseif _OS() == "Windows_NT" then
 			dap.adapters.cppdbg = {
 				id = "cppdbg",
 				type = "executable",

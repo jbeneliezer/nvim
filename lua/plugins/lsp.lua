@@ -127,6 +127,9 @@ M.mason_lspconfig = {
 
 		require("mason-lspconfig").setup_handlers({
 			function(server_name)
+				if server_name == "rust_analyzer" then
+					return
+				end
 				require("lspconfig")[server_name].setup({
 					capabilities = lsp_capabilities,
 					on_attach = on_attach,
@@ -134,6 +137,8 @@ M.mason_lspconfig = {
 				})
 			end,
 		})
+
+		require("rust-tools").inlay_hints.enable()
 	end,
 }
 
@@ -147,8 +152,18 @@ M.toggle_lsp = {
 M.rust_tools = {
 	"simrat39/rust-tools.nvim",
 	opts = {
+		inlay_hints = {
+			show_parameter_hints = false,
+		},
 		server = {
 			on_attach = on_attach,
+		},
+		dap = {
+			adapter = {
+				type = "executable",
+				command = "lldb-vscode",
+				name = "rt_lldb",
+			},
 		},
 	},
 }

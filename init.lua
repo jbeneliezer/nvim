@@ -1,4 +1,4 @@
-OS = function()
+_G._OS = function()
 	return vim.loop.os_uname().sysname
 end
 

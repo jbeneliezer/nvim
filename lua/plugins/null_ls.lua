@@ -8,7 +8,9 @@ return {
 			sources = {
 				null_ls.builtins.formatting.stylua,
 				null_ls.builtins.formatting.rustfmt,
-				null_ls.builtins.formatting.black,
+				null_ls.builtins.formatting.black.with({
+					extra_args = { "--line-length", "80" },
+				}),
 				null_ls.builtins.formatting.clang_format.with({
 					extra_args = { "--style={BasedOnStyle: llvm, IndentWidth: 4, AccessModifierOffset: -4}" },
 				}),
