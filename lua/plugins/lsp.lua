@@ -39,9 +39,9 @@ local servers = {
 
 local signs = {
 	{ name = "DiagnosticSignError", text = "" },
-	{ name = "DiagnosticSignWarn",  text = "" },
-	{ name = "DiagnosticSignHint",  text = "" },
-	{ name = "DiagnosticSignInfo",  text = "" },
+	{ name = "DiagnosticSignWarn", text = "" },
+	{ name = "DiagnosticSignHint", text = "" },
+	{ name = "DiagnosticSignInfo", text = "" },
 }
 
 local diag_config = {
@@ -80,21 +80,23 @@ local on_attach = function(_, bufnr)
 		-- end
 	end
 
-	keymap({ "n", "v" }, "gD", vim.lsp.buf.declaration, default_opts, "goto declaration")
-	keymap({ "n", "v" }, "gd", vim.lsp.buf.definition, default_opts, "goto definition")
-	keymap({ "n", "v" }, "gi", vim.lsp.buf.implementation, default_opts, "goto implementation")
-	keymap({ "n", "v" }, "gr", vim.lsp.buf.references, default_opts, "goto references")
-	keymap({ "n", "v" }, "[d", vim.diagnostic.goto_prev, default_opts, "previous diagnostic")
-	keymap({ "n", "v" }, "]d", vim.diagnostic.goto_next, default_opts, "next diagnostic")
-	keymap({ "n", "v" }, "gN", vim.diagnostic.goto_prev, default_opts, "previous diagnostic")
-	keymap({ "n", "v" }, "gn", vim.diagnostic.goto_next, default_opts, "next diagnostic")
+	keymap({ "n", "v" }, "gD", vim.lsp.buf.declaration, default_opts, "Goto Declaration")
+	keymap({ "n", "v" }, "gd", vim.lsp.buf.definition, default_opts, "Goto Definition")
+	keymap({ "n", "v" }, "gi", vim.lsp.buf.implementation, default_opts, "Goto Implementation")
+	keymap({ "n", "v" }, "gr", vim.lsp.buf.references, default_opts, "Goto References")
+	keymap({ "n", "v" }, "[d", vim.diagnostic.goto_prev, default_opts, "Previous Diagnostic")
+	keymap({ "n", "v" }, "]d", vim.diagnostic.goto_next, default_opts, "Next Diagnostic")
+	keymap({ "n", "v" }, "gN", vim.diagnostic.goto_prev, default_opts, "Previous Diagnostic")
+	keymap({ "n", "v" }, "gn", vim.diagnostic.goto_next, default_opts, "Next Diagnostic")
 
 	local wk = require("which-key")
 	wk.register({
 		l = {
 			name = "Lsp",
+			a = { vim.lsp.buf.code_action, "Code Action" },
 			i = { "<cmd>LspInfo<cr>", "Info" },
 			-- r = { vim.lsp.buf.rename, "Rename" },
+			l = { "<Plug>(toggle-lsp-diag)", "Toggle Diagnostics", noremap = false },
 			r = { require("telescope.builtin").lsp_references, "References" },
 			f = {
 				function()
