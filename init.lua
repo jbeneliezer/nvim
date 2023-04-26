@@ -20,7 +20,7 @@ local lazy_opts = {
     },
 }
 
-require("lazy").setup(require("plugins"), lazy_opts)
+require("lazy").setup("plugins", lazy_opts)
 
 require("settings.keymaps")
 require("settings.autocmds")
