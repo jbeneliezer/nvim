@@ -8,6 +8,8 @@ return {
         "Joakker/lua-json5",
         "jbyuki/one-small-step-for-vimkind",
         "mfussenegger/nvim-dap-python",
+        "nvim-neotest/neotest",
+        "nvim-neotest/neotest-python",
     },
     config = function()
         local dap = require("dap")
@@ -138,6 +140,19 @@ return {
             library = {
                 plugins = { "nvim-dap-ui" },
                 types = true,
+            },
+        })
+
+        require("neotest").setup({
+            adapters = {
+                require("neotest-python")({
+                    dap = {
+                        justMyCode = false,
+                        console = "integratedTerminal",
+                    },
+                    args = { "--log-level", "DEBUG", "--quiet" },
+                    runner = "pytest",
+                }),
             },
         })
 

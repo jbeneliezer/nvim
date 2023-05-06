@@ -18,6 +18,7 @@ return {
             d = { name = "Dap" },
             f = { name = "Telescope" },
             g = { name = "Git" },
+            n = { name = "Neotest" },
         }, { prefix = "<leader>" })
     end,
 }

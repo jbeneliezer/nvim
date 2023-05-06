@@ -30,16 +30,32 @@ local servers = {
         },
         single_file_support = true,
     },
-    bashls = {},
     rust_analyzer = {},
-    pylsp = {},
+    pyright = {
+        single_file_support = true,
+        settings = {
+            pyright = {
+                disableLanguageServices = false,
+                disableOrganizeImports = false,
+            },
+            python = {
+                analysis = {
+                    autoImportCompletions = true,
+                    autoSearchPaths = true,
+                    diagnosticMode = "workspace",
+                    typeCheckingMode = "basic",
+                    useLibraryCodeForTypes = true,
+                },
+            },
+        },
+    },
 }
 
 local signs = {
     { name = "DiagnosticSignError", text = "" },
-    { name = "DiagnosticSignWarn", text = "" },
-    { name = "DiagnosticSignHint", text = "" },
-    { name = "DiagnosticSignInfo", text = "" },
+    { name = "DiagnosticSignWarn",  text = "" },
+    { name = "DiagnosticSignHint",  text = "" },
+    { name = "DiagnosticSignInfo",  text = "" },
 }
 
 local diag_config = {

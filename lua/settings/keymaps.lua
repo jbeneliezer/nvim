@@ -141,6 +141,19 @@ keymap("n", "<leader>dsi", require("dap").step_into, default_opts, "Into")
 keymap("n", "<leader>dso", require("dap").step_over, default_opts, "Over")
 keymap("n", "<leader>dsu", require("dap").step_out, default_opts, "Out")
 
+-- Neotest
+keymap("n", "<leader>nm", require("neotest").run.run, default_opts, "Run Test")
+keymap("n", "<leader>nM", function()
+    require("neotest").run.run({ strategy = "dap" })
+end, default_opts, "Debug Test")
+keymap("n", "<leader>nf", function()
+    require("neotest").run.run({ vim.fn.expand("%") })
+end, default_opts, "Run All Tests")
+keymap("n", "<leader>nF", function()
+    require("neotest").run.run({ vim.fn.expand("%"), strategy = "dap" })
+end, default_opts, "Debug All Tests")
+keymap("n", "<leader>ns", require("neotest").summary.toggle, default_opts, "Test Summary")
+
 -- Telescope
 keymap("n", "<leader>fa", require("telescope.builtin").autocommands, default_opts, "Autocommands")
 keymap("n", "<leader>fc", require("telescope.builtin").commands, default_opts, "Commands")
