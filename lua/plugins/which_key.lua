@@ -15,7 +15,12 @@ return {
         })
 
         require("which-key").register({
-            d = { name = "Dap" },
+            d = {
+                name = "Dap",
+                {
+                    s = { name = "Step" },
+                },
+            },
             f = { name = "Telescope" },
             g = { name = "Git" },
             n = { name = "Neotest" },

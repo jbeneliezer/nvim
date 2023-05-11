@@ -5,8 +5,10 @@ return {
         { "<leader>vs", "<cmd>:VenvSelect<cr>", desc = "VenvSelect" },
         { "<leader>vc", "<cmd>:VenvSelectCached<cr", desc = "VenvSelectCached" },
     },
+    enabled = false,
     config = function()
         require("venv-selector").setup({
+            search = false,
             dap_enabled = true,
         })
         local ok, wk = pcall(require, "which-key")
