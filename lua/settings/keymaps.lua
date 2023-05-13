@@ -38,7 +38,6 @@ keymap("v", "<leader>j", "<cmd>m '>+1<cr>gv=gv<cr>")
 keymap("n", "<leader>k", "<cmd>m .-2<cr>==<cr>")
 keymap("v", "<leader>k", "<cmd>m '>-2<cr>gv=gv<cr>")
 
-keymap("n", "<leader>m", require("grapple").toggle, default_opts, "Toggle Tag")
 keymap("n", "<leader>o", "<c-w>o", default_opts, "Fullscreen")
 keymap("n", "<leader>q", "<cmd>q<cr>", default_opts, "Quit")
 keymap("n", "<leader>t", require("trouble").toggle, default_opts, "Trouble")
