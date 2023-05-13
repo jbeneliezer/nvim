@@ -29,4 +29,7 @@ return {
     {
         "Shatur/neovim-ayu",
     },
+    {
+        "neanias/everforest-nvim",
+    },
 }
