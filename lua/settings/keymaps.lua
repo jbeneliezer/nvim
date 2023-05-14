@@ -33,9 +33,9 @@ keymap({ "n", "v" }, "K", "<c-u>zz")
 keymap("n", "<leader>c", "<cmd>bdelete<cr>", default_opts, "Close")
 keymap("n", "<leader>e", "<cmd>Lex 25<cr>", default_opts, "Explorer")
 
-keymap("n", "<leader>j", "<cmd>m .+1<cr>==<cr>")
+keymap("n", "<leader>j", "<cmd>m .+1<cr>==")
 keymap("v", "<leader>j", "<cmd>m '>+1<cr>gv=gv<cr>")
-keymap("n", "<leader>k", "<cmd>m .-2<cr>==<cr>")
+keymap("n", "<leader>k", "<cmd>m .-2<cr>==")
 keymap("v", "<leader>k", "<cmd>m '>-2<cr>gv=gv<cr>")
 
 keymap("n", "<leader>o", "<c-w>o", default_opts, "Fullscreen")
@@ -65,33 +65,11 @@ keymap("n", "<s-l>", "<cmd>BufferLineCycleNext<cr>")
 keymap("n", "<s-h>", "<cmd>BufferLineCyclePrev<cr>")
 keymap("n", "<leader>L", "<cmd>BufferLineMoveNext<cr>")
 keymap("n", "<leader>H", "<cmd>BufferLineMovePrev<cr>")
-keymap("n", "<leader>1", function()
-    require("bufferline").go_to_buffer(1, true)
-end)
-keymap("n", "<leader>2", function()
-    require("bufferline").go_to_buffer(2, true)
-end)
-keymap("n", "<leader>3", function()
-    require("bufferline").go_to_buffer(3, true)
-end)
-keymap("n", "<leader>4", function()
-    require("bufferline").go_to_buffer(4, true)
-end)
-keymap("n", "<leader>5", function()
-    require("bufferline").go_to_buffer(5, true)
-end)
-keymap("n", "<leader>6", function()
-    require("bufferline").go_to_buffer(6, true)
-end)
-keymap("n", "<leader>7", function()
-    require("bufferline").go_to_buffer(7, true)
-end)
-keymap("n", "<leader>8", function()
-    require("bufferline").go_to_buffer(8, true)
-end)
-keymap("n", "<leader>9", function()
-    require("bufferline").go_to_buffer(9, true)
-end)
+for i = 1, 9 do
+    keymap({"n", "v"}, "<leader>" .. i, function ()
+        require("bufferline").go_to_buffer(i, true)
+    end)
+end
 
 -- Comment
 keymap("n", "<leader>/", "<Plug>(comment_toggle_linewise_current)", { noremap = false }, "Comment")
@@ -106,20 +84,24 @@ end, default_opts, "Toggle Copilot")
 keymap("v", "p", '"_dP')
 
 -- Toggleterm
-if vim.loop.os_uname().sysname == "Windows_NT" then
-    local ps_term = require("toggleterm.terminal").Terminal:new({
-        cmd = "powershell -nologo",
-        hidden = true,
-        op_open = function(_)
-            vim.cmd("startinsert!")
-        end,
-    })
-    keymap({ "n", "v", "t" }, "<c-t>", function()
-        ps_term:toggle()
-    end)
-else
-    keymap({ "n", "v", "t" }, "<c-t>", "<cmd>ToggleTerm<cr>")
-end
+-- if vim.loop.os_uname().sysname == "Windows_NT" then
+--     local ps_term = require("toggleterm.terminal").Terminal:new({
+--         cmd = "powershell -nologo",
+--         hidden = true,
+--         op_open = function(_)
+--             vim.cmd("startinsert!")
+--         end,
+--     })
+--     keymap({ "n", "v", "t" }, "<c-t>", function()
+--         ps_term:toggle()
+--     end)
+--     keymap({ "n", "v", "t" }, "<c-p>", function()
+--         ps_term:toggle()
+--     end)
+-- else
+keymap({ "n", "v", "t" }, "<c-t>", "<cmd>ToggleTerm<cr>")
+keymap({ "n", "v", "t" }, "<c-p>", "<cmd>ToggleTerm<cr>")
+-- end
 
 -- lazygit
 local lazygit = require("toggleterm.terminal").Terminal:new({
@@ -135,6 +117,7 @@ end)
 
 -- LF
 keymap({ "n", "v" }, "<c-e>", require("lf").start)
+keymap("t", "<c-e>", "<cmd>ToggleTerm<cr>")
 
 -- Todo-comments
 keymap("n", "]t", function()

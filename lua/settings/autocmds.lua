@@ -17,9 +17,13 @@ vim.api.nvim_create_autocmd({ "VimEnter", "Colorscheme" }, {
 
 vim.api.nvim_create_autocmd("FileType", {
 	desc = "set colorcolumn for python",
-	pattern = "python",
+	pattern = "*",
 	callback = function()
-		vim.opt.colorcolumn = "120"
+        if vim.bo.filetype == "python" then
+            vim.wo.colorcolumn = "120"
+        else
+            vim.wo.colorcolumn = "80"
+        end
 	end,
 	group = "CustomHighlights",
 })

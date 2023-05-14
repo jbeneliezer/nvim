@@ -40,7 +40,7 @@ return {
             dap.adapters.cppdbg = {
                 id = "cppdbg",
                 type = "executable",
-                command = "/home/jb/.local/bin/cpptools-linux/extension/debugAdapters/bin/OpenDebugAD7",
+                command = vim.fn.stdpath("data") .. "/mason/packages/cpptools/extension/debugAdapters/bin/OpenDebugAD7",
             }
         elseif vim.loop.os_uname().sysname == "Windows_NT" then
             dap.adapters.cppdbg = {
@@ -136,10 +136,43 @@ return {
 
         dap.configurations.python = {
             {
+                name = "Launch file",
                 type = "python",
                 request = "launch",
-                name = "Launch file",
                 program = "${file}",
+                args = { "-m", "debugpy.adapter" },
+                pythonPath = function()
+                    -- debugpy supports launching an application with a different interpreter then the one used to launch debugpy itself.
+                    -- The code below looks for a `venv` or `.venv` folder in the current directly and uses the python within.
+                    -- You could adapt this - to for example use the `VIRTUAL_ENV` environment variable.
+                    local cwd = vim.fn.getcwd()
+
+                    if vim.loop.os_uname().sysname == "Linux" then
+                        if vim.fn.executable(cwd .. "/venv/bin/python") == 1 then
+                            return cwd .. "/venv/bin/python"
+                        elseif vim.fn.executable(cwd .. "/.venv/bin/python") == 1 then
+                            return cwd .. "/.venv/bin/python"
+                        else
+                            return "/usr/bin/python"
+                        end
+                    elseif vim.loop.os_uname().sysname == "Windows_NT" then
+                        if vim.fn.executable(cwd .. "/venv/Scripts/python") == 1 then
+                            return cwd .. "/venv/Scripts/python"
+                        elseif vim.fn.executable(cwd .. "/.venv/Scripts/python") == 1 then
+                            return cwd .. "/.venv/Scripts/python"
+                        else
+                            return "python"
+                        end
+                    end
+                end,
+                stopAtEntry = true,
+                console = "integratedTerminal",
+            },
+            {
+                name = "Launch main",
+                type = "python",
+                request = "launch",
+                program = vim.fn.getcwd() .. "/main.py",
                 args = { "-m", "debugpy.adapter" },
                 pythonPath = function()
                     -- debugpy supports launching an application with a different interpreter then the one used to launch debugpy itself.

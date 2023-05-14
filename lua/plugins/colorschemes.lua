@@ -32,4 +32,7 @@ return {
     {
         "neanias/everforest-nvim",
     },
+    {
+        "Mofiqul/vscode.nvim"
+    },
 }
