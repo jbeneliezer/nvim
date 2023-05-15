@@ -66,7 +66,7 @@ keymap("n", "<s-h>", "<cmd>BufferLineCyclePrev<cr>")
 keymap("n", "<leader>L", "<cmd>BufferLineMoveNext<cr>")
 keymap("n", "<leader>H", "<cmd>BufferLineMovePrev<cr>")
 for i = 1, 9 do
-    keymap({"n", "v"}, "<leader>" .. i, function ()
+    keymap({ "n", "v" }, "<leader>" .. i, function()
         require("bufferline").go_to_buffer(i, true)
     end)
 end
@@ -84,24 +84,24 @@ end, default_opts, "Toggle Copilot")
 keymap("v", "p", '"_dP')
 
 -- Toggleterm
--- if vim.loop.os_uname().sysname == "Windows_NT" then
---     local ps_term = require("toggleterm.terminal").Terminal:new({
---         cmd = "powershell -nologo",
---         hidden = true,
---         op_open = function(_)
---             vim.cmd("startinsert!")
---         end,
---     })
---     keymap({ "n", "v", "t" }, "<c-t>", function()
---         ps_term:toggle()
---     end)
---     keymap({ "n", "v", "t" }, "<c-p>", function()
---         ps_term:toggle()
---     end)
--- else
-keymap({ "n", "v", "t" }, "<c-t>", "<cmd>ToggleTerm<cr>")
-keymap({ "n", "v", "t" }, "<c-p>", "<cmd>ToggleTerm<cr>")
--- end
+if vim.loop.os_uname().sysname == "Windows_NT" then
+    local ps_term = require("toggleterm.terminal").Terminal:new({
+        cmd = "powershell -nologo",
+        hidden = true,
+        op_open = function(_)
+            vim.cmd("startinsert!")
+        end,
+    })
+    keymap({ "n", "v", "t" }, "<c-t>", function()
+        ps_term:toggle()
+    end)
+    keymap({ "n", "v", "t" }, "<c-p>", function()
+        ps_term:toggle()
+    end)
+else
+    keymap({ "n", "v", "t" }, "<c-t>", "<cmd>ToggleTerm<cr>")
+    keymap({ "n", "v", "t" }, "<c-p>", "<cmd>ToggleTerm<cr>")
+end
 
 -- lazygit
 local lazygit = require("toggleterm.terminal").Terminal:new({

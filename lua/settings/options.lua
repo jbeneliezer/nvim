@@ -50,16 +50,6 @@ vim.cmd("set iskeyword+=-")
 -- clipboard
 vim.opt.clipboard:append("unnamedplus")
 
--- Powershell
-if vim.loop.os_uname().sysname == "Windows_NT" then
-    vim.opt.shell = "powershell"
-    vim.opt.shellcmdflag = "-NoLogo -Command [Console]::InputEncoding=[Console]::OutputEncoding=[System.Text.Encoding]::UTF8;"
-    vim.opt.shellredir = "-RedirectStandardOutput %s; -NoNewWindow -Wait"
-    vim.opt.shellpipe = "2>&1 | OutFile -Encoding UTF8 %s; exit $LastExitCode"
-    vim.opt.shellquote = ""
-    vim.opt.shellxquote = ""
-end
-
 -- leader
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
