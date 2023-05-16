@@ -60,15 +60,24 @@ keymap("n", "<c-k>", "<c-w>k")
 keymap("n", "<c-l>", "<c-w>l")
 
 -- Buffers
-keymap("n", "<leader>c", "<cmd>bdelete<cr>")
-keymap("n", "<s-l>", "<cmd>BufferLineCycleNext<cr>")
-keymap("n", "<s-h>", "<cmd>BufferLineCyclePrev<cr>")
-keymap("n", "<leader>L", "<cmd>BufferLineMoveNext<cr>")
-keymap("n", "<leader>H", "<cmd>BufferLineMovePrev<cr>")
+-- keymap("n", "<leader>c", "<cmd>bdelete<cr>")
+-- keymap("n", "<s-l>", "<cmd>BufferLineCycleNext<cr>")
+-- keymap("n", "<s-h>", "<cmd>BufferLineCyclePrev<cr>")
+-- keymap("n", "<leader>L", "<cmd>BufferLineMoveNext<cr>")
+-- keymap("n", "<leader>H", "<cmd>BufferLineMovePrev<cr>")
+-- for i = 1, 9 do
+--     keymap({ "n", "v" }, "<leader>" .. i, function()
+--         require("bufferline").go_to_buffer(i, true)
+--     end)
+-- end
+
+keymap("n", "<leader>c", "<cmd>BufferClose<cr>")
+keymap("n", "L", "<cmd>BufferNext<cr>")
+keymap("n", "H", "<cmd>BufferPrevious<cr>")
+keymap("n", "<leader>L", "<cmd>BufferMoveNext<cr>")
+keymap("n", "<leader>H", "<cmd>BufferMovePrevious<cr>")
 for i = 1, 9 do
-    keymap({ "n", "v" }, "<leader>" .. i, function()
-        require("bufferline").go_to_buffer(i, true)
-    end)
+    keymap({ "n", "v" }, "<leader>" .. i, "<cmd>BufferGoto " .. i .. "<cr>")
 end
 
 -- Comment
