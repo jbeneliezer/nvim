@@ -10,6 +10,7 @@ return {
         "mfussenegger/nvim-dap-python",
         "nvim-neotest/neotest",
         "nvim-neotest/neotest-python",
+        "ofirgall/goto-breakpoints.nvim",
     },
     config = function()
         local dap = require("dap")

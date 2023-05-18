@@ -30,9 +30,6 @@ keymap({ "n", "v" }, "<c-n>", "J")
 keymap({ "n", "v" }, "J", "<c-d>zz")
 keymap({ "n", "v" }, "K", "<c-u>zz")
 
-keymap("n", "<leader>c", "<cmd>bdelete<cr>", default_opts, "Close")
-keymap("n", "<leader>e", "<cmd>Lex 25<cr>", default_opts, "Explorer")
-
 keymap("n", "<leader>j", "<cmd>m .+1<cr>==")
 keymap("v", "<leader>j", "<cmd>m '>+1<cr>gv=gv<cr>")
 keymap("n", "<leader>k", "<cmd>m .-2<cr>==")
@@ -79,6 +76,11 @@ keymap("n", "<leader>H", "<cmd>BufferMovePrevious<cr>")
 for i = 1, 9 do
     keymap({ "n", "v" }, "<leader>" .. i, "<cmd>BufferGoto " .. i .. "<cr>")
 end
+
+-- File Explorer
+-- keymap("n", "<leader>e", "<cmd>Lex 25<cr>", default_opts, "Explorer")
+keymap("n", "<leader>e", "<cmd>NvimTreeToggle<cr>")
+
 
 -- Comment
 keymap("n", "<leader>/", "<Plug>(comment_toggle_linewise_current)", { noremap = false }, "Comment")
@@ -159,6 +161,9 @@ keymap("n", "<leader>dso", require("dap").step_over, default_opts, "Over")
 keymap("n", "<leader>dsu", require("dap").step_out, default_opts, "Out")
 keymap("n", "<leader>d<leader>", require("dap").run_to_cursor, default_opts, "Run to Cursor")
 keymap("n", "<leader>bc", require("dap").clear_breakpoints, default_opts, "Clear Breakpoints")
+keymap("n", "<leader>bn", require("goto-breakpoints").next, default_opts, "Next Breakpoint")
+keymap("n", "<leader>bN", require("goto-breakpoints").prev, default_opts, "Previous Breakpoint")
+keymap("n", "<leader>b<leader>", require("goto-breakpoints").stopped, default_opts, "Current Stopped Line")
 
 -- Neotest
 keymap("n", "<leader>nm", require("neotest").run.run, default_opts, "Run Test")
