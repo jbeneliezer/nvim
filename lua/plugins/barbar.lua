@@ -19,6 +19,6 @@ return {
             inactive = {},
             visible = {},
         },
-        minimum_padding = 0,
+        minimum_padding = 1,
     },
 }

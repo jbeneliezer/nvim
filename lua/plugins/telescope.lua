@@ -6,9 +6,7 @@ return {
 		"nvim-telescope/telescope-project.nvim",
 		{
 			"nvim-telescope/telescope-fzf-native.nvim",
-			build = [[cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release &&
-            cmake --build build --config Release &&
-            cmake --install build --prefix build]],
+			build = "cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build",
 		},
 		"gbrlsnchs/telescope-lsp-handlers.nvim",
 		"debugloop/telescope-undo.nvim",
@@ -17,7 +15,7 @@ return {
 		local actions = require("telescope.actions")
 		require("telescope").setup({
 			defaults = {
-				file_ignore_patterns = { ".svn", ".git", "site-packages", "__pycache__" },
+				file_ignore_patterns = { ".svn", ".git", "site-packages", "__pycache__", "Listings" },
 				prompt_prefix = " ",
 				selection_caret = " ",
 				path_display = { "truncate" },

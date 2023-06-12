@@ -232,7 +232,7 @@ return {
                         { id = "breakpoints", size = 0.33 },
                         { id = "watches",     size = 0.33 },
                     },
-                    size = 15,
+                    size = 10,
                     position = "bottom",
                 },
                 {
