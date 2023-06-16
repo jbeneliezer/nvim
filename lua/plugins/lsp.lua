@@ -31,23 +31,45 @@ local servers = {
 		single_file_support = true,
 	},
 	rust_analyzer = {},
-	pyright = {
-		single_file_support = true,
-		settings = {
-			pyright = {
-				disableLanguageServices = false,
-				disableOrganizeImports = false,
-			},
-			python = {
-				analysis = {
-					autoImportCompletions = true,
-					autoSearchPaths = true,
-					diagnosticMode = "workspace",
-					typeCheckingMode = "basic",
-					useLibraryCodeForTypes = true,
+	-- pyright = {
+	-- 	single_file_support = true,
+	-- 	settings = {
+	-- 		pyright = {
+	-- 			disableLanguageServices = false,
+	-- 			disableOrganizeImports = false,
+	-- 		},
+	-- 		python = {
+	-- 			analysis = {
+	-- 				autoImportCompletions = true,
+	-- 				autoSearchPaths = true,
+	-- 				diagnosticMode = "workspace",
+	-- 				typeCheckingMode = "basic",
+	-- 				useLibraryCodeForTypes = true,
+	-- 			},
+	-- 		},
+	-- 	},
+	-- },
+	pylsp = {
+		pylsp = {
+			plugins = {
+				autopep8 = {
+					eanbled = false,
 				},
+				pycodestyle = {
+					-- enabled = false,
+					-- ignore = { "E501", "E303" },
+					maxLineLength = 120,
+				},
+				rope_autoimport = {
+					enabled = true,
+					memory = true,
+				},
+				rope_completion = {
+					enabled = true,
+					eager = true,
+				}
 			},
-		},
+		}
 	},
 }
 
