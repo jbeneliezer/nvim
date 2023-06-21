@@ -31,21 +31,49 @@ local servers = {
 		single_file_support = true,
 	},
 	rust_analyzer = {},
-	pyright = {
-		single_file_support = true,
-		settings = {
-			pyright = {
-				disableLanguageServices = false,
-				disableOrganizeImports = false,
-			},
-			python = {
-				analysis = {
-					autoImportCompletions = true,
-					autoSearchPaths = true,
-					diagnosticMode = "workspace",
-					typeCheckingMode = "basic",
-					useLibraryCodeForTypes = true,
+	-- pyright = {
+	-- 	single_file_support = true,
+	-- 	settings = {
+	-- 		pyright = {
+	-- 			disableLanguageServices = false,
+	-- 			disableOrganizeImports = false,
+	-- 		},
+	-- 		python = {
+	-- 			analysis = {
+	-- 				autoImportCompletions = true,
+	-- 				autoSearchPaths = true,
+	-- 				diagnosticMode = "openFilesOnly",
+	-- 				typeCheckingMode = "basic",
+	-- 				useLibraryCodeForTypes = true,
+	-- 			},
+	-- 		},
+	-- 	},
+	-- },
+	pylsp = {
+		pylsp = {
+			plugins = {
+				autopep8 = { enabled = false },
+				flake8 = {
+					enabled = false,
+					ignore = {"F403", "F405"},
+					maxLineLength = 120,
+					indentSize = 4,
 				},
+				pycodestyle = {
+					exclude = { "site-packages" },
+					indentSize = 4,
+					maxLineLength = 120,
+				},
+				pyflakes = { enabled = false },
+				rope_autoimport = {
+					enabled = true,
+					memory = true,
+				},
+				rope_completion = {
+					enabled = true,
+					eager = true,
+				},
+				yapf = { enabled = false },
 			},
 		},
 	},
@@ -78,10 +106,11 @@ local diag_config = {
 
 local lsp_format = function(bufnr)
 	vim.lsp.buf.format({
+		async = true,
+		bufnr = bufnr,
 		filter = function(client)
 			return client.name ~= "clangd"
 		end,
-		bufnr = bufnr,
 	})
 end
 
