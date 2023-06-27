@@ -14,6 +14,8 @@ return {
 				">branch",
 				">tags",
 				"venv",
+				".venv",
+                "pyproject.toml",
 				"=Source",
 			},
 			silent_chdir = true,

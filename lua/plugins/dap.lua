@@ -220,6 +220,27 @@ return {
                     },
                     args = { "--log-level", "DEBUG", "--quiet" },
                     runner = "pytest",
+                    python = function()
+                        local cwd = vim.fn.getcwd()
+
+                        if vim.loop.os_uname().sysname == "Linux" then
+                            if vim.fn.executable(cwd .. "/venv/bin/python") == 1 then
+                                return cwd .. "/venv/bin/python"
+                            elseif vim.fn.executable(cwd .. "/.venv/bin/python") == 1 then
+                                return cwd .. "/.venv/bin/python"
+                            else
+                                return "/usr/bin/python"
+                            end
+                        elseif vim.loop.os_uname().sysname == "Windows_NT" then
+                            if vim.fn.executable(cwd .. "/venv/Scripts/python") == 1 then
+                                return cwd .. "/venv/Scripts/python"
+                            elseif vim.fn.executable(cwd .. "/.venv/Scripts/python") == 1 then
+                                return cwd .. "/.venv/Scripts/python"
+                            else
+                                return "python"
+                            end
+                        end
+                    end,
                 }),
             },
         })
