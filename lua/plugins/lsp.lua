@@ -31,52 +31,53 @@ local servers = {
 		single_file_support = true,
 	},
 	rust_analyzer = {},
-	-- pyright = {
-	-- 	single_file_support = true,
-	-- 	settings = {
-	-- 		pyright = {
-	-- 			disableLanguageServices = false,
-	-- 			disableOrganizeImports = false,
-	-- 		},
-	-- 		python = {
-	-- 			analysis = {
-	-- 				autoImportCompletions = true,
-	-- 				autoSearchPaths = true,
-	-- 				diagnosticMode = "openFilesOnly",
-	-- 				typeCheckingMode = "basic",
-	-- 				useLibraryCodeForTypes = true,
-	-- 			},
-	-- 		},
-	-- 	},
-	-- },
-	pylsp = {
-		pylsp = {
-			plugins = {
-				autopep8 = { enabled = false },
-				flake8 = {
-					enabled = false,
-					ignore = {"F403", "F405"},
-					maxLineLength = 120,
-					indentSize = 4,
+	pyright = {
+		single_file_support = true,
+		settings = {
+			pyright = {
+				disableLanguageServices = false,
+				disableOrganizeImports = false,
+			},
+			python = {
+				analysis = {
+					autoImportCompletions = true,
+					autoSearchPaths = true,
+					diagnosticMode = "openFilesOnly",
+					typeCheckingMode = "basic",
+					useLibraryCodeForTypes = true,
 				},
-				pycodestyle = {
-					exclude = { "site-packages" },
-					indentSize = 4,
-					maxLineLength = 120,
-				},
-				pyflakes = { enabled = false },
-				rope_autoimport = {
-					enabled = true,
-					memory = true,
-				},
-				rope_completion = {
-					enabled = true,
-					eager = true,
-				},
-				yapf = { enabled = false },
 			},
 		},
 	},
+	-- pylsp = {
+	-- 	pylsp = {
+	-- 		plugins = {
+	-- 			autopep8 = { enabled = false },
+	-- 			flake8 = {
+	-- 				enabled = false,
+	-- 				ignore = {"F403", "F405"},
+	-- 				maxLineLength = 120,
+	-- 				indentSize = 4,
+	-- 			},
+	-- 			pycodestyle = {
+	-- 				enabled = false,
+	-- 				exclude = { "site-packages" },
+	-- 				indentSize = 4,
+	-- 				maxLineLength = 120,
+	-- 			},
+	-- 			pyflakes = { enabled = false },
+	-- 			rope_autoimport = {
+	-- 				enabled = true,
+	-- 				memory = true,
+	-- 			},
+	-- 			rope_completion = {
+	-- 				enabled = true,
+	-- 				eager = true,
+	-- 			},
+	-- 			yapf = { enabled = false },
+	-- 		},
+	-- 	},
+	-- },
 }
 
 local signs = {
@@ -136,6 +137,7 @@ local on_attach = function(_, bufnr)
 	keymap({ "n", "v" }, "<leader>lI", "<cmd>LspInfo<cr>", default_opts, "Info")
 	keymap({ "n", "v" }, "<leader>ll", "<Plug>(toggle-lsp-diag)", { noremap = false }, "Toggle Diagnostics")
 	keymap({ "n", "v" }, "<leader>lr", require("telescope.builtin").lsp_references, default_opts, "References")
+	keymap({ "n", "v" }, "<leader>lR", vim.lsp.buf.rename, default_opts, "Rename")
 	keymap({ "n", "v" }, "<leader>lf", function()
 		lsp_format(bufnr)
 	end, default_opts, "Format")
