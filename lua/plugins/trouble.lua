@@ -1,5 +1,6 @@
 return {
 	"folke/trouble.nvim",
+	event = "BufEnter",
 	dependencies = { "nvim-tree/nvim-web-devicons" },
 	opts = {
 		height = 15,

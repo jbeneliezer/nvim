@@ -1,5 +1,6 @@
 return {
     "rmagatti/auto-session",
+	event = "VimEnter",
     config = function()
         require("auto-session").setup({
             auto_save_enabled = true,

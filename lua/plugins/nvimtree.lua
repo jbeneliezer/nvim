@@ -1,5 +1,6 @@
 return {
     "nvim-tree/nvim-tree.lua",
+	event = "BufEnter",
     dependencies = {
         "nvim-tree/nvim-web-devicons",
     },

@@ -1,5 +1,6 @@
 return {
 	"folke/which-key.nvim",
+	event = "BufEnter",
 	config = function()
 		require("which-key").setup({
 			plugins = {
@@ -24,6 +25,7 @@ return {
 			},
 			f = { name = "Telescope" },
 			g = { name = "Git" },
+			l = { name = "Lsp" },
 			n = { name = "Neotest" },
 			m = { name = "Neogen" },
 		}, { prefix = "<leader>" })
