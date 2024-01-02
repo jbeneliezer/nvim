@@ -62,8 +62,6 @@ return {
 			dap.adapters.cppdbg = {
 				id = "cppdbg",
 				type = "executable",
-				-- command =
-				-- "C:\\Users\\jb\\AppData\\Local\\cpptools-win64\\extension\\debugAdapters\\bin\\OpenDebugAD7.exe",
 				command = vim.fn.stdpath("data") .. "/mason/packages/cpptools/extension/debugAdapters/bin/OpenDebugAD7",
 				options = {
 					detached = false,
@@ -74,7 +72,7 @@ return {
 		dap.adapters.lldb = {
 			type = "executable",
 			command = vim.fn.stdpath("data") .. "/mason/packages/codelldb/extension/lldb/bin/lldb",
-			namd = "lldb"
+			namd = "lldb",
 		}
 
 		if vim.loop.os_uname().sysname == "Linux" then
@@ -197,9 +195,9 @@ return {
 			layouts = {
 				{
 					elements = {
-						{ id = "scopes",      size = 0.34 },
+						{ id = "scopes", size = 0.34 },
 						{ id = "breakpoints", size = 0.33 },
-						{ id = "watches",     size = 0.33 },
+						{ id = "watches", size = 0.33 },
 					},
 					size = 10,
 					position = "bottom",
