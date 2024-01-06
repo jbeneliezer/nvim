@@ -159,7 +159,7 @@ return {
 		"simrat39/rust-tools.nvim",
 		opts = {
 			inlay_hints = {
-				show_parameter_hints = false,
+				show_parameter_hints = true,
 			},
 			server = {
 				on_attach = on_attach,

@@ -2,7 +2,11 @@ vim.api.nvim_create_augroup("CustomHighlights", { clear = true })
 
 vim.api.nvim_create_autocmd("Colorscheme", {
 	desc = "remove underline from context start",
-	command = "hi IndentBlanklineContextStart guisp=#000000 gui=nocombine",
+    callback = function ()
+        vim.cmd("hi IndentBlanklineContextStart guisp=#000000 gui=nocombine")
+        vim.cmd("hi IblIndent guisp=#000000 gui=nocombine")
+    end,
+	-- command = "hi IndentBlanklineContextStart guisp=#000000 gui=nocombine",
 	group = "CustomHighlights",
 })
 
