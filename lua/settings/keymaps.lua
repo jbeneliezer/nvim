@@ -37,7 +37,6 @@ keymap("v", "<leader>k", ":m '<-2<cr>gv=gv")
 
 keymap("n", "<leader>o", "<c-w>o", default_opts, "Fullscreen")
 keymap("n", "<leader>q", "<cmd>q<cr>", default_opts, "Quit")
-keymap("n", "<leader>t", require("trouble").toggle, default_opts, "Trouble")
 keymap("n", "<leader>w", "<cmd>w<cr>", default_opts, "Save")
 
 -- Resize with arrows
@@ -55,18 +54,6 @@ keymap("n", "<c-h>", "<c-w>h")
 keymap("n", "<c-j>", "<c-w>j")
 keymap("n", "<c-k>", "<c-w>k")
 keymap("n", "<c-l>", "<c-w>l")
-
--- Buffers
--- keymap("n", "<leader>c", "<cmd>bdelete<cr>")
--- keymap("n", "<s-l>", "<cmd>BufferLineCycleNext<cr>")
--- keymap("n", "<s-h>", "<cmd>BufferLineCyclePrev<cr>")
--- keymap("n", "<leader>L", "<cmd>BufferLineMoveNext<cr>")
--- keymap("n", "<leader>H", "<cmd>BufferLineMovePrev<cr>")
--- for i = 1, 9 do
---     keymap({ "n", "v" }, "<leader>" .. i, function()
---         require("bufferline").go_to_buffer(i, true)
---     end)
--- end
 
 keymap("n", "<leader>c", "<cmd>BufferClose<cr>")
 keymap("n", "L", "<cmd>BufferNext<cr>")
@@ -126,8 +113,8 @@ keymap({ "n", "v", "t" }, "<c-g>", function()
 end)
 
 -- LF
-keymap({ "n", "v" }, "<c-e>", require("lf").start)
-keymap("t", "<c-e>", "<cmd>ToggleTerm<cr>")
+-- keymap({ "n", "v" }, "<c-e>", require("lf").start)
+-- keymap("t", "<c-e>", "<cmd>ToggleTerm<cr>")
 
 -- Todo-comments
 keymap("n", "]t", function()
@@ -191,7 +178,7 @@ keymap("n", "<leader>fg", require("telescope.builtin").live_grep, default_opts, 
 keymap("n", "<leader>fh", require("telescope.builtin").help_tags, default_opts, "Help Tags")
 keymap("n", "<leader>fH", require("telescope.builtin").highlights, default_opts, "Highlights")
 keymap("n", "<leader>fk", require("telescope.builtin").keymaps, default_opts, "Keymaps")
-keymap("n", "<leader>fp", require("telescope").extensions.projects.projects, default_opts, "Projects")
+-- keymap("n", "<leader>fp", require("telescope").extensions.projects.projects, default_opts, "Projects")
 keymap("n", "<leader>fu", require("telescope").extensions.undo.undo, default_opts, "Undo")
 keymap("n", "<leader>fs", require("auto-session.session-lens").search_session, default_opts, "Sessions")
 
@@ -224,3 +211,18 @@ end, default_opts, "Document Type")
 keymap("n", "<leader>mF", function()
     require("neogen").generate({ type = "File" })
 end, default_opts, "Document File")
+
+-- Trouble
+keymap("n", "<leader>t", require("trouble").toggle, default_opts, "Trouble")
+keymap("n", "<leader>g;", function()
+    require("trouble").next({ skip_groups = true, jump = true })
+end, default_opts, "Next Trouble")
+keymap("n", "<leader>g,", function()
+    require("trouble").previous({ skip_groups = true, jump = true })
+end, default_opts, "Next Trouble")
+keymap("n", "<leader>g0", function()
+    require("trouble").first({ skip_groups = true, jump = true })
+end, default_opts, "Next Trouble")
+keymap("n", "<leader>g$", function()
+    require("trouble").last({ skip_groups = true, jump = true })
+end, default_opts, "Next Trouble")

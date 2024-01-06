@@ -1,6 +1,7 @@
 return {
 	"ahmedkhalf/project.nvim",
 	event = "VimEnter",
+    enabled = false,
 	config = function()
 		require("project_nvim").setup({
 			patterns = {

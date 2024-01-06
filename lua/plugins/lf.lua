@@ -2,6 +2,7 @@ return {
 	"lmburns/lf.nvim",
 	dependencies = { "nvim-lua/plenary.nvim", "akinsho/toggleterm.nvim" },
 	lazy = false,
+    enabled = false,
 	opts = {
 		winblend = 0,
 		direction = "tab",

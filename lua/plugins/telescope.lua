@@ -1,10 +1,9 @@
 return {
 	"nvim-telescope/telescope.nvim",
-	tag = "0.1.1",
 	event = "VimEnter",
 	dependencies = {
 		"nvim-lua/plenary.nvim",
-		"nvim-telescope/telescope-project.nvim",
+		-- "nvim-telescope/telescope-project.nvim",
 		{
 			"nvim-telescope/telescope-fzf-native.nvim",
 			build = "cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build",
@@ -16,7 +15,7 @@ return {
 		local actions = require("telescope.actions")
 		require("telescope").setup({
 			defaults = {
-				file_ignore_patterns = { ".svn", ".git", "site-packages", "__pycache__", "Listings" },
+				file_ignore_patterns = { ".svn", ".git", "site-packages", "__pycache__", "Listings", "venv" },
 				prompt_prefix = " ",
 				selection_caret = " ",
 				path_display = { "truncate" },
@@ -76,7 +75,7 @@ return {
 			extensions = {
 				"fzf",
 				"lsp_handlers",
-				"projects",
+				-- "projects",
 				"dap",
 				undo = {
 					side_by_side = true,
@@ -89,7 +88,7 @@ return {
 		})
 		require("telescope").load_extension("fzf")
 		require("telescope").load_extension("lsp_handlers")
-		require("telescope").load_extension("projects")
+		-- require("telescope").load_extension("projects")
 		require("telescope").load_extension("dap")
 		require("telescope").load_extension("undo")
 	end,

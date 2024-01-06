@@ -44,6 +44,7 @@ luac.out
 
 # lazy
 lazy-lock.json
+package-lock.json
 
 # lua_ls
 .luarc.json

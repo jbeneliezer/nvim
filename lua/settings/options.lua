@@ -57,3 +57,6 @@ vim.g.maplocalleader = " "
 -- disable netrw
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
+
+-- disable python3_provider
+vim.g.loaded_python3_provider=0

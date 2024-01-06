@@ -6,7 +6,6 @@ return {
 		"nvim-telescope/telescope.nvim",
 	},
 	lazy = true,
-	-- cond = true,
 	cond = function(_)
 		return os.getenv("OPENAI_API_KEY") ~= nil
 	end,
