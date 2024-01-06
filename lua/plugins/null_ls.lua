@@ -7,7 +7,7 @@ return {
 			debug = false,
 			sources = {
 				null_ls.builtins.formatting.stylua,
-				null_ls.builtins.formatting.rustfmt,
+				-- null_ls.builtins.formatting.rustfmt,
                 null_ls.builtins.formatting.isort,
 				null_ls.builtins.formatting.black.with({
 					extra_args = { "--line-length", "120" },
@@ -25,7 +25,7 @@ return {
 					extra_args = { "--enable=warning,performance,portability", "$FILENAME" },
 				}),
 			},
-			on_attach = function(client, bufnr)
+			-- on_attach = function(client, bufnr)
 				-- if client.supports_method("textDocument/formatting") then
 				-- vim.api.nvim_create_autocmd("BufWritePre", {
 				-- 	buffer = bufnr,
@@ -34,7 +34,7 @@ return {
 				-- 	end,
 				-- })
 				-- end
-			end,
+			-- end,
 		})
 	end,
 }

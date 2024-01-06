@@ -62,13 +62,18 @@ return {
 			dap.adapters.cppdbg = {
 				id = "cppdbg",
 				type = "executable",
-				command =
-				"C:\\Users\\jb\\AppData\\Local\\cpptools-win64\\extension\\debugAdapters\\bin\\OpenDebugAD7.exe",
+				command = vim.fn.stdpath("data") .. "/mason/packages/cpptools/extension/debugAdapters/bin/OpenDebugAD7",
 				options = {
 					detached = false,
 				},
 			}
 		end
+
+		dap.adapters.lldb = {
+			type = "executable",
+			command = vim.fn.stdpath("data") .. "/mason/packages/codelldb/extension/lldb/bin/lldb",
+			namd = "lldb",
+		}
 
 		if vim.loop.os_uname().sysname == "Linux" then
 			require("dap-python").setup(vim.fn.stdpath("data") .. "/mason/packages/debugpy/venv/bin/python")
@@ -89,13 +94,14 @@ return {
 		dap.configurations.c = {
 			{
 				name = "Launch file",
-				type = "cppdbg",
+				type = "lldb",
 				request = "launch",
 				program = function()
 					return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
 				end,
 				cwd = "${workspaceFolder}",
 				stopAtEntry = true,
+				args = {},
 			},
 			{
 				name = "Attach to gdbserver :1234",
@@ -111,31 +117,7 @@ return {
 			},
 		}
 
-		dap.configurations.cpp = {
-			{
-				name = "Launch file",
-				type = "cppdbg",
-				request = "launch",
-				program = function()
-					return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
-				end,
-				cwd = "${workspaceFolder}",
-				stopAtEntry = true,
-			},
-			{
-				name = "Attach to gdbserver :1234",
-				type = "cppdbg",
-				request = "launch",
-				MIMode = "gdb",
-				miDebuggerServerAddress = "localhost:1234",
-				miDebuggerPath = "/usr/bin/gdb",
-				cwd = "${workspaceFolder}",
-				program = function()
-					return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
-				end,
-				stopAtEntry = true,
-			},
-		}
+		dap.configurations.cpp = dap.configurations.c
 
 		dap.configurations.rust = {
 			{
@@ -157,6 +139,7 @@ return {
 				request = "launch",
 				program = "${file}",
 				args = { "-m", "debugpy.adapter" },
+				justMyCode = false,
 				pythonPath = get_python,
 				stopAtEntry = true,
 				console = "integratedTerminal",
@@ -169,6 +152,7 @@ return {
 					return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
 				end,
 				args = { "-m", "debugpy.adapter" },
+				justMyCode = false,
 				pythonPath = get_python,
 				stopAtEntry = true,
 				console = "integratedTerminal",
@@ -179,6 +163,7 @@ return {
 				request = "launch",
 				program = vim.fn.getcwd() .. "/Denali_SVCP/main.py",
 				args = { "-m", "debugpy.adapter" },
+				justMyCode = false,
 				pythonPath = get_python,
 				stopAtEntry = true,
 				console = "integratedTerminal",
@@ -210,9 +195,9 @@ return {
 			layouts = {
 				{
 					elements = {
-						{ id = "scopes",      size = 0.34 },
+						{ id = "scopes", size = 0.34 },
 						{ id = "breakpoints", size = 0.33 },
-						{ id = "watches",     size = 0.33 },
+						{ id = "watches", size = 0.33 },
 					},
 					size = 10,
 					position = "bottom",
