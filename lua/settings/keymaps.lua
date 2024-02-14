@@ -1,29 +1,29 @@
 local default_opts = { noremap = true, silent = true }
 local keymap = function(mode, lhs, rhs, opts, description)
-    local local_opts = opts or { noremap = true, silent = true }
-    local_opts["desc"] = description or "which_key_ignore"
-    vim.keymap.set(mode, lhs, rhs, local_opts)
+	local local_opts = opts or { noremap = true, silent = true }
+	local_opts["desc"] = description or "which_key_ignore"
+	vim.keymap.set(mode, lhs, rhs, local_opts)
 end
 
 local toggle_source = function(source)
-    local cmp = require("cmp")
-    local toggle = false
-    local sources = cmp.get_config().sources
+	local cmp = require("cmp")
+	local toggle = false
+	local sources = cmp.get_config().sources
 
-    for i = #sources, 1, -1 do
-        if sources[i].name == source then
-            table.remove(sources, i)
-            toggle = true
-        end
-    end
+	for i = #sources, 1, -1 do
+		if sources[i].name == source then
+			table.remove(sources, i)
+			toggle = true
+		end
+	end
 
-    if not toggle then
-        table.insert(sources, { name = source })
-    end
+	if not toggle then
+		table.insert(sources, { name = source })
+	end
 
-    cmp.setup.buffer({
-        sources = sources,
-    })
+	cmp.setup.buffer({
+		sources = sources,
+	})
 end
 
 keymap({ "n", "v" }, "<c-n>", "J")
@@ -45,6 +45,9 @@ keymap("n", "<c-Down>", "<cmd>resize +2<cr>")
 keymap("n", "<c-Left>", "<cmd>vertical resize -2<cr>")
 keymap("n", "<c-Right>", "<cmd>vertical resize +2<cr>")
 
+keymap("n", "<c-ScrollWheelUp>", "<cmd>vertical resize -1<cr>")
+keymap("n", "<c-ScrollWheelDown>", "<cmd>vertical resize +1<cr>")
+
 -- Stay in indent mode
 keymap("v", "<", "<gv")
 keymap("v", ">", ">gv")
@@ -61,7 +64,7 @@ keymap("n", "H", "<cmd>BufferPrevious<cr>")
 keymap("n", "<leader>L", "<cmd>BufferMoveNext<cr>")
 keymap("n", "<leader>H", "<cmd>BufferMovePrevious<cr>")
 for i = 1, 9 do
-    keymap({ "n", "v" }, "<leader>" .. i, "<cmd>BufferGoto " .. i .. "<cr>")
+	keymap({ "n", "v" }, "<leader>" .. i, "<cmd>BufferGoto " .. i .. "<cr>")
 end
 
 -- File Explorer
@@ -74,7 +77,7 @@ keymap("v", "<leader>/", "<Plug>(comment_toggle_linewise_visual)gv", { noremap =
 
 -- Copilot
 keymap("n", "<leader>C", function()
-    toggle_source("copilot")
+	toggle_source("copilot")
 end, default_opts, "Toggle Copilot")
 
 -- Paste in visual mode
@@ -82,34 +85,34 @@ keymap("v", "p", '"_dP')
 
 -- Toggleterm
 if vim.loop.os_uname().sysname == "Windows_NT" then
-    local ps_term = require("toggleterm.terminal").Terminal:new({
-        cmd = "powershell -nologo",
-        hidden = true,
-        op_open = function(_)
-            vim.cmd("startinsert!")
-        end,
-    })
-    keymap({ "n", "v", "t" }, "<c-t>", function()
-        ps_term:toggle()
-    end)
-    keymap({ "n", "v", "t" }, "<c-p>", function()
-        ps_term:toggle()
-    end)
+	local ps_term = require("toggleterm.terminal").Terminal:new({
+		cmd = "powershell -nologo",
+		hidden = true,
+		op_open = function(_)
+			vim.cmd("startinsert!")
+		end,
+	})
+	keymap({ "n", "v", "t" }, "<c-t>", function()
+		ps_term:toggle()
+	end)
+	keymap({ "n", "v", "t" }, "<c-p>", function()
+		ps_term:toggle()
+	end)
 else
-    keymap({ "n", "v", "t" }, "<c-t>", "<cmd>ToggleTerm<cr>")
-    keymap({ "n", "v", "t" }, "<c-p>", "<cmd>ToggleTerm<cr>")
+	keymap({ "n", "v", "t" }, "<c-t>", "<cmd>ToggleTerm<cr>")
+	keymap({ "n", "v", "t" }, "<c-p>", "<cmd>ToggleTerm<cr>")
 end
 
 -- lazygit
 local lazygit = require("toggleterm.terminal").Terminal:new({
-    cmd = "lazygit",
-    hidden = true,
-    op_open = function(_)
-        vim.cmd("startinsert!")
-    end,
+	cmd = "lazygit",
+	hidden = true,
+	op_open = function(_)
+		vim.cmd("startinsert!")
+	end,
 })
 keymap({ "n", "v", "t" }, "<c-g>", function()
-    lazygit:toggle()
+	lazygit:toggle()
 end)
 
 -- LF
@@ -118,10 +121,10 @@ end)
 
 -- Todo-comments
 keymap("n", "]t", function()
-    require("todo-comments").jump_next()
+	require("todo-comments").jump_next()
 end)
 keymap("n", "[t", function()
-    require("todo-comments").jump_prev()
+	require("todo-comments").jump_prev()
 end)
 
 -- Dap
@@ -130,7 +133,7 @@ keymap("n", "<F8>", require("dap").step_over)
 keymap("n", "<F9>", require("dap").step_into)
 keymap("n", "<F10>", require("dap").step_out)
 keymap("n", "<leader>da", function()
-    require("dapui").elements.watches.add(vim.fn.input("Expression: "))
+	require("dapui").elements.watches.add(vim.fn.input("Expression: "))
 end, default_opts, "Add Watch")
 keymap("n", "<leader>db", require("telescope").extensions.dap.list_breakpoints, default_opts, "Breakpoints")
 keymap("n", "<leader>du", require("dapui").toggle, default_opts, "UI")
@@ -154,13 +157,13 @@ keymap("n", "<leader>b<leader>", require("goto-breakpoints").stopped, default_op
 -- Neotest
 keymap("n", "<leader>nm", require("neotest").run.run, default_opts, "Run Test")
 keymap("n", "<leader>nM", function()
-    require("neotest").run.run({ strategy = "dap" })
+	require("neotest").run.run({ strategy = "dap" })
 end, default_opts, "Debug Test")
 keymap("n", "<leader>nf", function()
-    require("neotest").run.run({ vim.fn.expand("%") })
+	require("neotest").run.run({ vim.fn.expand("%") })
 end, default_opts, "Run All Tests")
 keymap("n", "<leader>nF", function()
-    require("neotest").run.run({ vim.fn.expand("%"), strategy = "dap" })
+	require("neotest").run.run({ vim.fn.expand("%"), strategy = "dap" })
 end, default_opts, "Debug All Tests")
 keymap("n", "<leader>ns", require("neotest").summary.toggle, default_opts, "Test Summary")
 keymap("n", "<leader>np", require("neotest").run.stop, default_opts, "Stop Test")
@@ -170,7 +173,7 @@ keymap("n", "<leader>na", require("neotest").run.attach, default_opts, "Attach T
 keymap("n", "<leader>fa", require("telescope.builtin").autocommands, default_opts, "Autocommands")
 keymap("n", "<leader>fc", require("telescope.builtin").commands, default_opts, "Commands")
 keymap("n", "<leader>fC", function()
-    require("telescope.builtin").colorscheme({ enable_preview = true })
+	require("telescope.builtin").colorscheme({ enable_preview = true })
 end, default_opts, "Colorscheme")
 keymap("n", "<leader>ff", require("telescope.builtin").find_files, default_opts, "Find Files")
 keymap("n", "<leader>fr", require("telescope.builtin").oldfiles, default_opts, "Find Recent")
@@ -187,7 +190,7 @@ keymap("n", "<leader>gb", require("telescope.builtin").git_branches, default_opt
 keymap("n", "<leader>gc", require("telescope.builtin").git_commits, default_opts, "Find Commit")
 keymap({ "n", "v" }, "<leader>gd", require("gitsigns").diffthis, default_opts, "Diff")
 keymap("n", "<leader>gD", function()
-    require("gitsigns").diffthis("~")
+	require("gitsigns").diffthis("~")
 end, default_opts, "Diff with Head")
 keymap({ "n", "v" }, "<leader>gj", require("gitsigns").next_hunk, default_opts, "Next Hunk")
 keymap({ "n", "v" }, "<leader>gk", require("gitsigns").prev_hunk, default_opts, "Prev Hunk")
@@ -200,29 +203,29 @@ keymap("n", "<leader>gS", require("gitsigns").stage_buffer, default_opts, "Stage
 
 -- Neogen
 keymap("n", "<leader>mf", function()
-    require("neogen").generate({ type = "func" })
+	require("neogen").generate({ type = "func" })
 end, default_opts, "Document Function")
 keymap("n", "<leader>mc", function()
-    require("neogen").generate({ type = "class" })
+	require("neogen").generate({ type = "class" })
 end, default_opts, "Document Class")
 keymap("n", "<leader>mt", function()
-    require("neogen").generate({ type = "type" })
+	require("neogen").generate({ type = "type" })
 end, default_opts, "Document Type")
 keymap("n", "<leader>mF", function()
-    require("neogen").generate({ type = "File" })
+	require("neogen").generate({ type = "File" })
 end, default_opts, "Document File")
 
 -- Trouble
 keymap("n", "<leader>t", require("trouble").toggle, default_opts, "Trouble")
-keymap("n", "<leader>g;", function()
-    require("trouble").next({ skip_groups = true, jump = true })
+keymap("n", "g;", function()
+	require("trouble").next({ skip_groups = true, jump = true })
 end, default_opts, "Next Trouble")
-keymap("n", "<leader>g,", function()
-    require("trouble").previous({ skip_groups = true, jump = true })
+keymap("n", "g,", function()
+	require("trouble").previous({ skip_groups = true, jump = true })
 end, default_opts, "Next Trouble")
-keymap("n", "<leader>g0", function()
-    require("trouble").first({ skip_groups = true, jump = true })
+keymap("n", "g0", function()
+	require("trouble").first({ skip_groups = true, jump = true })
 end, default_opts, "Next Trouble")
-keymap("n", "<leader>g$", function()
-    require("trouble").last({ skip_groups = true, jump = true })
+keymap("n", "g$", function()
+	require("trouble").last({ skip_groups = true, jump = true })
 end, default_opts, "Next Trouble")
