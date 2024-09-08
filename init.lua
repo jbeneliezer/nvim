@@ -1,21 +1,27 @@
-require("jb.options")
-require("jb.keymaps")
-require("jb.plugins")
-require("jb.indent-blankline")
-require("jb.transparency")
-require("jb.colorizer")
-require("jb.neoscroll")
-require("jb.cmp")
-require("jb.lsp")
-require("jb.telescope")
-require("jb.treesitter")
-require("jb.autopairs")
-require("jb.comments")
-require("jb.gitsigns")
-require("jb.nvim-tree")
-require("jb.bufferline")
-require("jb.toggleterm")
-require("jb.which-key")
-require("jb.dap")
-require("jb.auto-session")
-require("jb.suda")
+require("settings.options")
+
+-- get lazy.nvim
+local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
+if not vim.loop.fs_stat(lazypath) then
+    vim.fn.system({
+        "git",
+        "clone",
+        "--filter=blob:none",
+        "https://github.com/folke/lazy.nvim.git",
+        "--branch=stable", -- latest stable release
+        lazypath,
+    })
+end
+vim.opt.rtp:prepend(lazypath)
+
+local lazy_opts = {
+    ui = {
+        border = "rounded",
+    },
+    rocks = { enabled = false },
+}
+
+require("lazy").setup("plugins", lazy_opts)
+
+require("settings.keymaps")
+require("settings.autocmds")

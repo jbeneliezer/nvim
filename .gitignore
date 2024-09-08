@@ -42,4 +42,9 @@ luac.out
 #undo
 .undo*
 
-plugin/packer_compiled.lua
+# lazy
+lazy-lock.json
+package-lock.json
+
+# lua_ls
+.luarc.json
