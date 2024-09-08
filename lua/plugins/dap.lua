@@ -1,6 +1,6 @@
 local get_python = function()
     local venv = vim.fn.getenv("VIRTUAL_ENV")
-    if vim.loop.os_uname().sysname == "Windows_NT" then
+    if vim.uv.os_uname().sysname == "Windows_NT" then
         if venv ~= vim.NIL then
             if vim.fn.executable(venv .. "/Scripts/python") then
                 return venv .. "/Scripts/python"
@@ -61,13 +61,13 @@ return {
             callback({ type = "server", host = config.host or "127.0.0.1", port = config.port or 8086 })
         end
 
-        if vim.loop.os_uname().sysname == "Linux" then
+        if vim.uv.os_uname().sysname == "Linux" then
             dap.adapters.cppdbg = {
                 id = "cppdbg",
                 type = "executable",
                 command = vim.fn.stdpath("data") .. "/mason/packages/cpptools/extension/debugAdapters/bin/OpenDebugAD7",
             }
-        elseif vim.loop.os_uname().sysname == "Windows_NT" then
+        elseif vim.uv.os_uname().sysname == "Windows_NT" then
             dap.adapters.cppdbg = {
                 id = "cppdbg",
                 type = "executable",
@@ -78,13 +78,13 @@ return {
             }
         end
 
-        if vim.loop.os_uname().sysname == "Linux" then
+        if vim.uv.os_uname().sysname == "Linux" then
             dap.adapters.lldb = {
                 type = "executable",
                 command = vim.fn.stdpath("data") .. "/mason/packages/codelldb/extension/lldb/bin/lldb",
                 name = "lldb",
             }
-        elseif vim.loop.os_uname().sysname == "Windows_NT" then
+        elseif vim.uv.os_uname().sysname == "Windows_NT" then
             dap.adapters.lldb = {
                 type = "executable",
                 command = vim.fn.stdpath("data") .. "/mason/packages/codelldb/extension/lldb/bin/lldb.exe",
@@ -92,9 +92,9 @@ return {
             }
         end
 
-        if vim.loop.os_uname().sysname == "Linux" then
+        if vim.uv.os_uname().sysname == "Linux" then
             require("dap-python").setup(vim.fn.stdpath("data") .. "/mason/packages/debugpy/venv/bin/python")
-        elseif vim.loop.os_uname().sysname == "Windows_NT" then
+        elseif vim.uv.os_uname().sysname == "Windows_NT" then
             require("dap-python").setup(vim.fn.stdpath("data") .. "/mason/packages/debugpy/venv/Scripts/python", {
                 console = "integratedTerminal",
             })

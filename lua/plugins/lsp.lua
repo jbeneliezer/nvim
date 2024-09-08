@@ -94,24 +94,29 @@ local on_attach = function(_, bufnr)
         local_opts["desc"] = description or "which_key_ignore"
         vim.keymap.set(mode, lhs, rhs, local_opts)
     end
+    local ts_repeat_move = require("nvim-treesitter.textobjects.repeatable_move")
+
+    -- Navigation
+    local next_diag_repeat, prev_diag_repeat =
+        ts_repeat_move.make_repeatable_move_pair(vim.diagnostic.goto_next, vim.diagnostic.goto_prev)
 
     keymap({ "n", "v" }, "gD", vim.lsp.buf.declaration, default_opts, "Goto Declaration")
     keymap({ "n", "v" }, "gd", vim.lsp.buf.definition, default_opts, "Goto Definition")
     keymap({ "n", "v" }, "gi", vim.lsp.buf.implementation, default_opts, "Goto Implementation")
     keymap({ "n", "v" }, "gr", vim.lsp.buf.references, default_opts, "Goto References")
-    keymap({ "n", "v" }, "[d", vim.diagnostic.goto_prev, default_opts, "Previous Diagnostic")
-    keymap({ "n", "v" }, "]d", vim.diagnostic.goto_next, default_opts, "Next Diagnostic")
-    keymap({ "n", "v" }, "gN", vim.diagnostic.goto_prev, default_opts, "Previous Diagnostic")
-    keymap({ "n", "v" }, "gn", vim.diagnostic.goto_next, default_opts, "Next Diagnostic")
+    keymap({ "n", "v" }, "]d", next_diag_repeat, default_opts, "Next Diagnostic")
+    keymap({ "n", "v" }, "[d", prev_diag_repeat, default_opts, "Previous Diagnostic")
+    keymap({ "n", "v" }, "gn", next_diag_repeat, default_opts, "Next Diagnostic")
+    keymap({ "n", "v" }, "gN", prev_diag_repeat, default_opts, "Previous Diagnostic")
     keymap({ "n", "v" }, "<leader>la", vim.lsp.buf.code_action, default_opts, "Code Action")
     keymap({ "n", "v" }, "<leader>li", vim.diagnostic.open_float, default_opts, "Diagnostic Info")
     keymap({ "n", "v" }, "<leader>lI", "<cmd>LspInfo<cr>", default_opts, "Info")
-    keymap({ "n", "v" }, "<leader>ll", "<Plug>(toggle-lsp-diag)", { noremap = false }, "Toggle Diagnostics")
     keymap({ "n", "v" }, "<leader>lr", require("telescope.builtin").lsp_references, default_opts, "References")
     keymap({ "n", "v" }, "<leader>lR", vim.lsp.buf.rename, default_opts, "Rename")
     keymap({ "n", "v" }, "<leader>lf", function()
         lsp_format(bufnr)
     end, default_opts, "Format")
+    keymap({ "n", "v" }, "<leader>ll", "<Plug>(toggle-lsp-diag)", { noremap = false }, "Toggle Diagnostics")
     keymap({ "n", "v" }, "<leader>lt", "<Plug>(toggle-lsp-diag-vtext)", { noremap = false }, "Toggle Vtext")
     keymap({ "n", "v" }, "<leader>lu", "<Plug>(toggle-lsp-diag-underline)", { noremap = false }, "Toggle Underline")
 end
@@ -128,7 +133,7 @@ return {
         config = function()
             require("mason-lspconfig").setup({
                 ensure_installed = vim.tbl_keys(servers),
-                automatic_installation = { exclude = { "rust_analyzer" } }
+                automatic_installation = { exclude = { "rust_analyzer" } },
             })
 
             local lsp_capabilities = vim.lsp.protocol.make_client_capabilities()
