@@ -14,6 +14,8 @@ return {
     },
     config = function()
         local actions = require("telescope.actions")
+        local open_with_trouble = require("trouble.sources.telescope").open
+        local add_to_trouble = require("trouble.sources.telescope").add
         require("telescope").setup({
             defaults = {
                 file_ignore_patterns = { ".svn", ".git", "site-packages", "__pycache__", "Listings", "venv" },
@@ -33,7 +35,7 @@ return {
                         ["<CR>"] = actions.select_default,
                         ["<C-x>"] = actions.select_horizontal,
                         ["<C-v>"] = actions.select_vertical,
-                        ["<C-t>"] = actions.select_tab,
+                        -- ["<C-t>"] = actions.select_tab,
                         ["<C-u>"] = actions.preview_scrolling_up,
                         ["<C-d>"] = actions.preview_scrolling_down,
                         ["<PageUp>"] = actions.results_scrolling_up,
@@ -42,8 +44,11 @@ return {
                         ["<S-Tab>"] = actions.toggle_selection + actions.move_selection_better,
                         ["<C-q>"] = actions.send_to_qflist + actions.open_qflist,
                         ["<M-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
-                        ["<C-l>"] = actions.complete_tag,
+                        -- ["<C-l>"] = actions.complete_tag,
                         ["<C-_>"] = actions.which_key, -- keys from pressing <C-/>
+                        ["<C-t>"] = open_with_trouble,
+                        ["<C-h>"] = actions.move_to_top,
+                        ["<C-l>"] = actions.move_to_bottom,
                     },
                     n = {
                         ["<esc>"] = actions.close,
@@ -51,7 +56,7 @@ return {
                         ["<CR>"] = actions.select_default,
                         ["<C-x>"] = actions.select_horizontal,
                         ["<C-v>"] = actions.select_vertical,
-                        ["<C-t>"] = actions.select_tab,
+                        -- ["<C-t>"] = actions.select_tab,
                         ["<Tab>"] = actions.toggle_selection + actions.move_selection_worse,
                         ["<S-Tab>"] = actions.toggle_selection + actions.move_selection_better,
                         ["<C-q>"] = actions.send_to_qflist + actions.open_qflist,
@@ -70,6 +75,7 @@ return {
                         ["<PageUp>"] = actions.results_scrolling_up,
                         ["<PageDown>"] = actions.results_scrolling_down,
                         ["?"] = actions.which_key,
+                        ["<C-t>"] = open_with_trouble,
                     },
                 },
             },

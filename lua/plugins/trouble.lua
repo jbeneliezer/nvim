@@ -8,5 +8,7 @@ return {
 			hover = "I",
 		},
 		auto_close = true,
+        focus = true,
+        warn_no_results = false,
 	},
 }
