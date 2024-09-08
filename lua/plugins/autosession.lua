@@ -1,13 +1,15 @@
 return {
     "rmagatti/auto-session",
-	event = "VimEnter",
+    event = "VimEnter",
     config = function()
         require("auto-session").setup({
-            auto_save_enabled = true,
-            auto_restore_enabled = true,
+            auto_restore = true,
+            auto_save = true,
             session_lens = {
-                theme_conf = { border = true },
                 previewer = true,
+                theme_conf = {
+                    border = true,
+                },
             },
         })
         vim.o.sessionoptions = "blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,localoptions"

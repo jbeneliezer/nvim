@@ -18,6 +18,7 @@ local lazy_opts = {
     ui = {
         border = "rounded",
     },
+    rocks = { enabled = false },
 }
 
 require("lazy").setup("plugins", lazy_opts)
