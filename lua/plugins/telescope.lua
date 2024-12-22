@@ -1,6 +1,9 @@
 return {
     "nvim-telescope/telescope.nvim",
     event = "VimEnter",
+    -- enabled = function()
+    --     return ~FZF_LUA
+    -- end,
     dependencies = {
         "nvim-lua/plenary.nvim",
         -- "nvim-telescope/telescope-project.nvim",
@@ -15,10 +18,10 @@ return {
     config = function()
         local actions = require("telescope.actions")
         local open_with_trouble = require("trouble.sources.telescope").open
-        local add_to_trouble = require("trouble.sources.telescope").add
+        -- local add_to_trouble = require("trouble.sources.telescope").add
         require("telescope").setup({
             defaults = {
-                file_ignore_patterns = { ".svn", ".git", "site-packages", "__pycache__", "Listings", "venv" },
+                file_ignore_patterns = { ".svn$", ".git$", "site-packages", "__pycache__", "Listings", "venv" },
                 prompt_prefix = " ",
                 selection_caret = " ",
                 path_display = { "truncate" },

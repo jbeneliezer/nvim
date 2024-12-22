@@ -1,6 +1,6 @@
 local get_python = function()
     local venv = vim.fn.getenv("VIRTUAL_ENV")
-    if vim.uv.os_uname().sysname == "Windows_NT" then
+    if OsCurrent == Os.WINDOWS then
         if venv ~= vim.NIL then
             if vim.fn.executable(venv .. "/Scripts/python") then
                 return venv .. "/Scripts/python"
@@ -61,13 +61,7 @@ return {
             callback({ type = "server", host = config.host or "127.0.0.1", port = config.port or 8086 })
         end
 
-        if vim.uv.os_uname().sysname == "Linux" then
-            dap.adapters.cppdbg = {
-                id = "cppdbg",
-                type = "executable",
-                command = vim.fn.stdpath("data") .. "/mason/packages/cpptools/extension/debugAdapters/bin/OpenDebugAD7",
-            }
-        elseif vim.uv.os_uname().sysname == "Windows_NT" then
+        if OsCurrent == Os.WINDOWS then
             dap.adapters.cppdbg = {
                 id = "cppdbg",
                 type = "executable",
@@ -76,28 +70,26 @@ return {
                     detached = false,
                 },
             }
-        end
-
-        if vim.uv.os_uname().sysname == "Linux" then
-            dap.adapters.lldb = {
-                type = "executable",
-                command = vim.fn.stdpath("data") .. "/mason/packages/codelldb/extension/lldb/bin/lldb",
-                name = "lldb",
-            }
-        elseif vim.uv.os_uname().sysname == "Windows_NT" then
             dap.adapters.lldb = {
                 type = "executable",
                 command = vim.fn.stdpath("data") .. "/mason/packages/codelldb/extension/lldb/bin/lldb.exe",
                 name = "lldb",
             }
-        end
-
-        if vim.uv.os_uname().sysname == "Linux" then
-            require("dap-python").setup(vim.fn.stdpath("data") .. "/mason/packages/debugpy/venv/bin/python")
-        elseif vim.uv.os_uname().sysname == "Windows_NT" then
             require("dap-python").setup(vim.fn.stdpath("data") .. "/mason/packages/debugpy/venv/Scripts/python", {
                 console = "integratedTerminal",
             })
+        elseif OsCurrent == Os.LINUX then
+            dap.adapters.cppdbg = {
+                id = "cppdbg",
+                type = "executable",
+                command = vim.fn.stdpath("data") .. "/mason/packages/cpptools/extension/debugAdapters/bin/OpenDebugAD7",
+            }
+            dap.adapters.lldb = {
+                type = "executable",
+                command = vim.fn.stdpath("data") .. "/mason/packages/codelldb/extension/lldb/bin/lldb",
+                name = "lldb",
+            }
+            require("dap-python").setup(vim.fn.stdpath("data") .. "/mason/packages/debugpy/venv/bin/python")
         end
 
         dap.configurations.lua = {
@@ -223,9 +215,9 @@ return {
             layouts = {
                 {
                     elements = {
-                        { id = "scopes",      size = 0.34 },
+                        { id = "scopes", size = 0.34 },
                         { id = "breakpoints", size = 0.33 },
-                        { id = "watches",     size = 0.33 },
+                        { id = "watches", size = 0.33 },
                     },
                     size = 10,
                     position = "bottom",

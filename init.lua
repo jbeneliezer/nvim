@@ -1,6 +1,16 @@
 require("settings.options")
+FZF_LUA = false
 
--- get lazy.nvim
+-- For OS-specific configuration
+Os = { LINUX = {}, WINDOWS = {} }
+OsCurrent = nil
+if vim.uv.os_uname().sysname == "Windows_NT" then
+    OsCurrent = Os.WINDOWS
+elseif vim.uv.os_uname().sysname == "Linux" then
+    OsCurrent = Os.LINUX
+end
+
+-- Bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.uv.fs_stat(lazypath) then
     vim.fn.system({
@@ -19,9 +29,12 @@ local lazy_opts = {
         border = "rounded",
     },
     rocks = { enabled = false },
+    change_detection = {
+        notify = false,
+    },
 }
 
 require("lazy").setup("plugins", lazy_opts)
 
-require("settings.keymaps")
+require("settings.keymaps").set_normal_keymaps()
 require("settings.autocmds")
