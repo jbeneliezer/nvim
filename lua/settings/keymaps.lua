@@ -133,25 +133,23 @@ function M.set_normal_keymaps()
     keymap("v", "p", '"_dP')
 
     -- Toggleterm
+    local utils = require("settings.utils")
+    keymap({ "n", "v", "t" }, "<c-l>", utils.next_term_or_win)
+    keymap({ "n", "v", "t" }, "<c-h>", utils.prev_term_or_win)
+    keymap({ "n", "v", "t" }, "<c-p>", utils.close_any_or_open1)
     keymap({ "n", "v", "t" }, "<c-_>", function()
         require("toggleterm").toggle_all()
     end)
 
-    local utils = require("settings.utils")
-
-    keymap({ "n", "v", "t" }, "<c-l>", utils.next_term_or_win)
-    keymap({ "n", "v", "t" }, "<c-h>", utils.prev_term_or_win)
-    keymap({ "n", "v", "t" }, "<c-p>", utils.close_any_or_open1)
-
     local trim_spaces = false
     keymap("v", "<leader>tl", function()
-        require("toggleterm").send_lines_to_terminal("single_line", trim_spaces, { args = 2 })
+        require("toggleterm").send_lines_to_terminal("single_line", trim_spaces, { args = 5 })
     end, default_opts, "Send Line to IPython")
     keymap("v", "<leader>tL", function()
-        require("toggleterm").send_lines_to_terminal("visual_lines", trim_spaces, { args = 2 })
+        require("toggleterm").send_lines_to_terminal("visual_lines", trim_spaces, { args = 5 })
     end, default_opts, "Send Selected Lines to IPython")
     keymap("v", "<leader>ts", function()
-        require("toggleterm").send_lines_to_terminal("visual_selection", trim_spaces, { args = 2 })
+        require("toggleterm").send_lines_to_terminal("visual_selection", trim_spaces, { args = 5 })
     end, default_opts, "Send Selection to IPython")
 
     -- LF
@@ -225,23 +223,6 @@ function M.set_normal_keymaps()
     keymap("n", "<leader>fj", telescope_builtin.jumplist, default_opts, "Jump List")
     keymap("n", "<leader>f/", telescope_builtin.current_buffer_fuzzy_find, default_opts, "Buffer Grep")
     keymap("n", "<leader>f.", telescope_builtin.resume, default_opts, "Resume")
-
-    -- Fzf-Lua
-    if FZF_LUA then
-        keymap("n", "<leader>_fl", require("fzf-lua").resume, default_opts, "Resume")
-
-        keymap("n", "<leader>_ff", require("fzf-lua").files, default_opts, "Files")
-        keymap("n", "<leader>_fr", require("fzf-lua").oldfiles, default_opts, "Recent Files")
-        keymap("n", "<leader>_fb", require("fzf-lua").buffers, default_opts, "Buffers")
-
-        keymap("n", "<leader>_fg", require("fzf-lua").live_grep, default_opts, "Live Grep")
-        -- keymap("n", "<leader>_f_g", require("fzf-lua").live_grep_native, default_opts, "Live Grep Native")
-        keymap("n", "<leader>_fG", require("fzf-lua").live_grep_resume, default_opts, "Live Grep Resume")
-        keymap("n", "<leader>_f/", require("fzf-lua").lgrep_curbuf, default_opts, "Live Grep Buffer")
-        keymap("n", "<leader>_f*", require("fzf-lua").grep_cword, default_opts, "Grep word")
-        keymap("n", "<leader>_F*", require("fzf-lua").grep_cWORD, default_opts, "Grep WORD")
-        keymap({ "v", "x" }, "<leader>_f*", require("fzf-lua").visual, default_opts, "Grep visual")
-    end
 
     -- Todo-comments
     keymap("n", "<leader>ft", "<cmd>TodoTelescope<cr>", default_opts, "Todo")

@@ -37,7 +37,7 @@ keymap({ "n", "v", "t" }, "<c-g>", function()
     terms.lazygit:toggle()
 end)
 
-M.close_any_or_open1 = function()
+function M.close_any_or_open1()
     local any_open = false
     for _, v in pairs(terms) do
         if v:is_open() then
@@ -50,7 +50,7 @@ M.close_any_or_open1 = function()
     end
 end
 
-M.next_term_or_win = function()
+function M.next_term_or_win()
     for i = 1, 4 do
         if terms[i]:is_focused() then
             terms[i]:close()
@@ -66,7 +66,7 @@ M.next_term_or_win = function()
     vim.cmd("wincmd l")
 end
 
-M.prev_term_or_win = function()
+function M.prev_term_or_win()
     for i = 1, 4 do
         if terms[i]:is_focused() then
             terms[i]:close()

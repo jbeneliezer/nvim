@@ -1,9 +1,6 @@
 return {
     "nvim-telescope/telescope.nvim",
     event = "VimEnter",
-    -- enabled = function()
-    --     return ~FZF_LUA
-    -- end,
     dependencies = {
         "nvim-lua/plenary.nvim",
         -- "nvim-telescope/telescope-project.nvim",

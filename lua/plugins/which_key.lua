@@ -22,7 +22,6 @@ return {
             { "<leader>m",  group = "Neogen" },
             { "<leader>n",  group = "Neotest" },
             { "<leader>t",  group = "ToggleTerm" },
-            { "<leader>f_",  group = "Fzf-Lua" },
         },
         icons = { mappings = false },
     },

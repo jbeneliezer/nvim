@@ -1,5 +1,4 @@
 require("settings.options")
-FZF_LUA = false
 
 -- For OS-specific configuration
 Os = { LINUX = {}, WINDOWS = {} }
