@@ -10,7 +10,7 @@ return {
             },
         },
         win = {
-        	border = "rounded",
+            border = "rounded",
         },
         spec = {
             { "<leader>b",  group = "Breakpoints" },
@@ -21,6 +21,8 @@ return {
             { "<leader>l",  group = "Lsp" },
             { "<leader>m",  group = "Neogen" },
             { "<leader>n",  group = "Neotest" },
+            { "<leader>t",  group = "ToggleTerm" },
+            { "<leader>f_",  group = "Fzf-Lua" },
         },
         icons = { mappings = false },
     },

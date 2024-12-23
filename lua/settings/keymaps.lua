@@ -2,7 +2,7 @@ local M = {}
 
 local default_opts = { noremap = true, silent = true }
 local keymap = function(mode, lhs, rhs, opts, description)
-    local local_opts = opts or { noremap = true, silent = true }
+    local local_opts = opts or default_opts
     local_opts.desc = description or "which_key_ignore"
     vim.keymap.set(mode, lhs, rhs, local_opts)
 end
@@ -91,10 +91,10 @@ function M.set_normal_keymaps()
     keymap("v", ">", ">gv")
 
     -- Windows
-    keymap("n", "<c-h>", "<c-w>h")
+    -- keymap("n", "<c-h>", "<c-w>h")
     keymap("n", "<c-j>", "<c-w>j")
     keymap("n", "<c-k>", "<c-w>k")
-    keymap("n", "<c-l>", "<c-w>l")
+    -- keymap("n", "<c-l>", "<c-w>l")
 
     keymap("n", "<leader>c", "<cmd>BufferClose<cr>")
 
@@ -133,36 +133,26 @@ function M.set_normal_keymaps()
     keymap("v", "p", '"_dP')
 
     -- Toggleterm
-    if OsCurrent == Os.WINDOWS then
-        local ps_term = require("toggleterm.terminal").Terminal:new({
-            cmd = "powershell -nologo",
-            hidden = true,
-            op_open = function(_)
-                vim.cmd("startinsert!")
-            end,
-        })
-        keymap({ "n", "v", "t" }, "<c-t>", function()
-            ps_term:toggle()
-        end)
-        keymap({ "n", "v", "t" }, "<c-p>", function()
-            ps_term:toggle()
-        end)
-    elseif OsCurrent == Os.LINUX then
-        keymap({ "n", "v", "t" }, "<c-t>", "<cmd>ToggleTerm<cr>")
-        keymap({ "n", "v", "t" }, "<c-p>", "<cmd>ToggleTerm<cr>")
-    end
-
-    -- lazygit
-    local lazygit = require("toggleterm.terminal").Terminal:new({
-        cmd = "lazygit",
-        hidden = true,
-        op_open = function(_)
-            vim.cmd("startinsert!")
-        end,
-    })
-    keymap({ "n", "v", "t" }, "<c-g>", function()
-        lazygit:toggle()
+    keymap({ "n", "v", "t" }, "<c-_>", function()
+        require("toggleterm").toggle_all()
     end)
+
+    local utils = require("settings.utils")
+
+    keymap({ "n", "v", "t" }, "<c-l>", utils.next_term_or_win)
+    keymap({ "n", "v", "t" }, "<c-h>", utils.prev_term_or_win)
+    keymap({ "n", "v", "t" }, "<c-p>", utils.close_any_or_open1)
+
+    local trim_spaces = false
+    keymap("v", "<leader>tl", function()
+        require("toggleterm").send_lines_to_terminal("single_line", trim_spaces, { args = 2 })
+    end, default_opts, "Send Line to IPython")
+    keymap("v", "<leader>tL", function()
+        require("toggleterm").send_lines_to_terminal("visual_lines", trim_spaces, { args = 2 })
+    end, default_opts, "Send Selected Lines to IPython")
+    keymap("v", "<leader>ts", function()
+        require("toggleterm").send_lines_to_terminal("visual_selection", trim_spaces, { args = 2 })
+    end, default_opts, "Send Selection to IPython")
 
     -- LF
     -- keymap({ "n", "v" }, "<c-e>", require("lf").start)
@@ -273,7 +263,7 @@ function M.set_normal_keymaps()
 
     -- Trouble
     local trouble = require("trouble")
-    keymap("n", "<leader>t", function()
+    keymap("n", "<leader>lt", function()
         trouble.toggle({ mode = "diagnostics" })
     end, default_opts, "Trouble Diagnostics")
     keymap("n", "<leader>s", function()
@@ -298,7 +288,7 @@ function M.set_normal_keymaps()
     end, default_opts, "Last Trouble")
 end
 
-M.set_lsp_keymaps = function(_, bufnr)
+function M.set_lsp_keymaps(_, bufnr)
     -- Navigation
     local next_diag_repeat, prev_diag_repeat = repeatable_pair(vim.diagnostic.goto_next, vim.diagnostic.goto_prev)
     local lsp_opts = { noremap = true, silent = true, buffer = bufnr }
@@ -320,7 +310,7 @@ M.set_lsp_keymaps = function(_, bufnr)
         lsp_format(bufnr)
     end, lsp_opts, "Format")
     keymap({ "n", "v" }, "<leader>ll", "<Plug>(toggle-lsp-diag)", { noremap = false }, "Toggle Diagnostics")
-    keymap({ "n", "v" }, "<leader>lt", "<Plug>(toggle-lsp-diag-vtext)", { noremap = false }, "Toggle Vtext")
+    keymap({ "n", "v" }, "<leader>lv", "<Plug>(toggle-lsp-diag-vtext)", { noremap = false }, "Toggle Vtext")
     keymap({ "n", "v" }, "<leader>lu", "<Plug>(toggle-lsp-diag-underline)", { noremap = false }, "Toggle Underline")
 end
 
@@ -368,6 +358,11 @@ M.set_git_keymaps = function(bufnr)
     keymap({ "n", "v" }, "<leader>gs", gs.stage_hunk, gs_opts, "Stage Hunk")
     keymap({ "n", "v" }, "<leader>gu", gs.undo_stage_hunk, gs_opts, "Undo Stage Hunk")
     keymap("n", "<leader>gS", gs.stage_buffer, gs_opts, "Stage Buffer")
+end
+
+function M.set_term_keymaps()
+    local term_opts = { noremap = true, silent = true, buffer = 0 }
+    keymap("t", "<esc>", "<c-\\><c-n>", term_opts)
 end
 
 return M
