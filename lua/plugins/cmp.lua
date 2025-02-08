@@ -11,6 +11,17 @@ return {
         "L3MON4D3/LuaSnip",
         "rafamadriz/friendly-snippets",
         {
+            "folke/lazydev.nvim",
+            ft = "lua",
+            opts = {
+                library = {
+                    { path = "${3rd}/luv/library", words = { "vim%uv" } },
+                    "lazy.nvim",
+                    "nvim-dap-ui",
+                },
+            },
+        },
+        {
             "zbirenbaum/copilot-cmp",
             config = function()
                 require("copilot_cmp").setup({
@@ -111,6 +122,7 @@ return {
                     vim_item.kind = string.format("%s", kind_icons[vim_item.kind])
                     -- vim_item.kind = string.format('%s %s', kind_icons[vim_item.kind], vim_item.kind) -- This concatonates the icons with the name of the item kind
                     vim_item.menu = ({
+                        lazydev = "[LazyDev]",
                         copilot = "[Copilot]",
                         nvim_lua = "[Nvim]",
                         nvim_lsp = "[Lsp]",
@@ -122,7 +134,7 @@ return {
                 end,
             },
             sources = {
-                -- { name = "copilot" },
+                { name = "lazydev", group_index = 0 },
                 { name = "nvim_lua" },
                 { name = "nvim_lsp" },
                 { name = "luasnip" },

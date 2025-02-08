@@ -29,11 +29,11 @@ return {
                 },
                 selection_modes = {
                     ["@function.outer"] = "V",
-                    ["@function.inner"] = "v",
+                    ["@function.inner"] = "V",
                     ["@class.outer"] = "V",
                     ["@class.inner"] = "V",
                     ["@loop.outer"] = "V",
-                    ["@loop.inner"] = "v",
+                    ["@loop.inner"] = "V",
                     ["@scope"] = "V",
                 },
                 move = {
@@ -70,5 +70,6 @@ return {
                 },
             },
         })
+        require("treesitter-context").setup({ max_lines = 5, multiline_threshold = 5 })
     end,
 }

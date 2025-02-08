@@ -3,11 +3,6 @@ return {
     event = "VimEnter",
     dependencies = {
         "nvim-lua/plenary.nvim",
-        -- "nvim-telescope/telescope-project.nvim",
-        -- {
-        --     "nvim-telescope/telescope-fzf-native.nvim",
-        --     build = "cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build",
-        -- },
         "gbrlsnchs/telescope-lsp-handlers.nvim",
         "debugloop/telescope-undo.nvim",
         "natecraddock/telescope-zf-native.nvim",
@@ -35,7 +30,6 @@ return {
                         ["<CR>"] = actions.select_default,
                         ["<C-x>"] = actions.select_horizontal,
                         ["<C-v>"] = actions.select_vertical,
-                        -- ["<C-t>"] = actions.select_tab,
                         ["<C-u>"] = actions.preview_scrolling_up,
                         ["<C-d>"] = actions.preview_scrolling_down,
                         ["<PageUp>"] = actions.results_scrolling_up,
@@ -44,7 +38,6 @@ return {
                         ["<S-Tab>"] = actions.toggle_selection + actions.move_selection_better,
                         ["<C-q>"] = actions.send_to_qflist + actions.open_qflist,
                         ["<M-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
-                        -- ["<C-l>"] = actions.complete_tag,
                         ["<C-_>"] = actions.which_key, -- keys from pressing <C-/>
                         ["<C-t>"] = open_with_trouble,
                         ["<C-h>"] = actions.move_to_top,
@@ -56,7 +49,6 @@ return {
                         ["<CR>"] = actions.select_default,
                         ["<C-x>"] = actions.select_horizontal,
                         ["<C-v>"] = actions.select_vertical,
-                        -- ["<C-t>"] = actions.select_tab,
                         ["<Tab>"] = actions.toggle_selection + actions.move_selection_worse,
                         ["<S-Tab>"] = actions.toggle_selection + actions.move_selection_better,
                         ["<C-q>"] = actions.send_to_qflist + actions.open_qflist,
@@ -109,7 +101,6 @@ return {
                 -- "projects",
             },
         })
-        -- require("telescope").load_extension("fzf")
         require("telescope").load_extension("lsp_handlers")
         require("telescope").load_extension("dap")
         require("telescope").load_extension("undo")

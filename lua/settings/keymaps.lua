@@ -7,27 +7,6 @@ local keymap = function(mode, lhs, rhs, opts, description)
     vim.keymap.set(mode, lhs, rhs, local_opts)
 end
 
-local toggle_source = function(source)
-    local cmp = require("cmp")
-    local toggle = false
-    local sources = cmp.get_config().sources
-
-    for i = #sources, 1, -1 do
-        if sources[i].name == source then
-            table.remove(sources, i)
-            toggle = true
-        end
-    end
-
-    if not toggle then
-        table.insert(sources, { name = source })
-    end
-
-    cmp.setup.buffer({
-        sources = sources,
-    })
-end
-
 local ts_repeat_move = require("nvim-treesitter.textobjects.repeatable_move")
 local repeatable_pair = ts_repeat_move.make_repeatable_move_pair
 local repeatable = function(f)
@@ -46,6 +25,7 @@ local lsp_format = function(bufnr)
 end
 
 function M.set_normal_keymaps()
+    local util = require("settings.util")
     keymap({ "n", "x", "o" }, ";", ts_repeat_move.repeat_last_move)
     keymap({ "n", "x", "o" }, ",", ts_repeat_move.repeat_last_move_opposite)
 
@@ -89,6 +69,7 @@ function M.set_normal_keymaps()
     -- Stay in indent mode
     keymap("v", "<", "<gv")
     keymap("v", ">", ">gv")
+    keymap("v", "=", "=gv")
 
     -- Windows
     -- keymap("n", "<c-h>", "<c-w>h")
@@ -117,29 +98,43 @@ function M.set_normal_keymaps()
     end
 
     -- File Explorer
-    -- keymap("n", "<leader>e", "<cmd>Lex 25<cr>", default_opts, "Explorer")
     keymap("n", "<leader>e", "<cmd>NvimTreeToggle<cr>")
+    -- keymap("n", "<leader>e", "<cmd>Lex 25<cr>", default_opts, "Explorer")
 
     -- Comment
     keymap("n", "<leader>/", "<Plug>(comment_toggle_linewise_current)", { noremap = false }, "Comment")
     keymap("v", "<leader>/", "<Plug>(comment_toggle_linewise_visual)gv", { noremap = false }, "Comment")
 
     -- Copilot
-    keymap("n", "<leader>C", function()
-        toggle_source("copilot")
-    end, default_opts, "Toggle Copilot")
+    -- keymap("n", "<leader>C", function()
+    --     util.toggle_cmp_source("copilot")
+    -- end, default_opts, "Toggle Copilot")
 
     -- Paste in visual mode
     keymap("v", "p", '"_dP')
 
+    -- Build and Debug
+    keymap("n", "M", util.build_command, default_opts, "Build Command")
+    keymap("n", "C", util.clean_command, default_opts, "Clean Command")
+
     -- Toggleterm
-    local utils = require("settings.utils")
-    keymap({ "n", "v", "t" }, "<c-l>", utils.next_term_or_win)
-    keymap({ "n", "v", "t" }, "<c-h>", utils.prev_term_or_win)
-    keymap({ "n", "v", "t" }, "<c-p>", utils.close_any_or_open1)
-    keymap({ "n", "v", "t" }, "<c-_>", function()
-        require("toggleterm").toggle_all()
+    local tm = util.TermManager:new()
+    keymap({ "n", "v", "t" }, "<c-g>", function()
+        tm[1]:toggle()
     end)
+    keymap({ "n", "v", "t" }, "<c-l>", function()
+        tm:next_term_or_win()
+    end)
+    keymap({ "n", "v", "t" }, "<c-h>", function()
+        tm:prev_term_or_win()
+    end)
+    keymap({ "n", "v", "t" }, "<c-p>", function()
+        tm:term_toggle()
+    end)
+    keymap({ "n", "v", "t" }, "<leader><c-p>", function()
+        tm:ipy_term_toggle()
+    end)
+    keymap({ "n", "v", "t" }, "<c-_>", require("toggleterm").toggle_all)
 
     local trim_spaces = false
     keymap("v", "<leader>tl", function()
@@ -154,37 +149,33 @@ function M.set_normal_keymaps()
 
     -- LF
     -- keymap({ "n", "v" }, "<c-e>", require("lf").start)
-    -- keymap("t", "<c-e>", "<cmd>ToggleTerm<cr>")
 
     -- Dap
     local dap = require("dap")
+    local dapui = require("dapui")
     local next_bp_repeat, prev_bp_repeat =
         repeatable_pair(require("goto-breakpoints").next, require("goto-breakpoints").prev)
-    keymap("n", "<F5>", repeatable(dap.continue))
-    keymap("n", "<F8>", repeatable(dap.step_over))
-    keymap("n", "<F9>", repeatable(dap.step_into))
-    keymap("n", "<F10>", repeatable(dap.step_out))
-    keymap("n", "<leader>da", function()
-        require("dapui").elements.watches.add(vim.fn.input("Expression: "))
-    end, default_opts, "Add Watch")
     keymap("n", "<leader>db", require("telescope").extensions.dap.list_breakpoints, default_opts, "Breakpoints")
     keymap("n", "<leader>du", require("dapui").toggle, default_opts, "UI")
     keymap("n", "<leader>dt", dap.toggle_breakpoint, default_opts, "Breakpoint")
     keymap("n", "<leader>dc", repeatable(dap.continue), default_opts, "Continue")
     keymap("n", "<leader>dC", require("telescope").extensions.dap.commands, default_opts, "Commands")
-    keymap({ "n", "v" }, "<leader>de", require("dapui").eval, default_opts, "Evaluate")
     keymap("n", "<leader>dr", dap.run_last, default_opts, "Run Last")
     keymap("n", "<leader>dR", dap.repl.toggle, default_opts, "Repl")
-    keymap("n", "<leader>dp", dap.pause, default_opts, "Pause")
-    keymap("n", "<leader>dq", dap.terminate, default_opts, "Quit")
-    keymap("n", "<leader>dsi", repeatable(dap.step_into), default_opts, "Into")
-    keymap("n", "<leader>dso", repeatable(dap.step_over), default_opts, "Over")
-    keymap("n", "<leader>dsu", repeatable(dap.step_out), default_opts, "Out")
-    keymap("n", "<leader>d<leader>", repeatable(dap.run_to_cursor), default_opts, "Run to Cursor")
     keymap("n", "<leader>bc", dap.clear_breakpoints, default_opts, "Clear Breakpoints")
     keymap("n", "<leader>bn", next_bp_repeat, default_opts, "Next Breakpoint")
     keymap("n", "<leader>bN", prev_bp_repeat, default_opts, "Previous Breakpoint")
     keymap("n", "<leader>b<leader>", require("goto-breakpoints").stopped, default_opts, "Current Stopped Line")
+    keymap("n", "<leader>dB", function()
+        dapui.toggle({ 1, true })
+    end, default_opts, "Toggle Bottom Layout")
+    keymap("n", "<leader>dL", function()
+        dapui.toggle({ 2, true })
+    end, default_opts, "Toggle Side Layout")
+    keymap("n", "<leader>dl", util.dap_next_layout, default_opts, "Next Layout")
+    keymap("n", "<leader>dh", util.dap_prev_layout, default_opts, "Prev Layout")
+    keymap("n", "<leader>dd", util.dap_default_layout, default_opts, "Default Layout")
+    keymap("n", "<leader>dD", util.dap_repl_layout, default_opts, "Repl Layout")
 
     -- Neotest
     local neotest = require("neotest")
@@ -206,9 +197,6 @@ function M.set_normal_keymaps()
     local telescope_builtin = require("telescope.builtin")
     keymap("n", "<leader>fa", telescope_builtin.autocommands, default_opts, "Autocommands")
     keymap("n", "<leader>fc", telescope_builtin.commands, default_opts, "Commands")
-    -- keymap("n", "<leader>fC", function()
-    --     telescope_builtin.colorscheme({ enable_preview = true })
-    -- end, default_opts, "Colorscheme")
     keymap("n", "<leader>ff", telescope_builtin.find_files, default_opts, "Files")
     keymap("n", "<leader>fr", telescope_builtin.oldfiles, default_opts, "Recent Files")
     keymap("n", "<leader>fC", telescope_builtin.command_history, default_opts, "Recent Commands")
@@ -297,7 +285,6 @@ end
 
 M.set_git_keymaps = function(bufnr)
     local gs = require("gitsigns")
-    -- local gs = package.loaded.gitsigns
     local gs_opts = { noremap = true, silent = true, buffer = bufnr }
 
     local next_hunk = function()
@@ -344,6 +331,58 @@ end
 function M.set_term_keymaps()
     local term_opts = { noremap = true, silent = true, buffer = 0 }
     keymap("t", "<esc>", "<c-\\><c-n>", term_opts)
+end
+
+local dap_keymaps = {
+    ["<leader>da"] = {
+        "n",
+        "<leader>da",
+        function()
+            require("dapui").elements.watches.add(vim.fn.input("Expression: "))
+        end,
+        default_opts,
+        "Add Watch",
+    },
+    ["<leader>de"] = { { "n", "v" }, "<leader>de", require("dapui").eval, default_opts, "Evaluate" },
+    ["<leader>dp"] = { "n", "<leader>dp", require("dap").pause, default_opts, "Pause" },
+    ["<leader>dq"] = { "n", "<leader>dq", require("dap").terminate, default_opts, "Quit" },
+    ["<leader>dsi"] = { "n", "<leader>dsi", repeatable(require("dap").step_into), default_opts, "Into" },
+    ["<leader>dso"] = { "n", "<leader>dso", repeatable(require("dap").step_over), default_opts, "Over" },
+    ["<leader>dsu"] = { "n", "<leader>dsu", repeatable(require("dap").step_out), default_opts, "Out" },
+    ["<leader>d<leader>"] = {
+        "n",
+        "<leader>d<leader>",
+        repeatable(require("dap").run_to_cursor),
+        default_opts,
+        "Run to Cursor",
+    },
+    ["<F5>"] = { "n", "<F5>", repeatable(require("dap").continue) },
+    ["<F8>"] = { "n", "<F8>", repeatable(require("dap").step_over) },
+    ["<F9>"] = { "n", "<F9>", repeatable(require("dap").step_into) },
+    ["<F10>"] = { "n", "<F10>", repeatable(require("dap").step_out) },
+}
+
+M.set_dap_keymaps = function()
+    for _, v in pairs(dap_keymaps) do
+        keymap(unpack(v))
+    end
+end
+
+M.del_dap_keymaps = function()
+    for _, v in pairs(vim.api.nvim_get_keymap("n")) do
+        for dk, _ in pairs(dap_keymaps) do
+            if dk == v["lhs"]:gsub(" ", "<leader>") then
+                vim.keymap.del("n", dk)
+            end
+        end
+    end
+    for _, v in pairs(vim.api.nvim_get_keymap("v")) do
+        for dk, _ in pairs(dap_keymaps) do
+            if dk == v["lhs"]:gsub(" ", "<leader>") then
+                vim.keymap.del("v", dk)
+            end
+        end
+    end
 end
 
 return M
