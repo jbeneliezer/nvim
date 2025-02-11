@@ -13,7 +13,7 @@ return {
                     extra_args = { "--line-length", "120" },
                 }),
                 null_ls.builtins.formatting.clang_format.with({
-                    extra_args = { "--style={BasedOnStyle: llvm, IndentWidth: 4, AccessModifierOffset: -4}" },
+                    -- extra_args = { "--style={BasedOnStyle: llvm, IndentWidth: 4, AccessModifierOffset: -4}" },
                 }),
                 -- diagnostics
                 null_ls.builtins.diagnostics.cppcheck.with({
