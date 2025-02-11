@@ -48,3 +48,6 @@ package-lock.json
 
 # lua_ls
 .luarc.json
+
+# neovide
+neovide_backtraces.log
