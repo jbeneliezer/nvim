@@ -22,8 +22,27 @@ return {
                 -- null_ls.builtins.diagnostics.ruff.with({
                 -- 	extra_args = { "--line-length", "120", "--ignore", "F403", "--ignore", "F405" },
                 -- }),
+                null_ls.builtins.diagnostics.cppcheck.with({
+                    extra_args = { "--enable=warning,performance,portability", "$FILENAME" },
+                }),
+                -- null_ls.builtins.diagnostics.ruff.with({
+                -- 	extra_args = { "--line-length", "120", "--ignore", "F403", "--ignore", "F405" },
+                -- }),
                 -- code actions
                 null_ls.builtins.code_actions.gitsigns,
+            },
+            -- on_attach = function(client, bufnr)
+            -- if client.supports_method("textDocument/formatting") then
+            -- vim.api.nvim_create_autocmd("BufWritePre", {
+            -- 	buffer = bufnr,
+            -- 	callback = function()
+            -- 		vim.lsp.buf.format({ bufnr = bufnr })
+            -- 	end,
+            -- })
+            -- end
+            -- end,
+        })
+    end,
             },
             -- on_attach = function(client, bufnr)
             -- if client.supports_method("textDocument/formatting") then

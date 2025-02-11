@@ -39,8 +39,12 @@ luac.out
 *.x86_64
 *.hex
 
-#undo
+# undo
 .undo*
+
+# venv
+venv*
+.venv*
 
 # lazy
 lazy-lock.json

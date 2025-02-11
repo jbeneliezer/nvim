@@ -58,5 +58,6 @@ vim.g.maplocalleader = " "
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 
--- disable python3_provider
-vim.g.loaded_python3_provider=0
+-- python3_provider
+vim.g.python3_host_prog = '/Users/jb/AppData/Local/nvim/.venv/Scripts/python.exe'
+-- vim.g.loaded_python3_provider=0

@@ -1,5 +1,3 @@
-require("settings.options")
-
 -- For OS-specific configuration
 Os = { LINUX = {}, WINDOWS = {} }
 OsCurrent = nil
@@ -8,6 +6,8 @@ if vim.uv.os_uname().sysname == "Windows_NT" then
 elseif vim.uv.os_uname().sysname == "Linux" then
     OsCurrent = Os.LINUX
 end
+
+require("settings.options")
 
 -- Bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
@@ -24,6 +24,8 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 local lazy_opts = {
+    custom_keys = { K = false },
+    diff = "diffview.nvim",
     ui = {
         border = "rounded",
     },

@@ -4,6 +4,15 @@ return {
     opts = {
         open_mapping = "<c-\\>",
         direction = "tab",
-        winbar = { enabled = true },
+        autochdir = true,
+        shell = function()
+            return OsCurrent == Os.WINDOWS and "powershell -nologo" or vim.o.shell
+        end,
+        winbar = {
+            enabled = true,
+            name_formatter = function(term)
+                return term.display_name .. " "
+            end,
+        },
     },
 }
