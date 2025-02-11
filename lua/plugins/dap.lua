@@ -255,8 +255,8 @@ return {
 
         require("dap-python").setup(
             vim.fn.stdpath("data")
-            .. "/mason/packages/debugpy/venv/"
-            .. (OsCurrent == Os.WINDOWS and "Scripts/python" or "bin/python"),
+                .. "/mason/packages/debugpy/venv/"
+                .. (OsCurrent == Os.WINDOWS and "Scripts/python" or "bin/python"),
             {
                 console = "integratedTerminal",
             }

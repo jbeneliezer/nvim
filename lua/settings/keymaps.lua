@@ -26,8 +26,11 @@ end
 
 function M.set_normal_keymaps()
     local util = require("settings.util")
-    keymap({ "n", "x", "o" }, ";", ts_repeat_move.repeat_last_move)
-    keymap({ "n", "x", "o" }, ",", ts_repeat_move.repeat_last_move_opposite)
+    local bind = util.bind
+    local partial = util.partial
+
+    keymap({ "n", "x", "o" }, ";", ts_repeat_move.repeat_last_move_next)
+    keymap({ "n", "x", "o" }, ",", ts_repeat_move.repeat_last_move_previous)
 
     keymap({ "n", "x", "o" }, "f", ts_repeat_move.builtin_f_expr, { noremap = true, silent = true, expr = true })
     keymap({ "n", "x", "o" }, "F", ts_repeat_move.builtin_F_expr, { noremap = true, silent = true, expr = true })
@@ -35,9 +38,7 @@ function M.set_normal_keymaps()
     keymap({ "n", "x", "o" }, "T", ts_repeat_move.builtin_T_expr, { noremap = true, silent = true, expr = true })
 
     -- This repeats the last query with always previous direction and to the start of the range.
-    keymap({ "n", "x", "o" }, "<leader>0", function()
-        ts_repeat_move.repeat_last_move({ forward = false, start = true })
-    end)
+    keymap({ "n", "x", "o" }, "<leader>0", partial(ts_repeat_move.repeat_last_move, { forward = false, start = true }))
 
     -- This repeats the last query with always next direction and to the end of the range.
     keymap({ "n", "x", "o" }, "<leader>$", function()
@@ -79,16 +80,10 @@ function M.set_normal_keymaps()
 
     keymap("n", "<leader>c", "<cmd>BufferClose<cr>")
 
-    local next_file_repeat, prev_file_repeat = repeatable_pair(function()
-        vim.cmd("BufferNext")
-    end, function()
-        vim.cmd("BufferPrevious")
-    end)
-    local next_file_move_repeat, prev_file_move_repeat = repeatable_pair(function()
-        vim.cmd("BufferMoveNext")
-    end, function()
-        vim.cmd("BufferMovePrevious")
-    end)
+    local next_file_repeat, prev_file_repeat =
+        repeatable_pair(partial(vim.cmd, "BufferNext"), partial(vim.cmd, "BufferPrevious"))
+    local next_file_move_repeat, prev_file_move_repeat =
+        repeatable_pair(partial(vim.cmd, "BufferMoveNext"), partial(vim.cmd, "BufferMovePrevious"))
     keymap("n", "L", next_file_repeat)
     keymap("n", "H", prev_file_repeat)
     keymap("n", "<leader>L", next_file_move_repeat)
@@ -118,34 +113,15 @@ function M.set_normal_keymaps()
     keymap("n", "C", util.clean_command, default_opts, "Clean Command")
 
     -- Toggleterm
-    local tm = util.TermManager:new()
+    local TM = util.TM
     keymap({ "n", "v", "t" }, "<c-g>", function()
-        tm[1]:toggle()
+        TM.get().lazygit:toggle()
     end)
-    keymap({ "n", "v", "t" }, "<c-l>", function()
-        tm:next_term_or_win()
-    end)
-    keymap({ "n", "v", "t" }, "<c-h>", function()
-        tm:prev_term_or_win()
-    end)
-    keymap({ "n", "v", "t" }, "<c-p>", function()
-        tm:term_toggle()
-    end)
-    keymap({ "n", "v", "t" }, "<leader><c-p>", function()
-        tm:ipy_term_toggle()
-    end)
+    keymap({ "n", "v", "t" }, "<c-l>", TM.next_term_or_win)
+    keymap({ "n", "v", "t" }, "<c-h>", TM.prev_term_or_win)
+    keymap({ "n", "v", "t" }, "<c-p>", TM.term_toggle)
+    keymap({ "n", "v", "t" }, "<leader><c-p>", TM.ipy_term_toggle)
     keymap({ "n", "v", "t" }, "<c-_>", require("toggleterm").toggle_all)
-
-    local trim_spaces = false
-    keymap("v", "<leader>tl", function()
-        require("toggleterm").send_lines_to_terminal("single_line", trim_spaces, { args = 5 })
-    end, default_opts, "Send Line to IPython")
-    keymap("v", "<leader>tL", function()
-        require("toggleterm").send_lines_to_terminal("visual_lines", trim_spaces, { args = 5 })
-    end, default_opts, "Send Selected Lines to IPython")
-    keymap("v", "<leader>ts", function()
-        require("toggleterm").send_lines_to_terminal("visual_selection", trim_spaces, { args = 5 })
-    end, default_opts, "Send Selection to IPython")
 
     -- LF
     -- keymap({ "n", "v" }, "<c-e>", require("lf").start)
@@ -155,6 +131,10 @@ function M.set_normal_keymaps()
     local dapui = require("dapui")
     local next_bp_repeat, prev_bp_repeat =
         repeatable_pair(require("goto-breakpoints").next, require("goto-breakpoints").prev)
+
+    keymap("n", "<leader>da", function()
+        require("dapui").elements.watches.add(vim.fn.input("Expression: "))
+    end, default_opts, "Add Watch")
     keymap("n", "<leader>db", require("telescope").extensions.dap.list_breakpoints, default_opts, "Breakpoints")
     keymap("n", "<leader>du", require("dapui").toggle, default_opts, "UI")
     keymap("n", "<leader>dt", dap.toggle_breakpoint, default_opts, "Breakpoint")
@@ -166,29 +146,26 @@ function M.set_normal_keymaps()
     keymap("n", "<leader>bn", next_bp_repeat, default_opts, "Next Breakpoint")
     keymap("n", "<leader>bN", prev_bp_repeat, default_opts, "Previous Breakpoint")
     keymap("n", "<leader>b<leader>", require("goto-breakpoints").stopped, default_opts, "Current Stopped Line")
-    keymap("n", "<leader>dB", function()
-        dapui.toggle({ 1, true })
-    end, default_opts, "Toggle Bottom Layout")
-    keymap("n", "<leader>dL", function()
-        dapui.toggle({ 2, true })
-    end, default_opts, "Toggle Side Layout")
-    keymap("n", "<leader>dl", util.dap_next_layout, default_opts, "Next Layout")
-    keymap("n", "<leader>dh", util.dap_prev_layout, default_opts, "Prev Layout")
-    keymap("n", "<leader>dd", util.dap_default_layout, default_opts, "Default Layout")
-    keymap("n", "<leader>dD", util.dap_repl_layout, default_opts, "Repl Layout")
+    keymap("n", "<leader>dB", partial(dapui.toggle, { 1, true }), default_opts, "Toggle Bottom Layout")
+    keymap("n", "<leader>dL", partial(dapui.toggle, { 2, true }), default_opts, "Toggle Side Layout")
+    local DM = util.DM
+    keymap("n", "<leader>dl", DM.next_layout, default_opts, "Next Layout")
+    keymap("n", "<leader>dh", DM.prev_layout, default_opts, "Prev Layout")
+    keymap("n", "<leader>dd", DM.default_layout, default_opts, "Default Layout")
+    keymap("n", "<leader>dD", DM.repl_layout, default_opts, "Repl Layout")
 
     -- Neotest
     local neotest = require("neotest")
     keymap("n", "<leader>nm", neotest.run.run, default_opts, "Run Test")
-    keymap("n", "<leader>nM", function()
-        neotest.run.run({ strategy = "dap" })
-    end, default_opts, "Debug Test")
-    keymap("n", "<leader>nf", function()
-        neotest.run.run({ vim.fn.expand("%") })
-    end, default_opts, "Run All Tests")
-    keymap("n", "<leader>nF", function()
-        neotest.run.run({ vim.fn.expand("%"), strategy = "dap" })
-    end, default_opts, "Debug All Tests")
+    keymap("n", "<leader>nM", partial(neotest.run.run, { strategy = "dap" }), default_opts, "Debug Test")
+    keymap("n", "<leader>nf", partial(neotest.run.run, { vim.fn.expand("%") }), default_opts, "Run All Tests")
+    keymap(
+        "n",
+        "<leader>nF",
+        partial(neotest.run.run, { vim.fn.expand("%"), strategy = "dap" }),
+        default_opts,
+        "Debug All Tests"
+    )
     keymap("n", "<leader>ns", neotest.summary.toggle, default_opts, "Test Summary")
     keymap("n", "<leader>np", neotest.run.stop, default_opts, "Stop Test")
     keymap("n", "<leader>na", neotest.run.attach, default_opts, "Attach To Test")
@@ -217,48 +194,45 @@ function M.set_normal_keymaps()
 
     -- Neogen
     local neogen = require("neogen")
-    keymap("n", "<leader>mf", function()
-        neogen.generate({ type = "func" })
-    end, default_opts, "Document Function")
-    keymap("n", "<leader>mc", function()
-        neogen.generate({ type = "class" })
-    end, default_opts, "Document Class")
-    keymap("n", "<leader>mt", function()
-        neogen.generate({ type = "type" })
-    end, default_opts, "Document Type")
-    keymap("n", "<leader>mF", function()
-        neogen.generate({ type = "File" })
-    end, default_opts, "Document File")
+    keymap("n", "<leader>mf", partial(neogen.generate, { type = "func" }), default_opts, "Document Function")
+    keymap("n", "<leader>mc", partial(neogen.generate, { type = "class" }), default_opts, "Document Class")
+    keymap("n", "<leader>mt", partial(neogen.generate, { type = "type" }), default_opts, "Document Type")
+    keymap("n", "<leader>mF", partial(neogen.generate, { type = "File" }), default_opts, "Document File")
 
     -- Trouble
     local trouble = require("trouble")
-    keymap("n", "<leader>lt", function()
-        trouble.toggle({ mode = "diagnostics" })
-    end, default_opts, "Trouble Diagnostics")
-    keymap("n", "<leader>s", function()
-        trouble.toggle({ mode = "symbols", focus = true, win = { position = "left" } })
-    end, default_opts, "Trouble Symbols")
+    keymap("n", "<leader>lt", partial(trouble.toggle, { mode = "diagnostics" }), default_opts, "Trouble Diagnostics")
+    keymap(
+        "n",
+        "<leader>s",
+        partial(trouble.toggle, { mode = "symbols", focus = true, win = { position = "left" } }),
+        default_opts,
+        "Trouble Symbols"
+    )
 
-    local next_trouble_repeat, prev_trouble_repeat = repeatable_pair(function()
-        trouble.next({ skip_groups = true, jump = true })
-    end, function()
-        trouble.previous({ skip_groups = true, jump = true })
-    end)
+    local next_trouble_repeat, prev_trouble_repeat = repeatable_pair(
+        partial(trouble.next, { skip_groups = true, jump = true }),
+        partial(trouble.prev, { skip_groups = true, jump = true })
+    )
 
+    keymap({ "n", "v" }, "<leader>tr", trouble.refresh, default_opts, "Refresh Trouble")
     keymap({ "n", "v" }, "]t", next_trouble_repeat, default_opts, "Next Trouble")
     keymap({ "n", "v" }, "[t", prev_trouble_repeat, default_opts, "Previous Trouble")
     keymap({ "n", "v" }, "g;", next_trouble_repeat, default_opts, "Next Trouble")
     keymap({ "n", "v" }, "g,", prev_trouble_repeat, default_opts, "Previous Trouble")
-    keymap({ "n", "v" }, "g0", function()
-        trouble.first({ skip_groups = true, jump = true })
-    end, default_opts, "First Trouble")
-    keymap({ "n", "v" }, "g$", function()
-        trouble.last({ skip_groups = true, jump = true })
-    end, default_opts, "Last Trouble")
+    keymap(
+        { "n", "v" },
+        "g0",
+        partial(trouble.first, { skip_groups = true, jump = true }),
+        default_opts,
+        "First Trouble"
+    )
+    keymap({ "n", "v" }, "g$", partial(trouble.last, { skip_groups = true, jump = true }), default_opts, "Last Trouble")
 end
 
 function M.set_lsp_keymaps(_, bufnr)
     -- Navigation
+    local partial = require("settings.util").partial
     local next_diag_repeat, prev_diag_repeat = repeatable_pair(vim.diagnostic.goto_next, vim.diagnostic.goto_prev)
     local lsp_opts = { noremap = true, silent = true, buffer = bufnr }
 
@@ -275,15 +249,14 @@ function M.set_lsp_keymaps(_, bufnr)
     keymap({ "n", "v" }, "<leader>lI", "<cmd>LspInfo<cr>", lsp_opts, "Info")
     keymap({ "n", "v" }, "<leader>lr", require("telescope.builtin").lsp_references, lsp_opts, "References")
     keymap({ "n", "v" }, "<leader>lR", vim.lsp.buf.rename, lsp_opts, "Rename")
-    keymap({ "n", "v" }, "<leader>lf", function()
-        lsp_format(bufnr)
-    end, lsp_opts, "Format")
+    keymap({ "n", "v" }, "<leader>lf", partial(lsp_format, bufnr), lsp_opts, "Format")
     keymap({ "n", "v" }, "<leader>ll", "<Plug>(toggle-lsp-diag)", { noremap = false }, "Toggle Diagnostics")
     keymap({ "n", "v" }, "<leader>lv", "<Plug>(toggle-lsp-diag-vtext)", { noremap = false }, "Toggle Vtext")
     keymap({ "n", "v" }, "<leader>lu", "<Plug>(toggle-lsp-diag-underline)", { noremap = false }, "Toggle Underline")
 end
 
 M.set_git_keymaps = function(bufnr)
+    local partial = require("settings.util").partial
     local gs = require("gitsigns")
     local gs_opts = { noremap = true, silent = true, buffer = bufnr }
 
@@ -314,9 +287,7 @@ M.set_git_keymaps = function(bufnr)
     keymap("n", "<leader>gb", require("telescope.builtin").git_branches, gs_opts, "Find Branch")
     keymap("n", "<leader>gc", require("telescope.builtin").git_commits, gs_opts, "Find Commit")
     keymap({ "n", "v" }, "<leader>gd", gs.diffthis, gs_opts, "Diff")
-    keymap("n", "<leader>gD", function()
-        gs.diffthis("~")
-    end, gs_opts, "Diff with Head")
+    keymap("n", "<leader>gD", partial(gs.diffthis, "~"), gs_opts, "Diff with Head")
     keymap({ "n", "v" }, "<leader>gj", next_hunk_repeat, gs_opts, "Next Hunk")
     keymap({ "n", "v" }, "<leader>gk", prev_hunk_repeat, gs_opts, "Prev Hunk")
     keymap({ "n", "v" }, "<leader>gp", gs.preview_hunk, gs_opts, "Preview Hunk")
@@ -333,16 +304,57 @@ function M.set_term_keymaps()
     keymap("t", "<esc>", "<c-\\><c-n>", term_opts)
 end
 
+function M.set_ipy_keymaps()
+    local util = require("settings.util")
+    local TM = util.TM
+    keymap("v", "<leader>tl", TM.send_line, default_opts, "Send Line to IPython")
+    keymap("v", "<leader>tL", TM.send_lines, default_opts, "Send Selected Lines to IPython")
+    keymap("v", "<leader>ts", TM.send_selection, default_opts, "Send Selection to IPython")
+
+    -- Molten
+    keymap("n", "<leader>mI", ":MoltenInit<CR>", default_opts, "Initialize")
+end
+
+function M.set_molten_keymaps()
+    local util = require("settings.util")
+    local bind = util.bind
+    local partial = util.partial
+
+    keymap("n", "<leader>mQ", ":MoltenDeinit<CR>", default_opts, "De-init")
+    keymap("n", "<leader>mq", ":MoltenInterrupt<CR>", default_opts, "Interrupt")
+    keymap("n", "<leader>mi", ":MoltenInfo<CR>", default_opts, "Info")
+    keymap("n", "<leader>me", ":MoltenEvaluateLine<CR>", default_opts, "Evaluate Line")
+    keymap("n", "<leader>mr", ":MoltenReevaluateCell<CR>", default_opts, "Re-evaluate Cell")
+    keymap("n", "<leader>ma", ":MoltenReevaluateAll<CR>", default_opts, "Re-evaluate All")
+    keymap("n", "<leader>md", ":MoltenDelete<CR>", default_opts, "Delete Cell")
+    keymap("n", "<leader>mR", ":MoltenRestart<CR>", default_opts, "Restart")
+    keymap("v", "<leader>m", ":<C-u>MoltenEvaluateVisual<CR>gv", default_opts, "Evaluate Visual Selection")
+
+    local next_cell_repeat, prev_cell_repeat =
+        repeatable_pair(partial(vim.cmd, "MoltenNext"), partial(vim.cmd, "MoltenPrev"))
+    keymap("n", "<leader>mn", next_cell_repeat, default_opts, "Next Cell")
+    keymap("n", "<leader>mN", prev_cell_repeat, default_opts, "Previous Cell")
+
+    local show_hide = util.Toggle.new(partial(vim.cmd, "MoltenShowOutput"), partial(vim.cmd, "MoltenHideOutput"))
+    local auto_open = false
+    local vtext = true
+    keymap("n", "<leader>ms", bind(show_hide, "call"), default_opts, "Show/Hide Output")
+    keymap("n", "<leader>mS", function()
+        auto_open = not auto_open
+        vim.fn.MoltenUpdateOption("molten_auto_open_output", auto_open)
+        show_hide.value = auto_open
+    end, default_opts, "Auto Open Output")
+    keymap("n", "<leader>mv", function()
+        vtext = not vtext
+        vim.fn.MoltenUpdateOption("molten_virt_text_output", vtext)
+    end, default_opts, "Virtual Text Output")
+    keymap("n", "<leader>m<cr>", function()
+        vim.cmd("noautocmd MoltenEnterOutput")
+        show_hide.value = true
+    end, default_opts, "Enter Output")
+end
+
 local dap_keymaps = {
-    ["<leader>da"] = {
-        "n",
-        "<leader>da",
-        function()
-            require("dapui").elements.watches.add(vim.fn.input("Expression: "))
-        end,
-        default_opts,
-        "Add Watch",
-    },
     ["<leader>de"] = { { "n", "v" }, "<leader>de", require("dapui").eval, default_opts, "Evaluate" },
     ["<leader>dp"] = { "n", "<leader>dp", require("dap").pause, default_opts, "Pause" },
     ["<leader>dq"] = { "n", "<leader>dq", require("dap").terminate, default_opts, "Quit" },

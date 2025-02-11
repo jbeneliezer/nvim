@@ -5,6 +5,7 @@ return {
         "lewis6991/gitsigns.nvim",
         "nvim-tree/nvim-web-devicons",
     },
+    enabled = true,
     init = function()
         vim.g.barbar_auto_setup = false
     end,

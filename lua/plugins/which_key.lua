@@ -19,7 +19,7 @@ return {
             { "<leader>f",  group = "Telescope" },
             { "<leader>g",  group = "Git" },
             { "<leader>l",  group = "Lsp" },
-            { "<leader>m",  group = "Neogen" },
+            { "<leader>m",  group = "Molten/Neogen" },
             { "<leader>n",  group = "Neotest" },
             { "<leader>t",  group = "ToggleTerm" },
         },
