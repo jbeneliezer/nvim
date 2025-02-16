@@ -14,7 +14,7 @@ return {
         -- local add_to_trouble = require("trouble.sources.telescope").add
         require("telescope").setup({
             defaults = {
-                file_ignore_patterns = { ".svn$", ".git$", "site-packages", "__pycache__", "Listings", "venv" },
+                file_ignore_patterns = { ".svn$", ".git$", "site-packages", "__pycache__", ".d$", ".o$", "venv" },
                 prompt_prefix = " ",
                 selection_caret = " ",
                 path_display = { "truncate" },
