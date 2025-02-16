@@ -54,15 +54,15 @@ vim.api.nvim_create_autocmd("FileType", {
     group = "PythonKeymaps",
 })
 
-vim.api.nvim_create_autocmd("User", {
-    desc = "Set Molten Highlights",
-    pattern = "MoltenInitPost",
+vim.api.nvim_create_autocmd("FileType", {
+    desc = "Set Neotest Keymaps",
+    pattern = "*",
     callback = function()
-        vim.api.nvim_set_hl(0, "MoltenOutputBorder", { link = "DiagnosticHint" })
-        vim.api.nvim_set_hl(0, "MoltenOutputBorderFail", { link = "DiagnosticError" })
-        vim.api.nvim_set_hl(0, "MoltenOutputBorderSuccess", { link = "String" })
+        if vim.bo.filetype == "python" then
+            require("settings.keymaps").set_neotest_keymaps()
+        end
     end,
-    group = "CustomHighlights",
+    group = "PythonKeymaps",
 })
 
 vim.api.nvim_create_autocmd("User", {
@@ -72,4 +72,24 @@ vim.api.nvim_create_autocmd("User", {
         require("settings.keymaps").set_molten_keymaps()
     end,
     group = "PythonKeymaps",
+})
+
+vim.api.nvim_create_autocmd("User", {
+    desc = "Delete Molten Keymaps",
+    pattern = "MoltenDeinitPre",
+    callback = function()
+        require("settings.keymaps").del_molten_keymaps()
+    end,
+    group = "PythonKeymaps",
+})
+
+vim.api.nvim_create_autocmd("User", {
+    desc = "Set Molten Highlights",
+    pattern = "MoltenInitPost",
+    callback = function()
+        vim.api.nvim_set_hl(0, "MoltenOutputBorder", { link = "DiagnosticHint" })
+        vim.api.nvim_set_hl(0, "MoltenOutputBorderFail", { link = "DiagnosticError" })
+        vim.api.nvim_set_hl(0, "MoltenOutputBorderSuccess", { link = "String" })
+    end,
+    group = "CustomHighlights",
 })

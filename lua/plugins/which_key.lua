@@ -2,6 +2,10 @@ return {
     "folke/which-key.nvim",
     event = "BufEnter",
     opts = {
+        delay = 0,
+        filter = function (mapping)
+            return mapping.desc and mapping.desc ~= ""
+        end,
         plugins = {
             presets = {
                 operators = false,

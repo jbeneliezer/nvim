@@ -9,6 +9,14 @@ return {
                 previewer = true,
                 theme_conf = {
                     border = true,
+                    layout_strategy = "horizontal",
+                    sorting_strategy = "descending",
+                    layout_config = {
+                        height = 0.9,
+                        preview_cutoff = 120,
+                        prompt_position = "bottom",
+                        width = 0.8,
+                    },
                 },
             },
         })

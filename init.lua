@@ -37,5 +37,5 @@ local lazy_opts = {
 
 require("lazy").setup("plugins", lazy_opts)
 
-require("settings.keymaps").set_normal_keymaps()
+require("settings.keymaps").set_basic_keymaps()
 require("settings.autocmds")

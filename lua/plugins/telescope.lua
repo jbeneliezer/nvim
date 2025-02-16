@@ -6,6 +6,7 @@ return {
         "gbrlsnchs/telescope-lsp-handlers.nvim",
         "debugloop/telescope-undo.nvim",
         "natecraddock/telescope-zf-native.nvim",
+        "Marskey/telescope-sg",
     },
     config = function()
         local actions = require("telescope.actions")
@@ -98,13 +99,21 @@ return {
                         smart_case = true,
                     },
                 },
+                ast_grep = {
+                    command = {
+                        "sg",
+                        "--json=stream"
+                    },
+                    grep_open_files = true,
+                }
                 -- "projects",
             },
         })
-        require("telescope").load_extension("lsp_handlers")
-        require("telescope").load_extension("dap")
-        require("telescope").load_extension("undo")
-        require("telescope").load_extension("zf-native")
+        -- require("telescope").load_extension("lsp_handlers")
+        -- require("telescope").load_extension("dap")
+        -- require("telescope").load_extension("undo")
+        -- require("telescope").load_extension("zf-native")
+        -- require("telescope").load_extension("ast_grep")
         -- require("telescope").load_extension("projects")
     end,
 }

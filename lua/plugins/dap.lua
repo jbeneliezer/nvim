@@ -248,15 +248,15 @@ return {
         dap.defaults.fallback.terminal_win_cmd = "tabnew"
         dap.set_log_level("TRACE")
 
-        dap.listeners.before.attach.dap_keymaps = require("settings.keymaps").set_dap_keymaps
-        dap.listeners.before.launch.dap_keymaps = require("settings.keymaps").set_dap_keymaps
-        dap.listeners.before.event_terminated.dap_keymaps = require("settings.keymaps").del_dap_keymaps
-        dap.listeners.before.event_exited.dap_keymaps = require("settings.keymaps").del_dap_keymaps
+        dap.listeners.before.attach["dap_keymaps"] = require("settings.keymaps").set_dap_keymaps
+        dap.listeners.before.launch["dap_keymaps"] = require("settings.keymaps").set_dap_keymaps
+        dap.listeners.before.event_terminated["dap_keymaps"] = require("settings.keymaps").del_dap_keymaps
+        dap.listeners.before.event_exited["dap_keymaps"] = require("settings.keymaps").del_dap_keymaps
 
         require("dap-python").setup(
             vim.fn.stdpath("data")
-                .. "/mason/packages/debugpy/venv/"
-                .. (OsCurrent == Os.WINDOWS and "Scripts/python" or "bin/python"),
+            .. "/mason/packages/debugpy/venv/"
+            .. (OsCurrent == Os.WINDOWS and "Scripts/python" or "bin/python"),
             {
                 console = "integratedTerminal",
             }

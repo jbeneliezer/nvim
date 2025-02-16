@@ -7,6 +7,12 @@ function M.bind(obj, m, ...)
     end
 end
 
+function M.tbl_f(obj)
+    return function(...)
+        return obj(...)
+    end
+end
+
 function M.partial(f, ...)
     local _args = { ... }
     return function(...)
@@ -33,6 +39,63 @@ M.toggle_cmp_source = function(source)
     cmp.setup.buffer({
         sources = sources,
     })
+end
+
+local LZ = {}
+
+function LZ.index(path)
+    return setmetatable({}, {
+        __index = function(_, k)
+            return require(path)[k]
+        end,
+        __newindex = function(_, k, v)
+            require(path)[k] = v
+        end,
+    })
+end
+
+function LZ.module_call(path)
+    return setmetatable({}, {
+        __call = function(_, ...)
+            return require(path)(...)
+        end,
+    })
+end
+
+function LZ.export_call(path, level)
+    level = level or 1
+    local function export_call_r(lvl, ks)
+        return setmetatable({}, {
+            __index = function(_, k)
+                local new_ks = ks or {}
+                if lvl == 1 then
+                    return function(...)
+                        local m = require(path)
+                        for _, v in ipairs(new_ks) do
+                            m = m[v]
+                        end
+                        return m[k](...)
+                    end
+                else
+                    table.insert(new_ks, k)
+                    return export_call_r(lvl - 1, new_ks)
+                end
+            end,
+        })
+    end
+    return export_call_r(level)
+end
+
+M.LZ = LZ
+
+M.ts_repeat_move = M.LZ.export_call("nvim-treesitter.textobjects.repeatable_move")
+function M.repeatable_pair(ff, bf)
+    return M.ts_repeat_move.make_repeatable_move_pair(ff, bf)
+end
+
+function M.repeatable(f)
+    local fw, _ = M.repeatable_pair(f, function() end)
+    return fw
 end
 
 local TM = {
@@ -235,7 +298,7 @@ local DM = {
         layouts = {
             {
                 elements = {
-                    { id = "repl", size = 0.60 },
+                    { id = "repl",   size = 0.60 },
                     { id = "scopes", size = 0.40 },
                 },
                 size = 12,
@@ -269,9 +332,9 @@ local DM = {
         layouts = {
             {
                 elements = {
-                    { id = "scopes", size = 0.34 },
+                    { id = "scopes",      size = 0.34 },
                     { id = "breakpoints", size = 0.33 },
-                    { id = "watches", size = 0.33 },
+                    { id = "watches",     size = 0.33 },
                 },
                 size = 12,
                 position = "bottom",
@@ -304,9 +367,9 @@ local DM = {
         layouts = {
             {
                 elements = {
-                    { id = "scopes", size = 0.34 },
+                    { id = "scopes",      size = 0.34 },
                     { id = "breakpoints", size = 0.33 },
-                    { id = "watches", size = 0.33 },
+                    { id = "watches",     size = 0.33 },
                 },
                 size = 12,
                 position = "bottom",
@@ -417,12 +480,12 @@ function Toggle.new(tf, ff, initial)
     })
 end
 
-function Toggle:call()
+function Toggle:call(...)
     self.value = not self.value
     if self.value then
-        self.tf()
+        self.tf(...)
     else
-        self.ff()
+        self.ff(...)
     end
 end
 
