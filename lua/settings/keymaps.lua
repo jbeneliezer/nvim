@@ -144,13 +144,14 @@ function M.set_basic_keymaps()
 
     local DM = util.DM
     keymap("n", "<leader>dl", DM.next_layout, default_opts, "Next Layout")
-    keymap("n", "<leader>dh", DM.prev_layout, default_opts, "Prev Layout")
+    keymap("n", "<leader>dh", DM.prev_layout, default_opts, "Previous Layout")
     keymap("n", "<leader>dd", DM.default_layout, default_opts, "Default Layout")
     keymap("n", "<leader>dD", DM.repl_layout, default_opts, "Repl Layout")
 
     -- Telescope
     local telescope_builtin = LZ.export_call("telescope.builtin")
     keymap("n", "<leader>fa", require("telescope").extensions.ast_grep.ast_grep, default_opts, "Ast Grep")
+    keymap("n", "<leader>fA", telescope_builtin.autocommands, default_opts, "Autocommands")
     keymap("n", "<leader>fc", telescope_builtin.commands, default_opts, "Commands")
     keymap("n", "<leader>ff", telescope_builtin.find_files, default_opts, "Files")
     keymap("n", "<leader>fr", telescope_builtin.oldfiles, default_opts, "Recent Files")
@@ -179,13 +180,13 @@ function M.set_basic_keymaps()
 
     -- Trouble
     local trouble = LZ.export_call("trouble")
-    keymap("n", "<leader>lt", partial(trouble.toggle, { mode = "diagnostics" }), default_opts, "Trouble Diagnostics")
+    keymap("n", "<leader>tl", partial(trouble.toggle, { mode = "diagnostics" }), default_opts, "Diagnostics")
     keymap(
         "n",
-        "<leader>ls",
+        "<leader>ts",
         partial(trouble.toggle, { mode = "symbols", focus = true, win = { position = "left" } }),
         default_opts,
-        "Trouble Symbols"
+        "Symbols"
     )
 
     local next_trouble, prev_trouble = repeatable_pair(
@@ -193,19 +194,13 @@ function M.set_basic_keymaps()
         partial(trouble.prev, { skip_groups = true, jump = true })
     )
 
-    keymap({ "n", "v" }, "<leader>tr", trouble.refresh, default_opts, "Refresh Trouble")
-    keymap({ "n", "v" }, "]t", next_trouble, default_opts, "Next Trouble")
-    keymap({ "n", "v" }, "[t", prev_trouble, default_opts, "Previous Trouble")
-    keymap({ "n", "v" }, "g;", next_trouble, default_opts, "Next Trouble")
-    keymap({ "n", "v" }, "g,", prev_trouble, default_opts, "Previous Trouble")
-    keymap(
-        { "n", "v" },
-        "g0",
-        partial(trouble.first, { skip_groups = true, jump = true }),
-        default_opts,
-        "First Trouble"
-    )
-    keymap({ "n", "v" }, "g$", partial(trouble.last, { skip_groups = true, jump = true }), default_opts, "Last Trouble")
+    keymap("n", "<leader>tr", trouble.refresh, default_opts, "Refresh")
+    keymap("n", "g;", next_trouble, default_opts, "Next Trouble")
+    keymap("n", "]t", next_trouble, default_opts, "Next Trouble")
+    keymap("n", "g,", prev_trouble, default_opts, "Previous Trouble")
+    keymap("n", "[t", prev_trouble, default_opts, "Previous Trouble")
+    keymap("n", "g0", partial(trouble.first, { skip_groups = true, jump = true }), default_opts, "First Trouble")
+    keymap("n", "g$", partial(trouble.last, { skip_groups = true, jump = true }), default_opts, "Last Trouble")
 end
 
 function M.set_lsp_keymaps(_, bufnr)
@@ -236,38 +231,59 @@ M.set_git_keymaps = function(bufnr)
     local gs_opts = { noremap = true, silent = true, buffer = bufnr }
 
     local next_hunk, prev_hunk = repeatable_pair(function()
-        _ = vim.wo.diff and vim.cmd.normal({ "]c", bang = true }) or gs.nav_hunk("next")
+        _ = vim.wo.diff and vim.cmd.normal({ "]c", bang = true }) or gs.nav_hunk("next", { target = "all" })
     end, function()
-        _ = vim.wo.diff and vim.cmd.normal({ "[c", bang = true }) or gs.nav_hunk("prev")
+        _ = vim.wo.diff and vim.cmd.normal({ "[c", bang = true }) or gs.nav_hunk("prev", { target = "all" })
     end)
-    keymap("n", "]h", next_hunk)
-    keymap("n", "[h", prev_hunk)
 
-    -- Text object
-    keymap({ "o", "x" }, "ih", ":<C-U>Gitsigns select_hunk<cr>")
-
-    keymap("n", "<leader>gb", LZ.export_call("telescope.builtin").git_branches, gs_opts, "Find Branch")
+    keymap("n", "<leader>fb", LZ.export_call("telescope.builtin").git_branches, gs_opts, "Find Branch")
     keymap("n", "<leader>gc", LZ.export_call("telescope.builtin").git_commits, gs_opts, "Find Commit")
+    keymap({ "n", "v" }, "<leader>gj", next_hunk, gs_opts, "Next Hunk")
+    keymap({ "n", "v" }, "]h", next_hunk, gs_opts, "Next Hunk")
+    keymap({ "n", "v" }, "<leader>gk", prev_hunk, gs_opts, "Previous Hunk")
+    keymap({ "n", "v" }, "[h", prev_hunk, gs_opts, "Previous Hunk")
+    keymap("n", "<leader>g0", partial(gs.nav_hunk, "first", { target = "all" }), gs_opts, "First Hunk")
+    keymap("n", "<leader>g$", partial(gs.nav_hunk, "last", { target = "all" }), gs_opts, "Last Hunk")
+    keymap("n", "<leader>gp", gs.preview_hunk, gs_opts, "Preview Hunk")
+    keymap("n", "<leader>gb", gs.toggle_current_line_blame, gs_opts, "Blame Line")
+    keymap("n", "<leader>gB", gs.blame, gs_opts, "Blame File")
+    keymap("n", "<leader>gs", gs.stage_hunk, gs_opts, "Stage Hunk")
+    keymap("n", "<leader>gS", gs.stage_buffer, gs_opts, "Stage Buffer")
+    keymap("n", "<leader>gr", gs.reset_hunk, gs_opts, "Reset Hunk")
+    keymap("n", "<leader>gR", gs.reset_buffer, gs_opts, "Reset Buffer")
+    keymap("n", "<leader>tg", gs.setqflist, gs_opts, "Hunks")
     -- keymap({ "n", "v" }, "<leader>gd", gs.diffthis, gs_opts, "Diff")
     -- keymap("n", "<leader>gD", partial(gs.diffthis, "~"), gs_opts, "Diff with Head")
-    keymap({ "n", "v" }, "<leader>gj", next_hunk, gs_opts, "Next Hunk")
-    keymap({ "n", "v" }, "<leader>gk", prev_hunk, gs_opts, "Prev Hunk")
-    keymap({ "n", "v" }, "<leader>g0", next_hunk, gs_opts, "Next Hunk")
-    keymap({ "n", "v" }, "<leader>g$", prev_hunk, gs_opts, "Prev Hunk")
-    keymap({ "n", "v" }, "<leader>gp", gs.preview_hunk, gs_opts, "Preview Hunk")
-    keymap({ "n", "v" }, "<leader>gr", gs.reset_hunk, gs_opts, "Reset Hunk")
-    keymap("n", "<leader>gR", gs.reset_buffer, gs_opts, "Reset Buffer")
-    keymap({ "n", "v" }, "<leader>gt", gs.toggle_current_line_blame, gs_opts, "Blame")
-    keymap({ "n", "v" }, "<leader>gs", gs.stage_hunk, gs_opts, "Stage Hunk")
-    keymap({ "n", "v" }, "<leader>gu", gs.undo_stage_hunk, gs_opts, "Undo Stage Hunk")
-    keymap({ "n", "v" }, "<leader>gu", gs.undo_stage_hunk, gs_opts, "Undo Stage Hunk")
-    keymap("n", "<leader>gS", gs.stage_buffer, gs_opts, "Stage Buffer")
+
+    keymap("v", "<leader>gs", function()
+        gs.stage_hunk({ vim.fn.line("."), vim.fn.line("v") })
+    end, gs_opts, "Stage Hunk")
+
+    keymap("v", "<leader>gr", function()
+        gs.reset_hunk({ vim.fn.line("."), vim.fn.line("v") })
+    end, gs_opts, "Reset Hunk")
+
+    -- Text object
+    keymap({ "o", "x" }, "ih", gs.select_hunk, gs_opts)
 
     -- Diffview
-    local dv_toggle = util.Toggle.new(partial(vim.cmd, "DiffviewOpen"), partial(vim.cmd, "DiffviewClose"))
-    local dv_fh_toggle = util.Toggle.new(partial(vim.cmd, "DiffviewFileHistory"), partial(vim.cmd, "DiffviewClose"))
-    keymap("n", "<leader>gd", util.tbl_f(dv_toggle), default_opts, "Toggle Diffview")
-    keymap("n", "<leader>gf", util.tbl_f(dv_fh_toggle), default_opts, "Toggle Diffview File History")
+    local DV = {
+        default = util.Toggle.new(partial(vim.cmd, "DiffviewOpen"), partial(vim.cmd, "DiffviewClose")),
+        rev_path = util.Toggle.new(function()
+            vim.cmd("DiffviewOpen " .. vim.fn.input("Revision(s) / Path(s): "))
+        end, partial(vim.cmd, "DiffviewClose")),
+        fh = util.Toggle.new(partial(vim.cmd, "DiffviewFileHistory %"), partial(vim.cmd, "DiffviewClose")),
+        fh_all = util.Toggle.new(partial(vim.cmd, "DiffviewFileHistory"), partial(vim.cmd, "DiffviewClose")),
+        fh_path_rev = util.Toggle.new(function()
+            vim.cmd("DiffviewFileHistory " .. vim.fn.input("Path(s)/ Revision(s): "))
+        end, partial(vim.cmd, "DiffviewClose")),
+    }
+
+    keymap("n", "<leader>gd", util.tbl_f(DV.default), default_opts, "Toggle Diffview")
+    keymap("n", "<leader>gD", util.tbl_f(DV.rev_path), default_opts, "Toggle Diffview Custom")
+    keymap("n", "<leader>gf", util.tbl_f(DV.fh), default_opts, "Toggle Diffview Current File History")
+    keymap("n", "<leader>ga", util.tbl_f(DV.fh_all), default_opts, "Toggle Diffview All Files History ")
+    keymap("n", "<leader>gF", util.tbl_f(DV.fh_path_rev), default_opts, "Toggle Diffview File History Custom")
 end
 
 function M.set_term_keymaps()
@@ -286,7 +302,6 @@ function M.set_ipy_keymaps()
 end
 
 function M.set_neotest_keymaps()
-    -- Neotest
     local neotest = LZ.export_call("neotest", 2)
     keymap("n", "<leader>nm", neotest.run.run, default_opts, "Run Test")
     keymap("n", "<leader>nM", partial(neotest.run.run, { strategy = "dap" }), default_opts, "Debug Test")
@@ -304,10 +319,24 @@ function M.set_neotest_keymaps()
 end
 
 local MS = {
-    show_hide = util.Toggle.new(partial(vim.cmd, "MoltenShowOutput"), partial(vim.cmd, "MoltenHideOutput")),
-    auto_open = false,
-    vtext = true,
+    show_output = util.Toggle.new(partial(vim.cmd, "MoltenShowOutput"), partial(vim.cmd, "MoltenHideOutput")),
+    vtext = util.Toggle.new(
+        partial(vim.fn.MoltenUpdateOption, "molten_virt_text_output", true),
+        partial(vim.fn.MoltenUpdateOption, "molten_virt_text_output", false)
+    ),
 }
+MS.auto_open = util.Toggle.new(
+    partial(vim.fn.MoltenUpdateOption, "molten_auto_open_output", true),
+    partial(vim.fn.MoltenUpdateOption, "molten_auto_open_output", false),
+    false,
+    MS.show_output
+)
+MS.enter_output = util.Toggle.new(
+    partial(vim.cmd, "noautocmd MoltenEnterOutput"),
+    partial(vim.cmd, "MoltenHideOutput"),
+    false,
+    MS.show_output
+)
 MS.next_cell, MS.prev_cell = repeatable_pair(partial(vim.cmd, "MoltenNext"), partial(vim.cmd, "MoltenPrev"))
 
 local molten_keymaps = {
@@ -319,47 +348,13 @@ local molten_keymaps = {
     { "n", "<leader>ma", "<cmd>MoltenReevaluateAll<cr>", default_opts, " Re-evaluate All" },
     { "n", "<leader>md", "<cmd>MoltenDelete<cr>", default_opts, " Delete Cell" },
     { "n", "<leader>mR", "<cmd>MoltenRestart<cr>", default_opts, " Restart" },
-    { "v", "<leader>m", "<cmd><C-u>MoltenEvaluateVisual<cr>gv", default_opts, " Evaluate Visual Selection" },
+    { "v", "<leader>m", ":<c-u>MoltenEvaluateVisual<cr>gv", default_opts, " Evaluate Visual Selection" },
     { "n", "<leader>mn", MS.next_cell, default_opts, " Next Cell" },
     { "n", "<leader>mN", MS.prev_cell, default_opts, " Previous Cell" },
-    {
-        "n",
-        "<leader>ms",
-        util.tbl_f(MS.show_hide),
-        default_opts,
-        " Show/Hide Output",
-    },
-    {
-        "n",
-        "<leader>mS",
-        function()
-            MS.auto_open = not MS.auto_open
-            vim.fn.MoltenUpdateOption("molten_auto_open_output", MS.auto_open)
-            MS.show_hide.value = MS.auto_open
-        end,
-        default_opts,
-        " Toggle Auto Open Output",
-    },
-    {
-        "n",
-        "<leader>mv",
-        function()
-            MS.vtext = not MS.vtext
-            vim.fn.MoltenUpdateOption("molten_virt_text_output", MS.vtext)
-        end,
-        default_opts,
-        " Toggle Vtext Output",
-    },
-    {
-        "n",
-        "<leader>m<cr>",
-        function()
-            vim.cmd("noautocmd MoltenEnterOutput")
-            MS.show_hide.value = true
-        end,
-        default_opts,
-        " Enter Output",
-    },
+    { "n", "<leader>ms", util.tbl_f(MS.show_output), default_opts, " Toggle Show Output" },
+    { "n", "<leader>mS", util.tbl_f(MS.auto_open), default_opts, " Toggle Auto Open Output" },
+    { "n", "<leader>mv", util.tbl_f(MS.vtext), default_opts, " Toggle Vtext Output" },
+    { "n", "<leader>m<cr>", util.tbl_f(MS.enter_output), default_opts, " Enter Output" },
 }
 
 function M.set_molten_keymaps()
@@ -375,16 +370,16 @@ function M.del_molten_keymaps()
 end
 
 local dap_keymaps = {
-    { { "n", "v" }, "<leader>de", LZ.export_call("dapui").eval, default_opts, "Evaluate" },
-    { "n", "<leader>dp", LZ.export_call("dap").pause, default_opts, "Pause" },
-    { "n", "<leader>dq", LZ.export_call("dap").terminate, default_opts, "Quit" },
-    { "n", "<leader>dsi", repeatable(LZ.export_call("dap").step_into), default_opts, "Into" },
-    { "n", "<leader>dso", repeatable(LZ.export_call("dap").step_over), default_opts, "Over" },
-    { "n", "<leader>dsu", repeatable(LZ.export_call("dap").step_out), default_opts, "Out" },
-    { "n", "<F5>", repeatable(LZ.export_call("dap").continue) },
-    { "n", "<F8>", repeatable(LZ.export_call("dap").step_over) },
-    { "n", "<F9>", repeatable(LZ.export_call("dap").step_into) },
-    { "n", "<F10>", repeatable(LZ.export_call("dap").step_out) },
+    { { "n", "v" }, "<leader>de",  LZ.export_call("dapui").eval,                default_opts, "Evaluate" },
+    { "n",          "<leader>dp",  LZ.export_call("dap").pause,                 default_opts, "Pause" },
+    { "n",          "<leader>dq",  LZ.export_call("dap").terminate,             default_opts, "Quit" },
+    { "n",          "<leader>dsi", repeatable(LZ.export_call("dap").step_into), default_opts, "Into" },
+    { "n",          "<leader>dso", repeatable(LZ.export_call("dap").step_over), default_opts, "Over" },
+    { "n",          "<leader>dsu", repeatable(LZ.export_call("dap").step_out),  default_opts, "Out" },
+    { "n",          "<F5>",        repeatable(LZ.export_call("dap").continue) },
+    { "n",          "<F8>",        repeatable(LZ.export_call("dap").step_over) },
+    { "n",          "<F9>",        repeatable(LZ.export_call("dap").step_into) },
+    { "n",          "<F10>",       repeatable(LZ.export_call("dap").step_out) },
     {
         "n",
         "<leader>d<leader>",

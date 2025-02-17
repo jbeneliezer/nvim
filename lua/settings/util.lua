@@ -1,11 +1,6 @@
 local M = {}
 
-function M.bind(obj, m, ...)
-    local args = { ... }
-    return function(...)
-        return obj[m](obj, unpack(args), ...)
-    end
-end
+function M.noop(...) end
 
 function M.tbl_f(obj)
     return function(...)
@@ -13,10 +8,17 @@ function M.tbl_f(obj)
     end
 end
 
-function M.partial(f, ...)
-    local _args = { ... }
+function M.bind(obj, m, ...)
+    local args = { ... }
     return function(...)
-        return f(unpack(_args), ...)
+        return obj[m](obj, unpack(args, ...))
+    end
+end
+
+function M.partial(f, ...)
+    local args = { ... }
+    return function(...)
+        return f(unpack(args, ...))
     end
 end
 
@@ -469,11 +471,12 @@ end
 
 local Toggle = {}
 
-function Toggle.new(tf, ff, initial)
+function Toggle.new(tf, ff, initial, linked)
     return setmetatable({
-        tf = tf or function() end,
-        ff = ff or function() end,
+        tf = tf or M.noop,
+        ff = ff or M.noop,
         value = initial or false,
+        linked = linked or {},
     }, {
         __index = Toggle,
         __call = Toggle.call,
@@ -481,11 +484,34 @@ function Toggle.new(tf, ff, initial)
 end
 
 function Toggle:call(...)
-    self.value = not self.value
-    if self.value then
+    if not self.value then
         self.tf(...)
     else
         self.ff(...)
+    end
+    self.value = not self.value
+    if self.linked then
+        self.linked.value = self.value
+    end
+end
+
+function Toggle:set(...)
+    if not self.value then
+        self.tf(...)
+        self.value = true
+    end
+    if self.linked then
+        self.linked.value = self.value
+    end
+end
+
+function Toggle:clear(...)
+    if self.value then
+        self.ff(...)
+        self.value = false
+    end
+    if self.linked then
+        self.linked.value = self.value
     end
 end
 
