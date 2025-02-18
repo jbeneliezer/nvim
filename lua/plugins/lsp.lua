@@ -24,6 +24,7 @@ local servers = {
         cmd = {
             "C:/Program Files/Microsoft Visual Studio/2022/Community/VC/Auxiliary/Build/vcvarsall.bat x64;",
             "clangd",
+            "--compile_commands_dir=build",
             "--background-index",
             "--clang-tidy",
             "--completion-style=bundled",
