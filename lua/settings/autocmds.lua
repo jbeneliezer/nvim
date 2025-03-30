@@ -100,8 +100,6 @@ vim.api.nvim_create_autocmd("User", {
     pattern = "DiffviewViewOpened",
     callback = function()
         require("settings.keymaps").set_dv_close_keymaps()
-        -- vim.api.nvim_set_hl(0, "DiffChange", { bg = "#11180f" })
-        print("opened diffview")
     end,
     group = "DiffviewKeymaps",
 })
@@ -111,7 +109,6 @@ vim.api.nvim_create_autocmd("User", {
     pattern = "DiffviewViewClosed",
     callback = function()
         require("settings.keymaps").set_dv_open_keymaps()
-        print("closed diffview")
     end,
     group = "DiffviewKeymaps",
 })
@@ -133,11 +130,24 @@ vim.api.nvim_create_autocmd("User", {
     callback = function()
         local pct = 1 / 8
 
+        local aqua = "#8ec07c"
+        local green = "#b8bb26"
+        local red = "#fb4934"
+        local yellow = "#fabd2f"
+
         local ns = vim.api.nvim_get_hl_ns({})
         local hl_add = vim.api.nvim_get_hl(ns, { name = "DiffAdd", link = false }).fg
+            or vim.api.nvim_get_hl(ns, { name = "String", link = false }).fg
+            or green
         local hl_change = vim.api.nvim_get_hl(ns, { name = "DiffChange", link = false }).fg
+            or vim.api.nvim_get_hl(ns, { name = "DiagnosticSignHint", link = false }).fg
+            or aqua
         local hl_del = vim.api.nvim_get_hl(ns, { name = "DiffDelete", link = false }).fg
+            or vim.api.nvim_get_hl(ns, { name = "DiagnosticSignError", link = false }).fg
+            or red
         local hl_text = vim.api.nvim_get_hl(ns, { name = "DiffText", link = false }).fg
+            or vim.api.nvim_get_hl(ns, { name = "DiagnosticSignWarn", link = false }).fg
+            or yellow
 
         vim.api.nvim_set_hl(ns, "DiffAdd", { bg = darken(hl_add, pct) })
         vim.api.nvim_set_hl(ns, "DiffChange", { bg = darken(hl_change, pct) })
