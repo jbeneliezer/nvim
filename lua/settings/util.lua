@@ -2,6 +2,9 @@ local M = {}
 
 function M.noop(...) end
 
+--- Converts table into function, mainly to work with vim.keymap.set.
+---@param obj metatable with __call() implemented.
+---@return any result of calling obj.__call().
 function M.tbl_f(obj)
     return function(...)
         return obj(...)
@@ -300,7 +303,7 @@ local DM = {
         layouts = {
             {
                 elements = {
-                    { id = "repl",   size = 0.60 },
+                    { id = "repl", size = 0.60 },
                     { id = "scopes", size = 0.40 },
                 },
                 size = 12,
@@ -334,9 +337,9 @@ local DM = {
         layouts = {
             {
                 elements = {
-                    { id = "scopes",      size = 0.34 },
+                    { id = "scopes", size = 0.34 },
                     { id = "breakpoints", size = 0.33 },
-                    { id = "watches",     size = 0.33 },
+                    { id = "watches", size = 0.33 },
                 },
                 size = 12,
                 position = "bottom",
@@ -369,9 +372,9 @@ local DM = {
         layouts = {
             {
                 elements = {
-                    { id = "scopes",      size = 0.34 },
+                    { id = "scopes", size = 0.34 },
                     { id = "breakpoints", size = 0.33 },
-                    { id = "watches",     size = 0.33 },
+                    { id = "watches", size = 0.33 },
                 },
                 size = 12,
                 position = "bottom",

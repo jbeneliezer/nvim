@@ -6,10 +6,37 @@ local repeatable = util.repeatable
 local LZ = util.LZ
 
 local default_opts = { noremap = true, silent = true }
-local keymap = function(mode, lhs, rhs, opts, description)
+
+---Wrapper for vim.keymap.set()
+---@param mode string|table
+---@param lhs string|table
+---@param rhs string|function
+---@param opts? table
+---@param desc? string
+local keymap = function(mode, lhs, rhs, opts, desc)
     local local_opts = opts or default_opts
-    local_opts.desc = description or ""
-    vim.keymap.set(mode, lhs, rhs, local_opts)
+    local_opts.desc = desc or ""
+    if type(lhs) == "table" then
+        for _, v in pairs(lhs) do
+            vim.keymap.set(mode, v, rhs, local_opts)
+        end
+    else
+        vim.keymap.set(mode, lhs, rhs, local_opts)
+    end
+end
+
+---Wrapper for vim.keymap.del()
+---@param mode string|table
+---@param lhs string|table
+---@param buffer? integer|boolean
+local del_keymap = function(mode, lhs, buffer)
+    if type(lhs) == "table" then
+        for _, v in pairs(lhs) do
+            vim.keymap.del(mode, v, { buffer })
+        end
+    else
+        vim.keymap.del(mode, lhs, { buffer })
+    end
 end
 
 local lsp_format = function(bufnr)
@@ -24,7 +51,7 @@ end
 
 local M = {}
 
-function M.set_basic_keymaps()
+M.set_basic_keymaps = function()
     keymap({ "n", "x", "o" }, ";", ts_repeat_move.repeat_last_move_next)
     keymap({ "n", "x", "o" }, ",", ts_repeat_move.repeat_last_move_previous)
 
@@ -79,7 +106,7 @@ function M.set_basic_keymaps()
     keymap("n", "<leader>L", next_file_move)
     keymap("n", "<leader>H", prev_file_move)
     for i = 1, 9 do
-        keymap({ "n", "v" }, "<leader>" .. i, "<cmd>BufferGoto " .. i .. "<cr>")
+        keymap("n", "<leader>" .. i, "<cmd>BufferGoto " .. i .. "<cr>")
     end
 
     -- File Explorer
@@ -121,7 +148,7 @@ function M.set_basic_keymaps()
     local telescope_dap = LZ.export_call("telescope", 3).extensions.dap
     local dap_repl = LZ.export_call("dap.repl")
     local dapui = LZ.export_call("dapui")
-    local dapui_watches = LZ.export_call("dapui.elements.watches")
+    local dapui_watches = LZ.export_call("dapui", 3).elements.watches
     local goto_breakpoints = LZ.export_call("goto-breakpoints")
     local next_bp, prev_bp = repeatable_pair(goto_breakpoints.next, goto_breakpoints.prev)
 
@@ -163,7 +190,8 @@ function M.set_basic_keymaps()
     keymap("n", "<leader>fk", telescope_builtin.keymaps, default_opts, "Keymaps")
     -- keymap("n", "<leader>fp", require("telescope").extensions.projects.projects, default_opts, "Projects")
     keymap("n", "<leader>fu", LZ.export_call("telescope", 3).extensions.undo.undo, default_opts, "Undo")
-    keymap("n", "<leader>fs", LZ.export_call("auto-session.session-lens").search_session, default_opts, "Sessions")
+    keymap("n", "<leader>fs", telescope_builtin.grep_string, default_opts, "Grep String")
+    keymap("n", "<leader>fS", LZ.export_call("auto-session.session-lens").search_session, default_opts, "Sessions")
     keymap("n", "<leader>fj", telescope_builtin.jumplist, default_opts, "Jump List")
     keymap("n", "<leader>f/", telescope_builtin.current_buffer_fuzzy_find, default_opts, "Buffer Grep")
     keymap("n", "<leader>f.", telescope_builtin.resume, default_opts, "Resume")
@@ -195,36 +223,62 @@ function M.set_basic_keymaps()
     )
 
     keymap("n", "<leader>tr", trouble.refresh, default_opts, "Refresh")
-    keymap("n", "g;", next_trouble, default_opts, "Next Trouble")
-    keymap("n", "]t", next_trouble, default_opts, "Next Trouble")
-    keymap("n", "g,", prev_trouble, default_opts, "Previous Trouble")
-    keymap("n", "[t", prev_trouble, default_opts, "Previous Trouble")
+    keymap("n", { "g;", "]t" }, next_trouble, default_opts, "Next Trouble")
+    keymap("n", { "g,", "[t" }, prev_trouble, default_opts, "Previous Trouble")
     keymap("n", "g0", partial(trouble.first, { skip_groups = true, jump = true }), default_opts, "First Trouble")
     keymap("n", "g$", partial(trouble.last, { skip_groups = true, jump = true }), default_opts, "Last Trouble")
 end
 
-function M.set_lsp_keymaps(_, bufnr)
+M.set_lsp_keymaps = function(_, bufnr)
     local next_diag, prev_diag = repeatable_pair(vim.diagnostic.goto_next, vim.diagnostic.goto_prev)
     local lsp_opts = { noremap = true, silent = true, buffer = bufnr }
+    local telescope_builtin = LZ.export_call("telescope.builtin")
 
-    keymap({ "n", "v" }, "gD", vim.lsp.buf.declaration, lsp_opts, "Goto Declaration")
-    keymap({ "n", "v" }, "gd", vim.lsp.buf.definition, lsp_opts, "Goto Definition")
-    keymap({ "n", "v" }, "gi", vim.lsp.buf.implementation, lsp_opts, "Goto Implementation")
-    keymap({ "n", "v" }, "gr", vim.lsp.buf.references, lsp_opts, "Goto References")
-    keymap({ "n", "v" }, "]d", next_diag, lsp_opts, "Next Diagnostic")
-    keymap({ "n", "v" }, "[d", prev_diag, lsp_opts, "Previous Diagnostic")
-    keymap({ "n", "v" }, "gn", next_diag, lsp_opts, "Next Diagnostic")
-    keymap({ "n", "v" }, "gN", prev_diag, lsp_opts, "Previous Diagnostic")
-    keymap({ "n", "v" }, "<leader>la", vim.lsp.buf.code_action, lsp_opts, "Code Action")
-    keymap({ "n", "v" }, "<leader>li", vim.diagnostic.open_float, lsp_opts, "Diagnostic Info")
-    keymap({ "n", "v" }, "<leader>lI", "<cmd>LspInfo<cr>", lsp_opts, "Info")
-    keymap({ "n", "v" }, "<leader>lr", LZ.export_call("telescope.builtin").lsp_references, lsp_opts, "References")
-    keymap({ "n", "v" }, "<leader>lR", vim.lsp.buf.rename, lsp_opts, "Rename")
-    keymap({ "n", "v" }, "<leader>lf", partial(lsp_format, bufnr), lsp_opts, "Format")
-    keymap({ "n", "v" }, "<leader>ll", "<Plug>(toggle-lsp-diag)", { noremap = false }, "Toggle Diagnostics")
-    keymap({ "n", "v" }, "<leader>lv", "<Plug>(toggle-lsp-diag-vtext)", { noremap = false }, "Toggle Vtext")
-    keymap({ "n", "v" }, "<leader>lu", "<Plug>(toggle-lsp-diag-underline)", { noremap = false }, "Toggle Underline")
+    keymap("n", "<leader>ll", "<Plug>(toggle-lsp-diag)", { noremap = false }, "Toggle Diagnostics")
+    keymap("n", "<leader>lv", "<Plug>(toggle-lsp-diag-vtext)", { noremap = false }, "Toggle Vtext")
+    keymap("n", "<leader>lu", "<Plug>(toggle-lsp-diag-underline)", { noremap = false }, "Toggle Underline")
+
+    keymap("n", { "ge", "<leader>le" }, telescope_builtin.diagnostics, lsp_opts, "Diagnostics")
+    keymap("n", { "gd", "<leader>ld" }, telescope_builtin.lsp_definitions, lsp_opts, "Definitions")
+    keymap("n", { "gt", "<leader>lt" }, telescope_builtin.lsp_type_definitions, lsp_opts, "Type Definitions")
+    keymap("n", { "gr", "<leader>lr" }, telescope_builtin.lsp_references, lsp_opts, "References")
+    keymap("n", { "gi", "<leader>li" }, telescope_builtin.lsp_incoming_calls, lsp_opts, "Incoming Calls")
+    keymap("n", { "go", "<leader>lo" }, telescope_builtin.lsp_outgoing_calls, lsp_opts, "Outgoing Calls")
+    keymap("n", { "gs", "<leader>ls" }, telescope_builtin.lsp_document_symbols, lsp_opts, "Document Symbols")
+    keymap("n", { "gw", "<leader>lw" }, telescope_builtin.lsp_dynamic_workspace_symbols, lsp_opts, "Workspace Symbols")
+    keymap("n", "gI", telescope_builtin.lsp_implementations, lsp_opts, "Implementations")
+
+    keymap("n", { "ga", "<leader>la" }, vim.lsp.buf.code_action, lsp_opts, "Code Actions")
+    keymap("n", "<leader>l?", vim.diagnostic.open_float, lsp_opts, "Diagnostic Info")
+    keymap("n", "<leader>lI", "<cmd>LspInfo<cr>", lsp_opts, "Lsp Info")
+    keymap("n", "<leader>lR", vim.lsp.buf.rename, lsp_opts, "Rename")
+    keymap("n", "<leader>lf", partial(lsp_format, bufnr), lsp_opts, "Format")
+
+    keymap({ "n", "v" }, { "gn", "]d" }, next_diag, lsp_opts, "Next Diagnostic")
+    keymap({ "n", "v" }, { "gN", "[d" }, prev_diag, lsp_opts, "Previous Diagnostic")
 end
+
+M.set_dv_close_keymaps = function()
+    keymap("n", "<leader>gd", "<cmd>DiffviewClose<cr>", default_opts, "Close Diffview")
+    keymap("n", "<leader>gD", "<cmd>DiffviewClose<cr>", default_opts, "Close Diffview Custom")
+    keymap("n", "<leader>gf", "<cmd>DiffviewClose<cr>", default_opts, "Close Diffview Current File History")
+    keymap("n", "<leader>ga", "<cmd>DiffviewClose<cr>", default_opts, "Close Diffview All Files History ")
+    keymap("n", "<leader>gF", "<cmd>DiffviewClose<cr>", default_opts, "Close Diffview File History Custom")
+end
+
+M.set_dv_open_keymaps = function()
+    keymap("n", "<leader>gd", "<cmd>DiffviewOpen<cr>", default_opts, "Open Diffview")
+    keymap("n", "<leader>gD", function()
+        vim.cmd("DiffviewOpen " .. vim.fn.input("Revision(s)/ Path(s): "))
+    end, default_opts, "Toggle Diffview Custom")
+    keymap("n", "<leader>gf", "<cmd>DiffviewFileHistory %<cr>", default_opts, "Toggle Diffview Current File History")
+    keymap("n", "<leader>ga", "<cmd>DiffviewFileHistory<cr>", default_opts, "Toggle Diffview All Files History ")
+    keymap("n", "<leader>gF", function()
+        vim.cmd("DiffviewFileHistory " .. vim.fn.input("Path(s)/ Revision(s): "))
+    end, default_opts, "Toggle Diffview File History Custom")
+end
+
+local dv_open_keymaps_set = false
 
 M.set_git_keymaps = function(bufnr)
     local gs = LZ.export_call("gitsigns")
@@ -238,10 +292,8 @@ M.set_git_keymaps = function(bufnr)
 
     keymap("n", "<leader>fb", LZ.export_call("telescope.builtin").git_branches, gs_opts, "Find Branch")
     keymap("n", "<leader>gc", LZ.export_call("telescope.builtin").git_commits, gs_opts, "Find Commit")
-    keymap({ "n", "v" }, "<leader>gj", next_hunk, gs_opts, "Next Hunk")
-    keymap({ "n", "v" }, "]h", next_hunk, gs_opts, "Next Hunk")
-    keymap({ "n", "v" }, "<leader>gk", prev_hunk, gs_opts, "Previous Hunk")
-    keymap({ "n", "v" }, "[h", prev_hunk, gs_opts, "Previous Hunk")
+    keymap({ "n", "v" }, { "<leader>gj", "]h" }, next_hunk, gs_opts, "Next Hunk")
+    keymap({ "n", "v" }, { "<leader>gk", "[h" }, prev_hunk, gs_opts, "Previous Hunk")
     keymap("n", "<leader>g0", partial(gs.nav_hunk, "first", { target = "all" }), gs_opts, "First Hunk")
     keymap("n", "<leader>g$", partial(gs.nav_hunk, "last", { target = "all" }), gs_opts, "Last Hunk")
     keymap("n", "<leader>gp", gs.preview_hunk, gs_opts, "Preview Hunk")
@@ -266,32 +318,18 @@ M.set_git_keymaps = function(bufnr)
     -- Text object
     keymap({ "o", "x" }, "ih", gs.select_hunk, gs_opts)
 
-    -- Diffview
-    local DV = {
-        default = util.Toggle.new(partial(vim.cmd, "DiffviewOpen"), partial(vim.cmd, "DiffviewClose")),
-        rev_path = util.Toggle.new(function()
-            vim.cmd("DiffviewOpen " .. vim.fn.input("Revision(s) / Path(s): "))
-        end, partial(vim.cmd, "DiffviewClose")),
-        fh = util.Toggle.new(partial(vim.cmd, "DiffviewFileHistory %"), partial(vim.cmd, "DiffviewClose")),
-        fh_all = util.Toggle.new(partial(vim.cmd, "DiffviewFileHistory"), partial(vim.cmd, "DiffviewClose")),
-        fh_path_rev = util.Toggle.new(function()
-            vim.cmd("DiffviewFileHistory " .. vim.fn.input("Path(s)/ Revision(s): "))
-        end, partial(vim.cmd, "DiffviewClose")),
-    }
-
-    keymap("n", "<leader>gd", util.tbl_f(DV.default), default_opts, "Toggle Diffview")
-    keymap("n", "<leader>gD", util.tbl_f(DV.rev_path), default_opts, "Toggle Diffview Custom")
-    keymap("n", "<leader>gf", util.tbl_f(DV.fh), default_opts, "Toggle Diffview Current File History")
-    keymap("n", "<leader>ga", util.tbl_f(DV.fh_all), default_opts, "Toggle Diffview All Files History ")
-    keymap("n", "<leader>gF", util.tbl_f(DV.fh_path_rev), default_opts, "Toggle Diffview File History Custom")
+    if not dv_open_keymaps_set then
+        M.set_dv_open_keymaps()
+        dv_open_keymaps_set = true
+    end
 end
 
-function M.set_term_keymaps()
+M.set_term_keymaps = function()
     local term_opts = { noremap = true, silent = true, buffer = 0 }
     keymap("t", "<esc>", "<c-\\><c-n>", term_opts)
 end
 
-function M.set_ipy_keymaps()
+M.set_ipy_keymaps = function()
     local TM = util.TM
     keymap("v", "<leader>tl", TM.send_line, default_opts, "Send Line to IPython")
     keymap("v", "<leader>tL", TM.send_lines, default_opts, "Send Selected Lines to IPython")
@@ -301,7 +339,7 @@ function M.set_ipy_keymaps()
     keymap("n", "<leader>mI", "<cmd>MoltenInit<cr>", default_opts, " Initialize")
 end
 
-function M.set_neotest_keymaps()
+M.set_neotest_keymaps = function()
     local neotest = LZ.export_call("neotest", 2)
     keymap("n", "<leader>nm", neotest.run.run, default_opts, "Run Test")
     keymap("n", "<leader>nM", partial(neotest.run.run, { strategy = "dap" }), default_opts, "Debug Test")
@@ -357,29 +395,29 @@ local molten_keymaps = {
     { "n", "<leader>m<cr>", util.tbl_f(MS.enter_output), default_opts, " Enter Output" },
 }
 
-function M.set_molten_keymaps()
+M.set_molten_keymaps = function()
     for _, v in ipairs(molten_keymaps) do
         keymap(unpack(v))
     end
 end
 
-function M.del_molten_keymaps()
+M.del_molten_keymaps = function()
     for _, v in ipairs(molten_keymaps) do
-        vim.keymap.del(v[1], v[2])
+        del_keymap(v[1], v[2])
     end
 end
 
 local dap_keymaps = {
-    { { "n", "v" }, "<leader>de",  LZ.export_call("dapui").eval,                default_opts, "Evaluate" },
-    { "n",          "<leader>dp",  LZ.export_call("dap").pause,                 default_opts, "Pause" },
-    { "n",          "<leader>dq",  LZ.export_call("dap").terminate,             default_opts, "Quit" },
-    { "n",          "<leader>dsi", repeatable(LZ.export_call("dap").step_into), default_opts, "Into" },
-    { "n",          "<leader>dso", repeatable(LZ.export_call("dap").step_over), default_opts, "Over" },
-    { "n",          "<leader>dsu", repeatable(LZ.export_call("dap").step_out),  default_opts, "Out" },
-    { "n",          "<F5>",        repeatable(LZ.export_call("dap").continue) },
-    { "n",          "<F8>",        repeatable(LZ.export_call("dap").step_over) },
-    { "n",          "<F9>",        repeatable(LZ.export_call("dap").step_into) },
-    { "n",          "<F10>",       repeatable(LZ.export_call("dap").step_out) },
+    { { "n", "v" }, "<leader>de", LZ.export_call("dapui").eval, default_opts, "Evaluate" },
+    { "n", "<leader>dp", LZ.export_call("dap").pause, default_opts, "Pause" },
+    { "n", "<leader>dq", LZ.export_call("dap").terminate, default_opts, "Quit" },
+    { "n", "<leader>dsi", repeatable(LZ.export_call("dap").step_into), default_opts, "Into" },
+    { "n", "<leader>dso", repeatable(LZ.export_call("dap").step_over), default_opts, "Over" },
+    { "n", "<leader>dsu", repeatable(LZ.export_call("dap").step_out), default_opts, "Out" },
+    { "n", "<F5>", repeatable(LZ.export_call("dap").continue) },
+    { "n", "<F8>", repeatable(LZ.export_call("dap").step_over) },
+    { "n", "<F9>", repeatable(LZ.export_call("dap").step_into) },
+    { "n", "<F10>", repeatable(LZ.export_call("dap").step_out) },
     {
         "n",
         "<leader>d<leader>",
@@ -398,8 +436,39 @@ end
 M.del_dap_keymaps = function()
     M.set_dap_keymaps()
     for _, v in ipairs(dap_keymaps) do
-        vim.keymap.del(v[1], v[2])
+        del_keymap(v[1], v[2])
     end
+end
+
+--- Currently identical to set_lsp_keymaps().
+M.set_rust_keymaps = function(_, bufnr)
+    local next_diag, prev_diag = repeatable_pair(vim.diagnostic.goto_next, vim.diagnostic.goto_prev)
+    local lsp_opts = { noremap = true, silent = true, buffer = bufnr }
+    local telescope_builtin = LZ.export_call("telescope.builtin")
+
+    keymap("n", "<leader>ll", "<Plug>(toggle-lsp-diag)", { noremap = false }, "Toggle Diagnostics")
+    keymap("n", "<leader>lv", "<Plug>(toggle-lsp-diag-vtext)", { noremap = false }, "Toggle Vtext")
+    keymap("n", "<leader>lu", "<Plug>(toggle-lsp-diag-underline)", { noremap = false }, "Toggle Underline")
+
+    keymap("n", { "ge", "<leader>le" }, telescope_builtin.diagnostics, lsp_opts, "Diagnostics")
+    keymap("n", { "gd", "<leader>ld" }, telescope_builtin.lsp_definitions, lsp_opts, "Definitions")
+    keymap("n", { "gt", "<leader>lt" }, telescope_builtin.lsp_type_definitions, lsp_opts, "Type Definitions")
+    keymap("n", { "gr", "<leader>lr" }, telescope_builtin.lsp_references, lsp_opts, "References")
+    keymap("n", { "gi", "<leader>li" }, telescope_builtin.lsp_incoming_calls, lsp_opts, "Incoming Calls")
+    keymap("n", { "go", "<leader>lo" }, telescope_builtin.lsp_outgoing_calls, lsp_opts, "Outgoing Calls")
+    keymap("n", { "gs", "<leader>ls" }, telescope_builtin.lsp_document_symbols, lsp_opts, "Document Symbols")
+    keymap("n", { "gw", "<leader>lw" }, telescope_builtin.lsp_dynamic_workspace_symbols, lsp_opts, "Workspace Symbols")
+    keymap("n", "gI", telescope_builtin.lsp_implementations, lsp_opts, "Implementations")
+
+    -- keymap("n", { "ga", "<leader>la" }, vim.cmd.RustLsp("codeAction"), lsp_opts, "Code Actions")
+    keymap("n", { "ga", "<leader>la" }, vim.lsp.buf.code_action, lsp_opts, "Code Actions")
+    keymap("n", "<leader>l?", vim.diagnostic.open_float, lsp_opts, "Diagnostic Info")
+    keymap("n", "<leader>lI", "<cmd>LspInfo<cr>", lsp_opts, "Lsp Info")
+    keymap("n", "<leader>lR", vim.lsp.buf.rename, lsp_opts, "Rename")
+    keymap("n", "<leader>lf", partial(lsp_format, bufnr), lsp_opts, "Format")
+
+    keymap({ "n", "v" }, { "gn", "]d" }, next_diag, lsp_opts, "Next Diagnostic")
+    keymap({ "n", "v" }, { "gN", "[d" }, prev_diag, lsp_opts, "Previous Diagnostic")
 end
 
 return M

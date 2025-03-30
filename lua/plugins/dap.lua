@@ -34,7 +34,7 @@ local dap_adapters = {
     },
     lldb = {
         type = "executable",
-        command = vim.fn.stdpath("data") .. "/mason/packages/codelldb/extension/adapter/codelldb.exe",
+        command = vim.fn.stdpath("data") .. "/mason/packages/codelldb/extension/adapter/codelldb",
         name = "lldb",
     },
 }
@@ -49,20 +49,20 @@ local dap_configurations = {
     },
     c = {
         {
-            name = "[LLDB] Launch ./build/" .. vim.uv.cwd():match(".*[/\\](.*)") .. ".exe",
+            name = "[LLDB] Launch ./build/" .. vim.uv.cwd():match(".*[/\\](.*)"),
             type = "lldb",
             request = "launch",
-            program = "${workspaceFolder}/build/${workspaceFolderBasename}.exe",
+            program = "${workspaceFolder}/build/${workspaceFolderBasename}",
             env = get_env_vars(),
             cwd = "${workspaceFolder}",
             stopOnEntry = false,
             runInTerminal = true,
         },
         {
-            name = "[LLDB] Launch ./build/Debug/" .. vim.uv.cwd():match(".*[/\\](.*)") .. ".exe",
+            name = "[LLDB] Launch ./build/Debug/" .. vim.uv.cwd():match(".*[/\\](.*)"),
             type = "lldb",
             request = "launch",
-            program = "${workspaceFolder}/build/Debug/${workspaceFolderBasename}.exe",
+            program = "${workspaceFolder}/build/Debug/${workspaceFolderBasename}",
             env = get_env_vars(),
             cwd = "${workspaceFolder}",
             stopOnEntry = false,
@@ -103,10 +103,10 @@ local dap_configurations = {
     },
     odin = {
         {
-            name = "Launch ./" .. vim.uv.cwd():match(".*[/\\](.*)") .. ".exe",
+            name = "Launch ./" .. vim.uv.cwd():match(".*[/\\](.*)"),
             type = "lldb",
             request = "launch",
-            program = "${workspaceFolderBasename}.exe",
+            program = "${workspaceFolderBasename}",
             args = {},
             env = get_env_vars(),
             cwd = "${workspaceFolder}",
@@ -136,30 +136,6 @@ local dap_configurations = {
                 }
             end,
         }),
-    },
-    rust = {
-        {
-            name = "Launch ./target/debug/" .. vim.uv.cwd():match(".*[/\\](.*)") .. ".exe",
-            type = "lldb",
-            request = "launch",
-            program = "${workspaceFolder}/target/debug/${workspaceFolderBasename}.exe",
-            cwd = "${workspaceFolder}",
-            stopOnEntry = true,
-        },
-        {
-            name = "Custom",
-            type = "lldb",
-            request = "launch",
-            program = function()
-                return vim.fn.input({
-                    prompt = "Path to executable",
-                    default = vim.fn.getcwd() .. "/target/debug/",
-                    completion = "file",
-                })
-            end,
-            cwd = "${workspaceFolder}",
-            stopOnEntry = true,
-        },
     },
     python = {
         {
@@ -233,7 +209,7 @@ return {
         {
             "theHamsta/nvim-dap-virtual-text",
             opts = {
-                highlight_new_as_changed = true,
+                highlight_new_as_changed = false,
                 show_stop_reason = true,
                 only_first_definition = false,
                 all_references = true,
@@ -255,8 +231,8 @@ return {
 
         require("dap-python").setup(
             vim.fn.stdpath("data")
-            .. "/mason/packages/debugpy/venv/"
-            .. (OsCurrent == Os.WINDOWS and "Scripts/python" or "bin/python"),
+                .. "/mason/packages/debugpy/venv/"
+                .. (OsCurrent == Os.WINDOWS and "Scripts/python" or "bin/python"),
             {
                 console = "integratedTerminal",
             }

@@ -9,6 +9,12 @@ return {
         require("nvim-treesitter.install").update({ with_sync = true })
     end,
     config = function()
+        vim.filetype.add({
+            extension = {
+                vert = "vert",
+                frag = "frag",
+            }
+        })
         require("nvim-treesitter.configs").setup({
             ensure_installed = { "c", "rust", "lua", "vim", "vimdoc", "query", "python" },
             auto_install = true,
@@ -26,15 +32,15 @@ return {
                         ["il"] = { query = "@loop.inner", desc = "Inside Loop" },
                         ["is"] = { query = "@scope", query_group = "locals", desc = "Inside Scope" },
                     },
-                },
-                selection_modes = {
-                    ["@function.outer"] = "V",
-                    ["@function.inner"] = "V",
-                    ["@class.outer"] = "V",
-                    ["@class.inner"] = "V",
-                    ["@loop.outer"] = "V",
-                    ["@loop.inner"] = "V",
-                    ["@scope"] = "V",
+                    selection_modes = {
+                        ["@function.outer"] = "V",
+                        ["@function.inner"] = "V",
+                        ["@class.outer"] = "V",
+                        ["@class.inner"] = "V",
+                        ["@loop.outer"] = "V",
+                        ["@loop.inner"] = "V",
+                        ["@scope"] = "V",
+                    },
                 },
                 move = {
                     enable = true,
@@ -71,5 +77,7 @@ return {
             },
         })
         require("treesitter-context").setup({ max_lines = 5, multiline_threshold = 5 })
+        vim.treesitter.language.register("glsl", "vert")
+        vim.treesitter.language.register("glsl", "frag")
     end,
 }
