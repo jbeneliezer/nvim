@@ -116,7 +116,7 @@ vim.api.nvim_create_autocmd("User", {
 local darken = function(color, pct)
     local r = math.floor(color / (2 ^ 16)) % 0x100
     local g = math.floor(color / (2 ^ 8)) % 0x100
-    local b = math.floor(color / (2 ^ 8)) % 0x100
+    local b = math.floor(color) % 0x100
     r = math.floor(math.min((r * pct), 0xFF))
     g = math.floor(math.min((g * pct), 0xFF))
     b = math.floor(math.min((b * pct), 0xFF))
