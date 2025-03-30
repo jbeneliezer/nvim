@@ -130,10 +130,10 @@ vim.api.nvim_create_autocmd("User", {
     callback = function()
         local pct = 1 / 8
 
-        local aqua = "#8ec07c"
-        local green = "#b8bb26"
-        local red = "#fb4934"
-        local yellow = "#fabd2f"
+        local aqua = 0x8ec07c
+        local green = 0xb8bb26
+        local red = 0xfb4934
+        local yellow = 0xfabd2f
 
         local ns = vim.api.nvim_get_hl_ns({})
         local hl_add = vim.api.nvim_get_hl(ns, { name = "DiffAdd", link = false }).fg
