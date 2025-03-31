@@ -259,15 +259,15 @@ M.set_lsp_keymaps = function(_, bufnr)
 end
 
 M.set_dv_close_keymaps = function()
-    keymap("n", "<leader>gd", "<cmd>DiffviewClose<cr>", default_opts, "Close Diffview")
-    keymap("n", "<leader>gD", "<cmd>DiffviewClose<cr>", default_opts, "Close Diffview Custom")
-    keymap("n", "<leader>gf", "<cmd>DiffviewClose<cr>", default_opts, "Close Diffview Current File History")
-    keymap("n", "<leader>ga", "<cmd>DiffviewClose<cr>", default_opts, "Close Diffview All Files History ")
-    keymap("n", "<leader>gF", "<cmd>DiffviewClose<cr>", default_opts, "Close Diffview File History Custom")
+    keymap("n", "<leader>gd", "<cmd>DiffviewClose<cr>", default_opts, "Toggle Diffview")
+    keymap("n", "<leader>gD", "<cmd>DiffviewClose<cr>", default_opts, "Toggle Diffview Custom")
+    keymap("n", "<leader>gf", "<cmd>DiffviewClose<cr>", default_opts, "Toggle Diffview Current File History")
+    keymap("n", "<leader>ga", "<cmd>DiffviewClose<cr>", default_opts, "Toggle Diffview All Files History ")
+    keymap("n", "<leader>gF", "<cmd>DiffviewClose<cr>", default_opts, "Toggle Diffview File History Custom")
 end
 
 M.set_dv_open_keymaps = function()
-    keymap("n", "<leader>gd", "<cmd>DiffviewOpen<cr>", default_opts, "Open Diffview")
+    keymap("n", "<leader>gd", "<cmd>DiffviewOpen<cr>", default_opts, "Toggle Diffview")
     keymap("n", "<leader>gD", function()
         vim.cmd("DiffviewOpen " .. vim.fn.input("Revision(s)/ Path(s): "))
     end, default_opts, "Toggle Diffview Custom")
