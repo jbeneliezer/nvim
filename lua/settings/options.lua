@@ -59,8 +59,11 @@ vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 
 -- python3_provider
-vim.g.python3_host_prog = '/Users/jb/AppData/Local/nvim/.venv/Scripts/python.exe'
--- vim.g.loaded_python3_provider=0-- neovide
+vim.g.python3_host_prog = vim.fn.stdpath("config")
+    .. (OsCurrent == Os.WINDOWS and "\\.venv\\Scripts\\python.exe" or "/.venv/bin/python")
+-- vim.g.loaded_python3_provider=0
+
+-- neovide
 if vim.g.neovide then
     vim.g.neovide_position_animation_length = 0
     vim.g.neovide_scroll_animation_length = 0

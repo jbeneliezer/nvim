@@ -207,6 +207,8 @@ function M.set_lsp_keymaps(_, bufnr)
     local next_diag, prev_diag = repeatable_pair(vim.diagnostic.goto_next, vim.diagnostic.goto_prev)
     local lsp_opts = { noremap = true, silent = true, buffer = bufnr }
 
+    require("telescope").load_extension("lsp_handlers")
+
     keymap({ "n", "v" }, "gD", vim.lsp.buf.declaration, lsp_opts, "Goto Declaration")
     keymap({ "n", "v" }, "gd", vim.lsp.buf.definition, lsp_opts, "Goto Definition")
     keymap({ "n", "v" }, "gi", vim.lsp.buf.implementation, lsp_opts, "Goto Implementation")
@@ -304,15 +306,17 @@ end
 function M.set_neotest_keymaps()
     local neotest = LZ.export_call("neotest", 2)
     keymap("n", "<leader>nm", neotest.run.run, default_opts, "Run Test")
-    keymap("n", "<leader>nM", partial(neotest.run.run, { strategy = "dap" }), default_opts, "Debug Test")
+    keymap("n", "<leader>nM", partial(neotest.run.run, { extra_args = {"-s"}, strategy = "dap" }), default_opts, "Debug Test")
     keymap("n", "<leader>nf", partial(neotest.run.run, { vim.fn.expand("%") }), default_opts, "Run All Tests")
     keymap(
         "n",
         "<leader>nF",
-        partial(neotest.run.run, { vim.fn.expand("%"), strategy = "dap" }),
+        partial(neotest.run.run, { vim.fn.expand("%"), extra_args = {"-s"}, strategy = "dap" }),
         default_opts,
         "Debug All Tests"
     )
+    keymap("n", "<leader>nr", neotest.run.run_last, default_opts, "Run Last")
+    keymap("n", "<leader>nR", partial(neotest.run.run_last, { extra_args = {"-s"}, strategy = "dap" }), default_opts, "Debug Last")
     keymap("n", "<leader>ns", neotest.summary.toggle, default_opts, "Test Summary")
     keymap("n", "<leader>np", neotest.run.stop, default_opts, "Stop Test")
     keymap("n", "<leader>na", neotest.run.attach, default_opts, "Attach To Test")
