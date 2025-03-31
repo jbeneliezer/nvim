@@ -31,7 +31,6 @@ local servers = {
         },
         single_file_support = true,
     },
-    rust_analyzer = {},
     pyright = {
         single_file_support = true,
         settings = {
@@ -102,13 +101,13 @@ return {
                     end
                     require("lspconfig")[server_name].setup({
                         capabilities = lsp_capabilities,
-                        on_attach = require("settings.keymaps").set_lsp_keymaps,
+                        on_attach = function(client, bufnr)
+                            require("settings.keymaps").set_lsp_keymaps(client, bufnr)
+                        end,
                         settings = servers[server_name],
                     })
                 end,
             })
-
-            require("rust-tools").inlay_hints.enable()
         end,
     },
     {
@@ -116,24 +115,6 @@ return {
         config = function()
             require("toggle_lsp_diagnostics").init(vim.diagnostic.config())
         end,
-    },
-    {
-        "simrat39/rust-tools.nvim",
-        opts = {
-            inlay_hints = {
-                show_parameter_hints = true,
-            },
-            server = {
-                on_attach = require("settings.keymaps").set_lsp_keymaps,
-            },
-            dap = {
-                adapter = {
-                    type = "executable",
-                    command = "lldb-vscode",
-                    name = "rt_lldb",
-                },
-            },
-        },
     },
     {
         "neovim/nvim-lspconfig",

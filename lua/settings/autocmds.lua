@@ -1,6 +1,7 @@
 vim.api.nvim_create_augroup("CustomHighlights", { clear = true })
 vim.api.nvim_create_augroup("TermKeymaps", { clear = true })
 vim.api.nvim_create_augroup("PythonKeymaps", { clear = true })
+vim.api.nvim_create_augroup("DiffviewKeymaps", { clear = true })
 
 vim.api.nvim_create_autocmd({ "VimEnter", "Colorscheme" }, {
     desc = "link Pmenu to Normal",
@@ -90,6 +91,69 @@ vim.api.nvim_create_autocmd("User", {
         vim.api.nvim_set_hl(0, "MoltenOutputBorder", { link = "DiagnosticHint" })
         vim.api.nvim_set_hl(0, "MoltenOutputBorderFail", { link = "DiagnosticError" })
         vim.api.nvim_set_hl(0, "MoltenOutputBorderSuccess", { link = "String" })
+    end,
+    group = "CustomHighlights",
+})
+
+vim.api.nvim_create_autocmd("User", {
+    desc = "Set Diffview Close Keymaps",
+    pattern = "DiffviewViewOpened",
+    callback = function()
+        require("settings.keymaps").set_dv_close_keymaps()
+    end,
+    group = "DiffviewKeymaps",
+})
+
+vim.api.nvim_create_autocmd("User", {
+    desc = "Set Diffview Open Keymaps",
+    pattern = "DiffviewViewClosed",
+    callback = function()
+        require("settings.keymaps").set_dv_open_keymaps()
+    end,
+    group = "DiffviewKeymaps",
+})
+
+local darken = function(color, pct)
+    local r = math.floor(color / (2 ^ 16)) % 0x100
+    local g = math.floor(color / (2 ^ 8)) % 0x100
+    local b = math.floor(color) % 0x100
+    r = math.floor(math.min((r * pct), 0xFF))
+    g = math.floor(math.min((g * pct), 0xFF))
+    b = math.floor(math.min((b * pct), 0xFF))
+    local c = r * (2 ^ 16) + g * (2 ^ 8) + b
+    return c
+end
+
+vim.api.nvim_create_autocmd("User", {
+    desc = "Set Diffview Highlights",
+    pattern = "DiffviewViewOpened",
+    callback = function()
+        local pct = 1 / 8
+
+        local aqua = 0x8ec07c
+        local green = 0xb8bb26
+        local red = 0xfb4934
+        local yellow = 0xfabd2f
+
+        local ns = vim.api.nvim_get_hl_ns({})
+        local hl_add = vim.api.nvim_get_hl(ns, { name = "DiffAdd", link = false }).fg
+            or vim.api.nvim_get_hl(ns, { name = "String", link = false }).fg
+            or green
+        local hl_change = vim.api.nvim_get_hl(ns, { name = "DiffChange", link = false }).fg
+            or vim.api.nvim_get_hl(ns, { name = "DiagnosticSignHint", link = false }).fg
+            or aqua
+        local hl_del = vim.api.nvim_get_hl(ns, { name = "DiffDelete", link = false }).fg
+            or vim.api.nvim_get_hl(ns, { name = "DiagnosticSignError", link = false }).fg
+            or red
+        local hl_text = vim.api.nvim_get_hl(ns, { name = "DiffText", link = false }).fg
+            or vim.api.nvim_get_hl(ns, { name = "DiagnosticSignWarn", link = false }).fg
+            or yellow
+
+        vim.api.nvim_set_hl(ns, "DiffAdd", { bg = darken(hl_add, pct) })
+        vim.api.nvim_set_hl(ns, "DiffChange", { bg = darken(hl_change, pct) })
+        vim.api.nvim_set_hl(ns, "DiffDelete", { bg = darken(hl_del, pct) })
+        vim.api.nvim_set_hl(ns, "DiffviewDiffAddAsDelete", { bg = darken(hl_del, pct) })
+        vim.api.nvim_set_hl(ns, "DiffText", { bg = darken(hl_text, pct) })
     end,
     group = "CustomHighlights",
 })

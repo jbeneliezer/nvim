@@ -5,6 +5,7 @@ return {
         "hrsh7th/cmp-buffer",
         "hrsh7th/cmp-path",
         "hrsh7th/cmp-cmdline",
+        "petertriho/cmp-git",
         "saadparwaiz1/cmp_luasnip",
         "hrsh7th/cmp-nvim-lsp",
         "hrsh7th/cmp-nvim-lua",
@@ -49,7 +50,7 @@ return {
             Function = "󰊕",
             Constructor = "",
             Field = "",
-            Variable = "󰫧",
+            Variable = "",
             Class = "",
             Interface = "",
             Module = "",
@@ -120,15 +121,17 @@ return {
                 format = function(entry, vim_item)
                     -- Kind icons
                     vim_item.kind = string.format("%s", kind_icons[vim_item.kind])
-                    -- vim_item.kind = string.format('%s %s', kind_icons[vim_item.kind], vim_item.kind) -- This concatonates the icons with the name of the item kind
+                    -- vim_item.kind = string.format('%s %s', kind_icons[vim_item.kind], vim_item.kind) -- This concatenates the icons with the name of the item kind
+                    local lsp_name = entry.source.source.client and entry.source.source.client.name or nil
                     vim_item.menu = ({
-                        lazydev = "[LazyDev]",
-                        copilot = "[Copilot]",
-                        nvim_lua = "[Nvim]",
-                        nvim_lsp = "[Lsp]",
-                        luasnip = "[Snip]",
-                        buffer = "[Buf]",
-                        path = "[Path]",
+                        lazydev = "[lazy_dev]",
+                        nvim_lsp = lsp_name and "[" .. lsp_name .. "]" or "[lsp]",
+                        nvim_lua = "[nvim]",
+                        luasnip = "[snip]",
+                        copilot = "[copilot]",
+                        buffer = "[buf]",
+                        path = "[path]",
+                        git = "[git]",
                     })[entry.source.name]
                     return vim_item
                 end,
@@ -146,7 +149,7 @@ return {
                 select = false,
             },
             experimental = {
-                -- ghost_text = true,
+                ghost_text = true,
             },
             window = {
                 completion = {
@@ -158,6 +161,15 @@ return {
                 },
             },
         })
+
+        cmp.setup.filetype("gitcommit", {
+            sources = cmp.config.sources({
+                { name = "git" },
+            }, {
+                { name = "buffer" },
+            }),
+        })
+        require("cmp_git").setup()
 
         cmp.setup.cmdline("/", {
             mapping = cmp.mapping.preset.cmdline(),
@@ -173,6 +185,7 @@ return {
             }, {
                 { name = "cmdline" },
             }),
+            matching = { disallow_symbol_nonprefix_matching = false },
         })
     end,
 }
