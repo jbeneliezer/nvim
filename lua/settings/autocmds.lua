@@ -130,8 +130,8 @@ vim.api.nvim_create_autocmd("User", {
     callback = function()
         local pct = 1 / 8
 
-        local aqua = 0x8ec07c
         local green = 0xb8bb26
+        local aqua = 0x8ec07c
         local red = 0xfb4934
         local yellow = 0xfabd2f
 

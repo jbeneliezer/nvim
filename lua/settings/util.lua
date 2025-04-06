@@ -1,30 +1,91 @@
 local M = {}
 
-function M.noop(...) end
+--- No-op.
+---@vararg any
+M.noop = function(...) end
+
+M.default_opts = { noremap = true, silent = true }
+
+---Wrapper for vim.keymap.set()
+---@param mode string|table
+---@param lhs string|table
+---@param rhs string|function
+---@param opts table?
+---@param desc string?
+M.set_keymap = function(mode, lhs, rhs, opts, desc)
+    local local_opts = opts or M.default_opts
+    local_opts.desc = desc or ""
+    if type(lhs) == "table" then
+        for _, v in pairs(lhs) do
+            vim.keymap.set(mode, v, rhs, local_opts)
+        end
+    else
+        vim.keymap.set(mode, lhs, rhs, local_opts)
+    end
+end
+
+---Wrapper for vim.keymap.del()
+---@param mode string|table
+---@param lhs string|table
+---@param buffer integer|boolean?
+M.del_keymap = function(mode, lhs, buffer)
+    if type(lhs) == "table" then
+        for _, v in pairs(lhs) do
+            vim.keymap.del(mode, v, { buffer })
+        end
+    else
+        vim.keymap.del(mode, lhs, { buffer })
+    end
+end
+
+--- Wrapper for vim.lsp.format.
+---@param bufnr integer
+M.lsp_format = function(bufnr)
+    vim.lsp.buf.format({
+        async = true,
+        bufnr = bufnr,
+        filter = function(client)
+            return client.name ~= "clangd"
+        end,
+    })
+end
 
 --- Converts table into function, mainly to work with vim.keymap.set.
----@param obj metatable with __call() implemented.
----@return any result of calling obj.__call().
-function M.tbl_f(obj)
+---@param obj table metatable with __call() implemented.
+---@return any result of calling obj:__call().
+M.tbl_fn = function(obj)
     return function(...)
         return obj(...)
     end
 end
 
-function M.bind(obj, m, ...)
-    local args = { ... }
-    return function(...)
-        return obj[m](obj, unpack(args, ...))
-    end
-end
-
-function M.partial(f, ...)
+--- Partial functions.
+---@generic T
+---@param f fun(...: any): T
+---@vararg any
+---@return T
+M.partial = function(f, ...)
     local args = { ... }
     return function(...)
         return f(unpack(args, ...))
     end
 end
 
+--- Partial bound method.
+---@generic K, T
+---@param obj table<K, fun(...: any): T>
+---@param m K
+---@vararg any
+---@return T
+M.bind = function(obj, m, ...)
+    local args = { ... }
+    return function(...)
+        return obj[m](obj, unpack(args, ...))
+    end
+end
+
+--- Toggles whether source is included in completion menu.
+---@param source string
 M.toggle_cmp_source = function(source)
     local cmp = require("cmp")
     local toggle = false
@@ -46,9 +107,14 @@ M.toggle_cmp_source = function(source)
     })
 end
 
+---@class (exact) LZ
+---@field index fun(path: string): table<string, table>
+---@field module_call fun(path: string): (fun(_: table, ...: any): any)
+---@field export_call fun(path: string): table<string, (fun(...:any): any)>
+---@field export_call_recursive fun(path: string, level: integer?): table<string, any>
 local LZ = {}
 
-function LZ.index(path)
+LZ.index = function(path)
     return setmetatable({}, {
         __index = function(_, k)
             return require(path)[k]
@@ -59,7 +125,10 @@ function LZ.index(path)
     })
 end
 
-function LZ.module_call(path)
+---@overload fun(path: string): (fun(_: table, ...: any): any)
+LZ.module_call = function(path)
+    ---@overload fun(_: table, ...: any): any
+    ---@diagnostic disable-next-line
     return setmetatable({}, {
         __call = function(_, ...)
             return require(path)(...)
@@ -67,7 +136,18 @@ function LZ.module_call(path)
     })
 end
 
-function LZ.export_call(path, level)
+---@overload fun(path: string): table<string, (fun(...:any): any)>
+LZ.export_call = function(path)
+    return setmetatable({}, {
+        __index = function(_, k)
+            return function(...)
+                return require(path)[k](...)
+            end
+        end,
+    })
+end
+
+LZ.export_call_recursive = function(path, level)
     level = level or 1
     local function export_call_r(lvl, ks)
         return setmetatable({}, {
@@ -91,28 +171,29 @@ function LZ.export_call(path, level)
     return export_call_r(level)
 end
 
-M.LZ = LZ
+---@module "nvim-treesitter.textobjects.repeatable_move"
+M.ts_repeat_move = LZ.export_call_recursive("nvim-treesitter.textobjects.repeatable_move")
 
-M.ts_repeat_move = M.LZ.export_call("nvim-treesitter.textobjects.repeatable_move")
-function M.repeatable_pair(ff, bf)
+--- Makes a pair of functions forward and backward repeatable.
+---@param ff fun(): nil
+---@param bf fun(): nil
+---@return (fun(opts: table, ...): nil), (fun(opts: table, ...): nil)
+M.repeatable_pair = function(ff, bf)
     return M.ts_repeat_move.make_repeatable_move_pair(ff, bf)
 end
 
-function M.repeatable(f)
+--- Makes a function repeatable.
+---@param f fun(): nil
+---@return fun(opts: table, ...): nil
+M.repeatable = function(f)
     local fw, _ = M.repeatable_pair(f, function() end)
     return fw
 end
 
-local TM = {
-    terms = {},
-    ipy_terms = {},
-    term_key = 1,
-    ipy_term_key = 1,
-    trim_spaces = false,
-    ipy_started = false,
-}
-
-local function check_close(t)
+--- Closes terminal if it is open.
+---@param t Terminal terminal to close.
+---@return boolean whether terminal was open.
+local check_close = function(t)
     if t:is_open() then
         t:close()
         return true
@@ -120,11 +201,37 @@ local function check_close(t)
     return false
 end
 
-function TM.get()
+---@class (exact) TM Terminal Manager, manages groups of terminals.
+---@field lazygit Terminal terminal for lazygit.
+---@field terms table<integer, Terminal> regular terminals.
+---@field ipy_terms table<integer, Terminal> ipython terminals.
+---@field term_key integer current regular terminal index.
+---@field ipy_term_key integer current ipython terminal index.
+---@field get fun(): TM
+---@field close_terms fun(): boolean
+---@field next_term fun(): boolean
+---@field prev_term fun(): boolean
+---@field next_ipy_term fun(): boolean
+---@field prev_ipy_term fun(): boolean
+---@field term_toggle fun(): nil
+---@field ipy_term_toggle fun(): nil
+---@field next_term_or_win fun(): nil
+---@field prev_term_or_win fun(): nil
+local TM = {
+    terms = {},
+    ipy_terms = {},
+    term_key = 1,
+    ipy_term_key = 1,
+}
+
+--- Creates terminals if they don't exist yet, otherwise just returns TM.
+---@return TM
+TM.get = function()
+    ---@module "toggleterm.terminal"
     if not vim.tbl_isempty(TM.terms) then
         return TM
     end
-    -- lazygit
+    -- lazygit terminal
     TM.lazygit = require("toggleterm.terminal").Terminal:new({
         display_name = "lazygit",
         cmd = "lazygit",
@@ -135,7 +242,7 @@ function TM.get()
     for i = 1, 4 do
         TM.terms[i] = require("toggleterm.terminal").Terminal:new({ display_name = "term " .. i, count = i + 1 })
     end
-    -- ipython
+    -- ipython terminals
     for i = 1, 4 do
         TM.ipy_terms[i] = require("toggleterm.terminal").Terminal:new({
             display_name = "ipython " .. i,
@@ -143,11 +250,12 @@ function TM.get()
             count = i + 5,
         })
     end
-
     return TM
 end
 
-function TM.close_terms()
+--- Closes all terminals, saving the index of the last one closed.
+---@return boolean whether any terminals were open.
+TM.close_terms = function()
     local tm = TM.get()
     local any_open = false
     if check_close(tm.lazygit) then
@@ -168,7 +276,10 @@ function TM.close_terms()
     return any_open
 end
 
-function TM.next_term()
+--- Closes any currently opened terminals.
+--- Opens and focuses the next terminal if a terminal is currently focused.
+---@return boolean whether any terminal was focused when called.
+TM.next_term = function()
     local tm = TM.get()
     if tm.terms[tm.term_key]:is_focused() then
         tm.terms[tm.term_key]:close()
@@ -180,7 +291,10 @@ function TM.next_term()
     return false
 end
 
-function TM.prev_term()
+--- Closes any currently opened terminals.
+--- Opens and focuses the previous terminal if a terminal is currently focused.
+---@return boolean whether any terminal was focused when called.
+TM.prev_term = function()
     local tm = TM.get()
     if tm.terms[tm.term_key]:is_focused() then
         tm.terms[tm.term_key]:close()
@@ -192,7 +306,9 @@ function TM.prev_term()
     return false
 end
 
-function TM.next_ipy_term()
+--- Same as next_term, except that it applies to ipython terminals
+---@return boolean whether any ipython terminal was focused when called.
+TM.next_ipy_term = function()
     local tm = TM.get()
     if tm.ipy_terms[tm.ipy_term_key]:is_focused() then
         tm.ipy_terms[tm.ipy_term_key]:close()
@@ -204,7 +320,9 @@ function TM.next_ipy_term()
     return false
 end
 
-function TM.prev_ipy_term()
+--- Same as prev_term, except that it applies to ipython terminals
+---@return boolean whether any ipython terminal was focused when called.
+TM.prev_ipy_term = function()
     local tm = TM.get()
     if tm.ipy_terms[tm.ipy_term_key]:is_focused() then
         tm.ipy_terms[tm.ipy_term_key]:close()
@@ -216,21 +334,25 @@ function TM.prev_ipy_term()
     return false
 end
 
-function TM.term_toggle()
+--- Toggles the most recently opened terminal.
+TM.term_toggle = function()
     local tm = TM.get()
     if not tm.close_terms() then
         tm.terms[tm.term_key]:open()
     end
 end
 
-function TM.ipy_term_toggle()
+--- Toggles the most recently opened ipython terminal.
+TM.ipy_term_toggle = function()
     local tm = TM.get()
     if not tm.close_terms() then
         tm.ipy_terms[tm.ipy_term_key]:open()
     end
 end
 
-function TM.next_term_or_win()
+--- If a regular or ipython terminal is currently opened, closes it and opens the next one.
+--- Otherwise, calls "wincmd l"
+TM.next_term_or_win = function()
     local tm = TM.get()
     if tm.next_term() or tm.next_ipy_term() then
         return
@@ -239,7 +361,9 @@ function TM.next_term_or_win()
     end
 end
 
-function TM.prev_term_or_win()
+--- If a regular or ipython terminal is currently opened, closes it and opens the previous one.
+--- Otherwise, calls "wincmd h"
+TM.prev_term_or_win = function()
     local tm = TM.get()
     if tm.prev_term() or tm.prev_ipy_term() then
         return
@@ -248,38 +372,19 @@ function TM.prev_term_or_win()
     end
 end
 
-function TM.ipy_start()
-    local tm = TM.get()
-    if not tm.ipy_started then
-        tm.ipy_terms[tm.ipy_term_key]:open()
-        tm.ipy_terms[tm.ipy_term_key]:close()
-        tm.ipy_started = true
-    end
-end
-
-function TM.send_line()
-    local tm = TM.get()
-    tm.ipy_start()
-    require("toggleterm").send_lines_to_terminal("single_line", tm.trim_spaces, { args = tm.ipy_term_key + 5 })
-    tm.ipy_terms[tm.ipy_term_key]:open()
-end
-
-function TM.send_lines()
-    local tm = TM.get()
-    tm.ipy_start()
-    require("toggleterm").send_lines_to_terminal("visual_lines", tm.trim_spaces, { args = tm.ipy_term_key + 5 })
-    tm.ipy_terms[tm.ipy_term_key]:open()
-end
-
-function TM.send_selection()
-    local tm = TM.get()
-    tm.ipy_start()
-    require("toggleterm").send_lines_to_terminal("visual_selection", tm.trim_spaces, { args = tm.ipy_term_key + 5 })
-    tm.ipy_terms[tm.ipy_term_key]:open()
-end
-
-M.TM = TM
-
+---@class (exact) DM Dapui Manager, manages layouts and controls.
+---Allows for dynamically switching between layouts.
+---@field ids string[] element ids to cycle between.
+---@field curr_id integer index of current element id.
+---@field config_active boolean whether layout cycling is active.
+---@field config table<string, table> config that supports layout cycling.
+---@field default_config table<string, table> default config.
+---@field repl_config table<string, table> like default config, but with repl in place of console.
+---@field reload fun(config: table<string, table>): nil
+---@field next_layout fun(): nil
+---@field prev_layout fun(): nil
+---@field default_layout fun(): nil
+---@field repl_layout fun(): nil
 local DM = {
     ids = { "scopes", "breakpoints", "watches", "stacks" },
     curr_id = 1,
@@ -390,70 +495,77 @@ local DM = {
     },
 }
 
-function DM.next_layout()
-    local dapui = require("dapui")
-    dapui.close()
+--- Reloads dapui with updated config.
+---@param config table<string, table> config to reload dapui with.
+DM.reload = function(config)
+    local plugin = require("lazy.core.config").plugins["nvim-dap-ui"]
+    plugin.opts = config
+    require("lazy.core.loader").reload(plugin)
+end
+
+--- If layout cycling is active, switches to the next layout.
+--- Otherwise, switches to layout cycling config.
+DM.next_layout = function()
+    require("dapui").close()
     if DM.config_active then
         DM.curr_id = (DM.curr_id % 4) + 1
     else
         DM.config_active = true
     end
-    DM.config.layouts[1].elements[2].id = DM.ids[DM.dap_curr_id]
-    dapui.setup(DM.config)
-    dapui.open()
+    DM.config.layouts[1].elements[2].id = DM.ids[DM.curr_id]
+    DM.reload(DM.config)
+    require("dapui").open()
 end
 
-function DM.prev_layout()
-    local dapui = require("dapui")
-    dapui.close()
+--- If layout cycling is active, switches to the previous layout.
+--- Otherwise, switches to layout cycling config.
+DM.prev_layout = function()
+    require("dapui").close()
     if DM.config_active then
-        DM.curr_id = DM.curr_id - 1
-        if DM.curr_id == 0 then
-            DM.curr_id = 4
-        end
+        DM.curr_id = DM.curr_id == 1 and 4 or DM.curr_id - 1
     else
         DM.config_active = true
     end
     DM.config.layouts[1].elements[2].id = DM.ids[DM.curr_id]
-    dapui.setup(DM.config)
-    dapui.open()
+    DM.reload(DM.config)
+    require("dapui").open()
 end
 
-function DM.default_layout()
-    local dapui = require("dapui")
-    dapui.close()
+--- Switches to default config.
+DM.default_layout = function()
+    require("dapui").close()
     DM.config_active = false
-    dapui.setup(DM.default_config)
-    dapui.open()
+    DM.reload(DM.default_config)
+    require("dapui").open()
 end
 
-function DM.repl_layout()
-    local dapui = require("dapui")
-    dapui.close()
+--- Switches to repl config.
+DM.repl_layout = function()
+    require("dapui").close()
     DM.config_active = false
-    dapui.setup(DM.repl_config)
-    dapui.open()
+    DM.reload(DM.repl_config)
+    require("dapui").open()
 end
 
-M.DM = DM
-
-function M.dap_disassemble()
+--- Custom DAP command to get disassembly.
+--- Really should create a custom element and add to dapui.
+M.dap_disassemble = function()
     require("dap").repl.execute("disassemble")
 end
 
-local function handle_stdout(err, data)
+local handle_stdout = function(err, data)
     if err ~= nil then
         vim.notify(err .. ": " .. data, vim.log.levels.INFO)
     end
 end
 
-local function handle_stderr(err, data)
+local handle_stderr = function(err, data)
     if err ~= nil then
         vim.notify(err .. ": " .. data, vim.log.levels.ERROR)
     end
 end
 
-local function on_exit(c)
+local on_exit = function(c)
     local s = "code: " .. c.code .. ", signal: " .. c.signal
     if c.stdout then
         s = s .. ", stdout: " .. c.stdout
@@ -464,19 +576,31 @@ local function on_exit(c)
     print(vim.inspect(s))
 end
 
-function M.build_command()
+M.build_command = function()
     vim.system({ vim.fn.getcwd() .. "/make.bat" }, { stdout = handle_stdout, stderr = handle_stderr }, on_exit)
 end
 
-function M.clean_command()
+M.clean_command = function()
     vim.system({ vim.fn.getcwd() .. "/make.bat", "clean" }, { stdout = handle_stdout, stderr = handle_stderr }, on_exit)
 end
 
+---@class (exact) Toggle turns set/clear functions into single toggle function.
+---@field rf fun(...: any): nil function called on rising edge.
+---@field ff fun(...: any): nil function called on falling edge.
+---@field value boolean Toggle value.
+---@field linked Toggle other Toggle instance to set/clear when toggling.
+---@field new fun(rf: (fun(...: any): nil)?, ff: (fun(...: any): nil)?, initial: boolean?, linked: Toggle?): Toggle
 local Toggle = {}
 
-function Toggle.new(tf, ff, initial, linked)
+--- Creates a new Toggle instance.
+---@param rf (fun(...: any): nil)? function to call on rising edge.
+---@param ff (fun(...: any): nil)? function to call on falling edge.
+---@param initial boolean? initial value.
+---@param linked Toggle? value of linked will be set/cleared when toggling.
+---@return Toggle
+Toggle.new = function(rf, ff, initial, linked)
     return setmetatable({
-        tf = tf or M.noop,
+        rf = rf or M.noop,
         ff = ff or M.noop,
         value = initial or false,
         linked = linked or {},
@@ -486,38 +610,39 @@ function Toggle.new(tf, ff, initial, linked)
     })
 end
 
-function Toggle:call(...)
-    if not self.value then
-        self.tf(...)
-    else
-        self.ff(...)
-    end
-    self.value = not self.value
-    if self.linked then
-        self.linked.value = self.value
-    end
-end
-
+--- Sets value, calling rf() if it was previously false.
+---@vararg any passed through to rf.
 function Toggle:set(...)
-    if not self.value then
-        self.tf(...)
-        self.value = true
-    end
+    _ = not self.value and self:rf(...)
+    self.value = true
     if self.linked then
         self.linked.value = self.value
     end
 end
 
+--- Clears value, calling ff() if it was previously true.
+---@vararg any passed through to ff.
 function Toggle:clear(...)
-    if self.value then
-        self.ff(...)
-        self.value = false
-    end
+    _ = self.value and self:ff(...)
+    self.value = false
     if self.linked then
         self.linked.value = self.value
     end
 end
 
+--- Toggles value, calling rf() if it was previously false, and ff() if it was previously true.
+---@vararg any passed through to either rf or ff.
+function Toggle:call(...)
+    self.value = not self.value
+    _ = self.value and self:rf(...) or self:ff(...)
+    if self.linked then
+        self.linked.value = self.value
+    end
+end
+
+M.LZ = LZ
+M.TM = TM
+M.DM = DM
 M.Toggle = Toggle
 
 return M

@@ -11,6 +11,7 @@ local options = {
     ignorecase = true,
     laststatus = 0,
     mouse = "a",
+    mousemodel = "extend",
     pumheight = 10,
     showmode = false,
     showtabline = 2,
@@ -43,9 +44,9 @@ for k, v in pairs(options) do
     vim.opt[k] = v
 end
 
-vim.opt.shortmess:append("c")
-vim.cmd("set whichwrap+=<,>,[,],h,l")
-vim.cmd("set iskeyword+=-")
+vim.opt.shortmess:append("acI")
+vim.opt.whichwrap:append("<,>,[,]")
+vim.opt.iskeyword:append("-")
 
 -- clipboard
 vim.opt.clipboard:append("unnamedplus")
@@ -60,7 +61,7 @@ vim.g.loaded_netrwPlugin = 1
 
 -- python3_provider
 vim.g.python3_host_prog = vim.fn.stdpath("config")
-    .. (OsCurrent == Os.WINDOWS and "\\.venv\\Scripts\\python.exe" or "/.venv/bin/python")
+    .. (OsCurrent == OS.WINDOWS and "\\.venv\\Scripts\\python.exe" or "/.venv/bin/python")
 -- vim.g.loaded_python3_provider=0
 
 -- neovide

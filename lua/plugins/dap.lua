@@ -1,23 +1,36 @@
+--- Finds the right python interpreter for the DAP configuration.
+--- @return string
 local function get_python()
     local venv = vim.fn.getenv("VIRTUAL_ENV")
     if venv ~= vim.NIL then
-        if OsCurrent == Os.WINDOWS and vim.fn.executable(venv .. "/Scripts/python") then
-            return venv .. "/Scripts/python"
-        elseif OsCurrent == Os.LINUX and vim.fn.executable(venv .. "/bin/python") then
-            return venv .. "/bin/python"
+        local p = venv .. (OsCurrent == OS.WINDOWS and "/Scripts/python" or "/bin/python")
+        if vim.fn.executable(p) then
+            return p
+        elseif vim.fn.executable("python3") then
+            return "python3"
         else
             return "python"
         end
+    elseif vim.fn.executable("python3") then
+        return "python3"
     else
         return "python"
     end
 end
 
-local function get_env_vars()
-    return {
-        PYTHONPATH = "C:/Program Files/Python310/Lib",
-        LLDB_USE_NATIVE_PDB_READER = "yes",
-    }
+--- Gets the environment variables for the DAP configuration.
+--- For LLDB configurations adds PYTHONPATH and LLDB_USE_NATIVE_PDB_READER
+--- @return table<string, string>
+local get_env_vars = function(opts)
+    local vars = {}
+    for k, v in pairs(vim.fn.environ()) do
+        table.insert(vars, string.format("%s=%s", k, v))
+    end
+    if opts["lldb"] then
+        vars.PYTHONPATH = "C:/Program Files/Python310/Lib"
+        vars.LLDB_USE_NATIVE_PDB_READER = "yes"
+    end
+    return vars
 end
 
 local dap_adapters = {
@@ -29,7 +42,7 @@ local dap_adapters = {
         type = "executable",
         command = vim.fn.stdpath("data") .. "/mason/packages/cpptools/extension/debugAdapters/bin/OpenDebugAD7",
         options = {
-            detached = OsCurrent == Os.WINDOWS,
+            detached = OsCurrent == OS.WINDOWS,
         },
     },
     lldb = {
@@ -39,7 +52,20 @@ local dap_adapters = {
     },
 }
 
-local dap_configurations = {
+--- Wrapper for vim.fn.input with common presets.
+---@param opts table<string, string>? passed through to vim.fn.input.
+---@return fun(): string
+local get_program = function(opts)
+    return function()
+        return vim.fn.input(vim.tbl_extend("force", {
+            prompt = "Path to executable: ",
+            default = vim.fn.getcwd() .. "/",
+            completion = "file",
+        }, opts))
+    end
+end
+
+local default_confs = {
     lua = {
         {
             name = "Attach to running Neovim instance",
@@ -48,89 +74,66 @@ local dap_configurations = {
         },
     },
     c = {
-        {
+        type = "lldb",
+        request = "launch",
+        env = get_env_vars({ lldb = true }),
+        cwd = "${workspaceFolder}",
+        stopOnEntry = false,
+        runInTerminal = true,
+    },
+    odin = {
+        type = "lldb",
+        request = "launch",
+        env = get_env_vars({ lldb = true }),
+        cwd = "${workspaceFolder}",
+        stopOnEntry = false,
+        runInTerminal = true,
+        preRunCommands = { "add-dsym ${workspaceFolderBasename}.pdb" },
+        breakpointMode = "file",
+    },
+    python = {
+        type = "python",
+        request = "launch",
+        args = { "-m", "debugpy.adapter" },
+        justMyCode = false,
+        pythonPath = get_python,
+        stopAtEntry = true,
+        console = "integratedTerminal",
+    },
+}
+
+local dap_configurations = {
+    lua = default_confs.lua,
+    c = {
+        vim.tbl_extend("force", default_confs.c, {
             name = "[LLDB] Launch ./build/" .. vim.uv.cwd():match(".*[/\\](.*)"),
-            type = "lldb",
-            request = "launch",
             program = "${workspaceFolder}/build/${workspaceFolderBasename}",
-            env = get_env_vars(),
-            cwd = "${workspaceFolder}",
-            stopOnEntry = false,
-            runInTerminal = true,
-        },
-        {
+        }),
+        vim.tbl_extend("force", default_confs.c, {
             name = "[LLDB] Launch ./build/Debug/" .. vim.uv.cwd():match(".*[/\\](.*)"),
-            type = "lldb",
-            request = "launch",
             program = "${workspaceFolder}/build/Debug/${workspaceFolderBasename}",
-            env = get_env_vars(),
-            cwd = "${workspaceFolder}",
-            stopOnEntry = false,
-            runInTerminal = true,
-        },
-        {
+        }),
+        vim.tbl_extend("force", default_confs.c, {
             name = "[LLDB] Custom",
-            type = "lldb",
-            request = "launch",
-            program = function()
-                return vim.fn.input({
-                    prompt = "Path to executable: ",
-                    default = vim.fn.getcwd() .. "/",
-                    completion = "file",
-                })
-            end,
-            env = get_env_vars(),
-            cwd = "${workspaceFolder}",
-            stopOnEntry = false,
-            runInTerminal = true,
-        },
-        {
+            program = get_program(),
+        }),
+        vim.tbl_extend("force", default_confs.c, {
             name = "[GDB] Attach to gdbserver :1234",
             type = "cppdbg",
-            request = "launch",
             MIMode = "gdb",
             miDebuggerServerAddress = "localhost:1234",
             miDebuggerPath = "/usr/bin/gdb",
-            cwd = "${workspaceFolder}",
-            program = function()
-                return vim.fn.input({
-                    prompt = "Path to executable: ",
-                    default = vim.fn.getcwd() .. "/",
-                    completion = "file",
-                })
-            end,
-        },
+            program = get_program(),
+        }),
     },
     odin = {
-        {
+        vim.tbl_extend("force", default_confs.odin, {
             name = "Launch ./" .. vim.uv.cwd():match(".*[/\\](.*)"),
-            type = "lldb",
-            request = "launch",
             program = "${workspaceFolderBasename}",
-            args = {},
-            env = get_env_vars(),
-            cwd = "${workspaceFolder}",
-            stopOnEntry = false,
-            runInTerminal = true,
-            preRunCommands = { "add-dsym ${workspaceFolderBasename}.pdb" },
-            breakpointMode = "file",
-        },
-        setmetatable({
-            name = "Custom",
-            type = "lldb",
-            request = "launch",
-            args = {},
-            env = get_env_vars(),
-            cwd = "${workspaceFolder}",
-            stopOnEntry = false,
-            runInTerminal = true,
-        }, {
+        }),
+        setmetatable(vim.tbl_extend("force", default_confs.odin, { name = "Custom" }), {
             __call = function()
-                local path = vim.fn.input({
-                    prompt = "Path to executable: ",
-                    default = vim.fn.getcwd() .. "/",
-                    completion = "file",
-                })
+                local path = get_program()()
                 return {
                     program = path,
                 }
@@ -138,63 +141,21 @@ local dap_configurations = {
         }),
     },
     python = {
-        {
-            name = "Current File",
-            type = "python",
-            request = "launch",
-            program = "${file}",
-            args = { "-m", "debugpy.adapter" },
-            justMyCode = false,
-            pythonPath = get_python,
-            stopAtEntry = true,
-            console = "integratedTerminal",
-        },
-        {
+        vim.tbl_extend("force", default_confs.python, { name = "Current File", program = "${file}" }),
+        vim.tbl_extend("force", default_confs.python, {
             name = "Current Module",
-            type = "python",
-            request = "launch",
             program = "${fileDirname}",
             args = { "-m", "debugpy.adapter", "-m" },
-            justMyCode = false,
-            pythonPath = get_python,
-            stopAtEntry = true,
-            console = "integratedTerminal",
-        },
-        {
-            name = "Denali",
-            type = "python",
-            request = "launch",
-            program = vim.fn.getcwd() .. "/Denali_SVCP/main.py",
-            args = { "-m", "debugpy.adapter" },
-            justMyCode = false,
-            pythonPath = get_python,
-            stopAtEntry = true,
-            console = "integratedTerminal",
-        },
-        {
-            name = "RTCU",
-            type = "python",
-            request = "launch",
-            program = vim.fn.getcwd() .. "/svcp/__init__.py",
-            args = { "-m", "debugpy.adapter" },
-            justMyCode = false,
-            pythonPath = get_python,
-            stopAtEntry = true,
-            console = "integratedTerminal",
-        },
-        {
+        }),
+        vim.tbl_extend(
+            "force",
+            default_confs.python,
+            { name = "Current Package", program = "${workspaceFolderBasename}/${workspaceFolderBasename}/__init__.py" }
+        ),
+        vim.tbl_extend("force", default_confs.python, {
             name = "Custom",
-            type = "python",
-            request = "launch",
-            program = function()
-                return vim.fn.input("Path to executable: ", vim.fn.getcwd() .. "/", "file")
-            end,
-            args = { "-m", "debugpy.adapter" },
-            justMyCode = false,
-            pythonPath = get_python,
-            stopAtEntry = true,
-            console = "integratedTerminal",
-        },
+            program = get_program({ prompt = "Path to script: " }),
+        }),
     },
 }
 
@@ -232,7 +193,7 @@ return {
         require("dap-python").setup(
             vim.fn.stdpath("data")
                 .. "/mason/packages/debugpy/venv/"
-                .. (OsCurrent == Os.WINDOWS and "Scripts/python" or "bin/python"),
+                .. (OsCurrent == OS.WINDOWS and "Scripts/python" or "bin/python"),
             {
                 console = "integratedTerminal",
             }
@@ -246,10 +207,7 @@ return {
             "DapBreakpoint",
             { text = "", texthl = "DiagnosticSignError", linehl = "", numhl = "DiagnosticSignError" }
         )
-        vim.fn.sign_define(
-            "DapStopped",
-            { text = "", texthl = "String", linehl = "CursorLine", numhl = "CursorLine" }
-        )
+        vim.fn.sign_define("DapStopped", { text = "", texthl = "String", linehl = "CursorLine", numhl = "String" })
 
         local repl = require("dap.repl")
         repl.commands = vim.tbl_extend("force", repl.commands, {

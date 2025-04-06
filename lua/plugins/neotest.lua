@@ -1,13 +1,18 @@
+--- Finds the right python interpreter for the DAP configuration.
+--- @return string
 local function get_python()
     local venv = vim.fn.getenv("VIRTUAL_ENV")
     if venv ~= vim.NIL then
-        if OsCurrent == Os.WINDOWS and vim.fn.executable(venv .. "/Scripts/python") then
-            return venv .. "/Scripts/python"
-        elseif OsCurrent == Os.LINUX and vim.fn.executable(venv .. "/bin/python") then
-            return venv .. "/bin/python"
+        local p = venv .. (OsCurrent == OS.WINDOWS and "/Scripts/python" or "/bin/python")
+        if vim.fn.executable(p) then
+            return p
+        elseif vim.fn.executable("python3") then
+            return "python3"
         else
             return "python"
         end
+    elseif vim.fn.executable("python3") then
+        return "python3"
     else
         return "python"
     end
@@ -20,9 +25,10 @@ return {
         "nvim-lua/plenary.nvim",
         "antoinemadec/FixCursorHold.nvim",
         "nvim-treesitter/nvim-treesitter",
-        { "nvim-neotest/neotest-python", lazy = false },
+        "nvim-neotest/neotest-python",
+        "rouge8/neotest-rust",
     },
-    ft = "py",
+    ft = { "python", "rust" },
     config = function()
         require("neotest").setup({
             adapters = {
@@ -35,6 +41,7 @@ return {
                     runner = "pytest",
                     python = get_python,
                 }),
+                require("neotest-rust")({ args = { "--no-capture" }, dap_adapter = "lldb" }),
             },
         })
     end,

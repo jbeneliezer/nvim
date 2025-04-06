@@ -3,6 +3,7 @@ return {
     event = "VimEnter",
     dependencies = {
         "nvim-lua/plenary.nvim",
+        "nvim-telescope/telescope-ui-select.nvim",
         "gbrlsnchs/telescope-lsp-handlers.nvim",
         "debugloop/telescope-undo.nvim",
         "natecraddock/telescope-zf-native.nvim",
@@ -10,10 +11,12 @@ return {
     },
     config = function()
         local actions = require("telescope.actions")
-        local open_with_trouble = require("trouble.sources.telescope").open
+        local open_with_trouble = function()
+            require("trouble.sources.telescope").open()
+        end
         require("telescope").setup({
             defaults = {
-                file_ignore_patterns = { ".svn$", ".git$", "site-packages", "__pycache__", ".d$", ".o$", "venv" },
+                file_ignore_patterns = { "nvim/.undo", ".svn$", ".git$", "__pycache__", ".pyc$", ".d$", ".o$" },
                 prompt_prefix = " ",
                 selection_caret = " ",
                 path_display = { "truncate" },
@@ -72,6 +75,7 @@ return {
                 },
             },
             extensions = {
+                "ui-select",
                 "lsp_handlers",
                 "dap",
                 undo = {
@@ -106,5 +110,6 @@ return {
                 },
             },
         })
+        require("telescope").load_extension("ui-select")
     end,
 }

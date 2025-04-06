@@ -4,19 +4,19 @@ return {
     config = function()
         local null_ls = require("null-ls")
         local clang_format_args = {
-            "--fallback-style=file:"
-            .. vim.fn.stdpath("config")
-            .. (OsCurrent == Os.WINDOWS and "\\.clang-format" or "/.clang-format"),
+            "--style=file:"
+                .. vim.fn.stdpath("config")
+                .. (OsCurrent == OS.WINDOWS and "\\.clang-format" or "/.clang-format"),
         }
         null_ls.setup({
             debug = false,
             sources = {
                 -- formatters
                 null_ls.builtins.formatting.stylua,
-                null_ls.builtins.formatting.isort.with({ extra_args = { "--line-length", "120", "--multi-line", "3" } }),
-                null_ls.builtins.formatting.black.with({
-                    extra_args = { "--line-length", "120" },
-                }),
+                -- null_ls.builtins.formatting.isort.with({ extra_args = { "--line-length", "120", "--multi-line", "3" } }),
+                -- null_ls.builtins.formatting.black.with({
+                --     extra_args = { "--line-length", "120" },
+                -- }),
                 null_ls.builtins.formatting.clang_format.with({
                     -- extra_args = { "--style={BasedOnStyle: llvm, IndentWidth: 4, AccessModifierOffset: -4}" },
                     extra_args = clang_format_args,

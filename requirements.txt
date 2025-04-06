@@ -1,0 +1,11 @@
+pynvim
+ipython
+ipykernel
+jupyter-client
+cairosvg
+pnglatex
+plotly
+kaleido
+pyperclip
+nbformat
+pillow

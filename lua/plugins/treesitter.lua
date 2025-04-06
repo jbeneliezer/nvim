@@ -79,5 +79,6 @@ return {
         require("treesitter-context").setup({ max_lines = 5, multiline_threshold = 5 })
         vim.treesitter.language.register("glsl", "vert")
         vim.treesitter.language.register("glsl", "frag")
+        vim.treesitter.language.register("verilog", "v")
     end,
 }

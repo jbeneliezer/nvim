@@ -6,7 +6,7 @@ return {
         direction = "tab",
         autochdir = true,
         shell = function()
-            return OsCurrent == Os.WINDOWS and "powershell -nologo" or vim.o.shell
+            return OsCurrent == OS.WINDOWS and "powershell -nologo" or vim.o.shell
         end,
         winbar = {
             enabled = true,

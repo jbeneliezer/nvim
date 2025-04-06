@@ -1,16 +1,20 @@
 return {
     {
         "ellisonleao/gruvbox.nvim",
+        enabled = false,
     },
     {
         "folke/tokyonight.nvim",
+        enabled = false,
     },
     {
         "Everblush/nvim",
         name = "everblush",
+        enabled = false,
     },
     {
         "EdenEast/nightfox.nvim",
+        enabled = false,
     },
     {
         "arturgoms/moonbow.nvim",
@@ -22,17 +26,18 @@ return {
     },
     {
         "rose-pine/neovim",
+        enabled = false,
     },
     {
         "AlexvZyl/nordic.nvim",
-    },
-    {
-        "Shatur/neovim-ayu",
+        enabled = false,
     },
     {
         "neanias/everforest-nvim",
+        enabled = false,
     },
     {
-        "Mofiqul/vscode.nvim"
+        "Mofiqul/vscode.nvim",
+        enabled = false,
     },
 }

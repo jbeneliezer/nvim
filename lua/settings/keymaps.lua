@@ -1,53 +1,38 @@
+---@module "util"
+-- -@source ./util.lua
 local util = require("settings.util")
+
+local default_opts = util.default_opts
+local keymap = util.set_keymap
+local del_keymap = util.del_keymap
 local partial = util.partial
 local ts_repeat_move = util.ts_repeat_move
 local repeatable_pair = util.repeatable_pair
 local repeatable = util.repeatable
+
+---@type LZ
 local LZ = util.LZ
 
-local default_opts = { noremap = true, silent = true }
-
----Wrapper for vim.keymap.set()
----@param mode string|table
----@param lhs string|table
----@param rhs string|function
----@param opts? table
----@param desc? string
-local keymap = function(mode, lhs, rhs, opts, desc)
-    local local_opts = opts or default_opts
-    local_opts.desc = desc or ""
-    if type(lhs) == "table" then
-        for _, v in pairs(lhs) do
-            vim.keymap.set(mode, v, rhs, local_opts)
-        end
-    else
-        vim.keymap.set(mode, lhs, rhs, local_opts)
-    end
-end
-
----Wrapper for vim.keymap.del()
----@param mode string|table
----@param lhs string|table
----@param buffer? integer|boolean
-local del_keymap = function(mode, lhs, buffer)
-    if type(lhs) == "table" then
-        for _, v in pairs(lhs) do
-            vim.keymap.del(mode, v, { buffer })
-        end
-    else
-        vim.keymap.del(mode, lhs, { buffer })
-    end
-end
-
-local lsp_format = function(bufnr)
-    vim.lsp.buf.format({
-        async = true,
-        bufnr = bufnr,
-        filter = function(client)
-            return client.name ~= "clangd"
-        end,
-    })
-end
+---@module "telescope.builtin"
+local telescope_builtin = LZ.export_call("telescope.builtin")
+---@module "dap"
+local dap = LZ.export_call("dap")
+---@module "dap.repl"
+local dap_repl = LZ.export_call("dap.repl")
+---@module "dapui"
+local dapui = LZ.export_call("dapui")
+---@module "goto-breakpoints"
+local goto_breakpoints = LZ.export_call("goto-breakpoints")
+---@module "neogen"
+local neogen = LZ.export_call("neogen")
+---@module "trouble"
+local trouble = LZ.export_call("trouble")
+---@module "auto-session.session-lens"
+local session_lens = LZ.export_call("auto-session.session-lens")
+---@module "gitsigns"
+local gs = LZ.export_call("gitsigns")
+---@module "toggleterm"
+local toggleterm = LZ.export_call("toggleterm")
 
 local M = {}
 
@@ -76,21 +61,18 @@ M.set_basic_keymaps = function()
     keymap("n", "<leader>z", "<cmd>tabclose<cr>", default_opts, "Close Tab")
     keymap("n", "<leader>w", "<cmd>w<cr>", default_opts, "Save")
 
-    -- Resize with arrows
     keymap("n", "<c-Up>", "<cmd>resize -2<cr>")
     keymap("n", "<c-Down>", "<cmd>resize +2<cr>")
     keymap("n", "<c-Left>", "<cmd>vertical resize -2<cr>")
     keymap("n", "<c-Right>", "<cmd>vertical resize +2<cr>")
-
     keymap("n", "<c-ScrollWheelUp>", "<cmd>vertical resize -1<cr>")
     keymap("n", "<c-ScrollWheelDown>", "<cmd>vertical resize +1<cr>")
 
-    -- Stay in visual mode
     keymap("v", "<", "<gv")
     keymap("v", ">", ">gv")
     keymap("v", "=", "=gv")
 
-    -- Windows
+    -- Window Navigation
     -- keymap("n", "<c-h>", "<c-w>h")
     keymap("n", "<c-j>", "<c-w>j")
     keymap("n", "<c-k>", "<c-w>k")
@@ -110,7 +92,9 @@ M.set_basic_keymaps = function()
     end
 
     -- File Explorer
-    keymap("n", "<leader>e", "<cmd>NvimTreeToggle<cr>")
+    keymap("n", "<leader>e", function()
+        require("nvim-tree.api").tree.toggle()
+    end)
     -- keymap("n", "<leader>e", "<cmd>Lex 25<cr>", default_opts, "Explorer")
 
     -- Comment
@@ -130,36 +114,35 @@ M.set_basic_keymaps = function()
     keymap("n", "C", util.clean_command, default_opts, "Clean Command")
 
     -- Toggleterm
+    ---@type TM
     local TM = util.TM
-    keymap({ "n", "v", "t" }, "<c-g>", function()
+    keymap({ "n", "t" }, "<c-g>", function()
         TM.get().lazygit:toggle()
     end)
-    keymap({ "n", "v", "t" }, "<c-l>", TM.next_term_or_win)
-    keymap({ "n", "v", "t" }, "<c-h>", TM.prev_term_or_win)
-    keymap({ "n", "v", "t" }, "<c-p>", TM.term_toggle)
-    keymap({ "n", "v", "t" }, "<leader><c-p>", TM.ipy_term_toggle)
-    keymap({ "n", "v", "t" }, "<c-_>", LZ.export_call("toggleterm").toggle_all)
+    keymap({ "n", "t" }, "<c-l>", TM.next_term_or_win)
+    keymap({ "n", "t" }, "<c-h>", TM.prev_term_or_win)
+    keymap({ "n", "t" }, "<c-p>", TM.term_toggle)
+    keymap({ "n", "t" }, "<leader><c-p>", TM.ipy_term_toggle)
+    keymap({ "n", "t" }, "<c-_>", toggleterm.toggle_all)
 
     -- LF
     -- keymap({ "n", "v" }, "<c-e>", require("lf").start)
 
     -- Dap
-    local dap = LZ.export_call("dap")
-    local telescope_dap = LZ.export_call("telescope", 3).extensions.dap
-    local dap_repl = LZ.export_call("dap.repl")
-    local dapui = LZ.export_call("dapui")
-    local dapui_watches = LZ.export_call("dapui", 3).elements.watches
-    local goto_breakpoints = LZ.export_call("goto-breakpoints")
     local next_bp, prev_bp = repeatable_pair(goto_breakpoints.next, goto_breakpoints.prev)
 
     keymap("n", "<leader>da", function()
-        dapui_watches.add(vim.fn.input("Expression: "))
+        require("dapui").elements.watches.add(vim.fn.input("Expression: "))
     end, default_opts, "Add Watch")
-    keymap("n", "<leader>db", telescope_dap.list_breakpoints, default_opts, "Breakpoints")
+    keymap("n", "<leader>db", function()
+        require("telescope").extensions.dap.list_breakpoints()
+    end, default_opts, "Breakpoints")
     keymap("n", "<leader>du", dapui.toggle, default_opts, "UI")
     keymap("n", "<leader>dt", dap.toggle_breakpoint, default_opts, "Breakpoint")
     keymap("n", "<leader>dc", repeatable(dap.continue), default_opts, "Continue")
-    keymap("n", "<leader>dC", telescope_dap.commands, default_opts, "Commands")
+    keymap("n", "<leader>dC", function()
+        require("telescope").extensions.dap.commands()
+    end, default_opts, "Commands")
     keymap("n", "<leader>dr", dap.run_last, default_opts, "Run Last")
     keymap("n", "<leader>dR", dap_repl.toggle, default_opts, "Repl")
     keymap("n", "<leader>bc", dap.clear_breakpoints, default_opts, "Clear Breakpoints")
@@ -176,9 +159,8 @@ M.set_basic_keymaps = function()
     keymap("n", "<leader>dD", DM.repl_layout, default_opts, "Repl Layout")
 
     -- Telescope
-    local telescope_builtin = LZ.export_call("telescope.builtin")
     keymap("n", "<leader>fa", require("telescope").extensions.ast_grep.ast_grep, default_opts, "Ast Grep")
-    keymap("n", "<leader>fA", telescope_builtin.autocommands, default_opts, "Autocommands")
+    keymap("n", "<leader>fA", telescope_builtin.autocommand, default_opts, "Autocommands")
     keymap("n", "<leader>fc", telescope_builtin.commands, default_opts, "Commands")
     keymap("n", "<leader>ff", telescope_builtin.find_files, default_opts, "Files")
     keymap("n", "<leader>fr", telescope_builtin.oldfiles, default_opts, "Recent Files")
@@ -188,10 +170,9 @@ M.set_basic_keymaps = function()
     keymap("n", "<leader>fh", telescope_builtin.help_tags, default_opts, "Help Tags")
     keymap("n", "<leader>fH", telescope_builtin.highlights, default_opts, "Highlights")
     keymap("n", "<leader>fk", telescope_builtin.keymaps, default_opts, "Keymaps")
-    -- keymap("n", "<leader>fp", require("telescope").extensions.projects.projects, default_opts, "Projects")
-    keymap("n", "<leader>fu", LZ.export_call("telescope", 3).extensions.undo.undo, default_opts, "Undo")
+    keymap("n", "<leader>fu", require("telescope").extensions.undo.undo, default_opts, "Undo")
     keymap("n", "<leader>fs", telescope_builtin.grep_string, default_opts, "Grep String")
-    keymap("n", "<leader>fS", LZ.export_call("auto-session.session-lens").search_session, default_opts, "Sessions")
+    keymap("n", "<leader>fS", session_lens.search_session, default_opts, "Sessions")
     keymap("n", "<leader>fj", telescope_builtin.jumplist, default_opts, "Jump List")
     keymap("n", "<leader>f/", telescope_builtin.current_buffer_fuzzy_find, default_opts, "Buffer Grep")
     keymap("n", "<leader>f.", telescope_builtin.resume, default_opts, "Resume")
@@ -200,14 +181,12 @@ M.set_basic_keymaps = function()
     keymap("n", "<leader>ft", "<cmd>TodoTelescope<cr>", default_opts, "Todo")
 
     -- Neogen
-    local neogen = LZ.export_call("neogen")
     keymap("n", "<leader>mf", partial(neogen.generate, { type = "func" }), default_opts, "Document Function")
     keymap("n", "<leader>mc", partial(neogen.generate, { type = "class" }), default_opts, "Document Class")
     keymap("n", "<leader>mt", partial(neogen.generate, { type = "type" }), default_opts, "Document Type")
     keymap("n", "<leader>mF", partial(neogen.generate, { type = "File" }), default_opts, "Document File")
 
     -- Trouble
-    local trouble = LZ.export_call("trouble")
     keymap("n", "<leader>tl", partial(trouble.toggle, { mode = "diagnostics" }), default_opts, "Diagnostics")
     keymap(
         "n",
@@ -230,11 +209,14 @@ M.set_basic_keymaps = function()
 end
 
 M.set_lsp_keymaps = function(_, bufnr)
-    local next_diag, prev_diag = repeatable_pair(vim.diagnostic.goto_next, vim.diagnostic.goto_prev)
+    local next_diag, prev_diag = repeatable_pair(
+        partial(vim.diagnostic.jump, { count = 1, float = true }),
+        partial(vim.diagnostic.jump, { count = -1, float = true })
+    )
     local lsp_opts = { noremap = true, silent = true, buffer = bufnr }
-    local telescope_builtin = LZ.export_call("telescope.builtin")
 
-    keymap("n", "<leader>ll", "<Plug>(toggle-lsp-diag)", { noremap = false }, "Toggle Diagnostics")
+    local show_diag = util.Toggle.new(vim.diagnostic.hide, vim.diagnostic.show)
+    keymap("n", "<leader>ll", util.tbl_fn(show_diag), lsp_opts, "Toggle Diagnostics")
     keymap("n", "<leader>lv", "<Plug>(toggle-lsp-diag-vtext)", { noremap = false }, "Toggle Vtext")
     keymap("n", "<leader>lu", "<Plug>(toggle-lsp-diag-underline)", { noremap = false }, "Toggle Underline")
 
@@ -252,7 +234,7 @@ M.set_lsp_keymaps = function(_, bufnr)
     keymap("n", "<leader>l?", vim.diagnostic.open_float, lsp_opts, "Diagnostic Info")
     keymap("n", "<leader>lI", "<cmd>LspInfo<cr>", lsp_opts, "Lsp Info")
     keymap("n", "<leader>lR", vim.lsp.buf.rename, lsp_opts, "Rename")
-    keymap("n", "<leader>lf", partial(lsp_format, bufnr), lsp_opts, "Format")
+    keymap("n", "<leader>lf", partial(util.lsp_format, bufnr), lsp_opts, "Format")
 
     keymap({ "n", "v" }, { "gn", "]d" }, next_diag, lsp_opts, "Next Diagnostic")
     keymap({ "n", "v" }, { "gN", "[d" }, prev_diag, lsp_opts, "Previous Diagnostic")
@@ -281,7 +263,6 @@ end
 local dv_open_keymaps_set = false
 
 M.set_git_keymaps = function(bufnr)
-    local gs = LZ.export_call("gitsigns")
     local gs_opts = { noremap = true, silent = true, buffer = bufnr }
 
     local next_hunk, prev_hunk = repeatable_pair(function()
@@ -290,8 +271,8 @@ M.set_git_keymaps = function(bufnr)
         _ = vim.wo.diff and vim.cmd.normal({ "[c", bang = true }) or gs.nav_hunk("prev", { target = "all" })
     end)
 
-    keymap("n", "<leader>fb", LZ.export_call("telescope.builtin").git_branches, gs_opts, "Find Branch")
-    keymap("n", "<leader>gc", LZ.export_call("telescope.builtin").git_commits, gs_opts, "Find Commit")
+    keymap("n", "<leader>fb", telescope_builtin.git_branches, gs_opts, "Find Branch")
+    keymap("n", "<leader>gc", telescope_builtin.git_commits, gs_opts, "Find Commit")
     keymap({ "n", "v" }, { "<leader>gj", "]h" }, next_hunk, gs_opts, "Next Hunk")
     keymap({ "n", "v" }, { "<leader>gk", "[h" }, prev_hunk, gs_opts, "Previous Hunk")
     keymap("n", "<leader>g0", partial(gs.nav_hunk, "first", { target = "all" }), gs_opts, "First Hunk")
@@ -330,29 +311,37 @@ M.set_term_keymaps = function()
 end
 
 M.set_ipy_keymaps = function()
-    local TM = util.TM
-    keymap("v", "<leader>tl", TM.send_line, default_opts, "Send Line to IPython")
-    keymap("v", "<leader>tL", TM.send_lines, default_opts, "Send Selected Lines to IPython")
-    keymap("v", "<leader>ts", TM.send_selection, default_opts, "Send Selection to IPython")
-
     -- Molten
     keymap("n", "<leader>mI", "<cmd>MoltenInit<cr>", default_opts, " Initialize")
 end
 
 M.set_neotest_keymaps = function()
-    local neotest = LZ.export_call("neotest", 2)
+    ---@module "neotest"
+    local neotest = require("neotest")
     keymap("n", "<leader>nm", neotest.run.run, default_opts, "Run Test")
-    keymap("n", "<leader>nM", partial(neotest.run.run, { extra_args = {"-s"}, strategy = "dap" }), default_opts, "Debug Test")
+    keymap(
+        "n",
+        "<leader>nM",
+        partial(neotest.run.run, { extra_args = { "-s" }, strategy = "dap" }),
+        default_opts,
+        "Debug Test"
+    )
     keymap("n", "<leader>nf", partial(neotest.run.run, { vim.fn.expand("%") }), default_opts, "Run All Tests")
     keymap(
         "n",
         "<leader>nF",
-        partial(neotest.run.run, { vim.fn.expand("%"), extra_args = {"-s"}, strategy = "dap" }),
+        partial(neotest.run.run, { vim.fn.expand("%"), extra_args = { "-s" }, strategy = "dap" }),
         default_opts,
         "Debug All Tests"
     )
     keymap("n", "<leader>nr", neotest.run.run_last, default_opts, "Run Last")
-    keymap("n", "<leader>nR", partial(neotest.run.run_last, { extra_args = {"-s"}, strategy = "dap" }), default_opts, "Debug Last")
+    keymap(
+        "n",
+        "<leader>nR",
+        partial(neotest.run.run_last, { extra_args = { "-s" }, strategy = "dap" }),
+        default_opts,
+        "Debug Last"
+    )
     keymap("n", "<leader>ns", neotest.summary.toggle, default_opts, "Test Summary")
     keymap("n", "<leader>np", neotest.run.stop, default_opts, "Stop Test")
     keymap("n", "<leader>na", neotest.run.attach, default_opts, "Attach To Test")
@@ -391,42 +380,38 @@ local molten_keymaps = {
     { "v", "<leader>m", ":<c-u>MoltenEvaluateVisual<cr>gv", default_opts, " Evaluate Visual Selection" },
     { "n", "<leader>mn", MS.next_cell, default_opts, " Next Cell" },
     { "n", "<leader>mN", MS.prev_cell, default_opts, " Previous Cell" },
-    { "n", "<leader>ms", util.tbl_f(MS.show_output), default_opts, " Toggle Show Output" },
-    { "n", "<leader>mS", util.tbl_f(MS.auto_open), default_opts, " Toggle Auto Open Output" },
-    { "n", "<leader>mv", util.tbl_f(MS.vtext), default_opts, " Toggle Vtext Output" },
-    { "n", "<leader>m<cr>", util.tbl_f(MS.enter_output), default_opts, " Enter Output" },
+    { "n", "<leader>ms", util.tbl_fn(MS.show_output), default_opts, " Toggle Show Output" },
+    { "n", "<leader>mS", util.tbl_fn(MS.auto_open), default_opts, " Toggle Auto Open Output" },
+    { "n", "<leader>mv", util.tbl_fn(MS.vtext), default_opts, " Toggle Vtext Output" },
+    { "n", "<leader>m<cr>", util.tbl_fn(MS.enter_output), default_opts, " Enter Output" },
 }
 
 M.set_molten_keymaps = function()
     for _, v in ipairs(molten_keymaps) do
         keymap(unpack(v))
     end
+    require("which-key").add({ "<leader>m", group = "Neogen/Molten" })
 end
 
 M.del_molten_keymaps = function()
+    require("which-key").add({ "<leader>m", group = "Neogen" })
     for _, v in ipairs(molten_keymaps) do
         del_keymap(v[1], v[2])
     end
 end
 
 local dap_keymaps = {
-    { { "n", "v" }, "<leader>de", LZ.export_call("dapui").eval, default_opts, "Evaluate" },
-    { "n", "<leader>dp", LZ.export_call("dap").pause, default_opts, "Pause" },
-    { "n", "<leader>dq", LZ.export_call("dap").terminate, default_opts, "Quit" },
-    { "n", "<leader>dsi", repeatable(LZ.export_call("dap").step_into), default_opts, "Into" },
-    { "n", "<leader>dso", repeatable(LZ.export_call("dap").step_over), default_opts, "Over" },
-    { "n", "<leader>dsu", repeatable(LZ.export_call("dap").step_out), default_opts, "Out" },
-    { "n", "<F5>", repeatable(LZ.export_call("dap").continue) },
-    { "n", "<F8>", repeatable(LZ.export_call("dap").step_over) },
-    { "n", "<F9>", repeatable(LZ.export_call("dap").step_into) },
-    { "n", "<F10>", repeatable(LZ.export_call("dap").step_out) },
-    {
-        "n",
-        "<leader>d<leader>",
-        repeatable(LZ.export_call("dap").run_to_cursor),
-        default_opts,
-        "Run to Cursor",
-    },
+    { { "n", "v" }, "<leader>de", dapui.eval, default_opts, "Evaluate" },
+    { "n", "<leader>dp", dap.pause, default_opts, "Pause" },
+    { "n", "<leader>dq", dap.terminate, default_opts, "Quit" },
+    { "n", "<leader>dsi", repeatable(dap.step_into), default_opts, "Into" },
+    { "n", "<leader>dso", repeatable(dap.step_over), default_opts, "Over" },
+    { "n", "<leader>dsu", repeatable(dap.step_out), default_opts, "Out" },
+    { "n", "<F5>", repeatable(dap.continue) },
+    { "n", "<F8>", repeatable(dap.step_over) },
+    { "n", "<F9>", repeatable(dap.step_into) },
+    { "n", "<F10>", repeatable(dap.step_out) },
+    { "n", "<leader>d<leader>", repeatable(dap.run_to_cursor), default_opts, "Run to Cursor" },
 }
 
 M.set_dap_keymaps = function()
@@ -438,15 +423,17 @@ end
 M.del_dap_keymaps = function()
     M.set_dap_keymaps()
     for _, v in ipairs(dap_keymaps) do
-        del_keymap(v[1], v[2])
+        del_keymap(v[1], v[2], "a")
     end
 end
 
 --- Currently identical to set_lsp_keymaps().
 M.set_rust_keymaps = function(_, bufnr)
-    local next_diag, prev_diag = repeatable_pair(vim.diagnostic.goto_next, vim.diagnostic.goto_prev)
+    local next_diag, prev_diag = repeatable_pair(
+        partial(vim.diagnostic.jump, { count = 1, float = true }),
+        partial(vim.diagnostic.jump, { count = -1, float = true })
+    )
     local lsp_opts = { noremap = true, silent = true, buffer = bufnr }
-    local telescope_builtin = LZ.export_call("telescope.builtin")
 
     keymap("n", "<leader>ll", "<Plug>(toggle-lsp-diag)", { noremap = false }, "Toggle Diagnostics")
     keymap("n", "<leader>lv", "<Plug>(toggle-lsp-diag-vtext)", { noremap = false }, "Toggle Vtext")
@@ -467,7 +454,7 @@ M.set_rust_keymaps = function(_, bufnr)
     keymap("n", "<leader>l?", vim.diagnostic.open_float, lsp_opts, "Diagnostic Info")
     keymap("n", "<leader>lI", "<cmd>LspInfo<cr>", lsp_opts, "Lsp Info")
     keymap("n", "<leader>lR", vim.lsp.buf.rename, lsp_opts, "Rename")
-    keymap("n", "<leader>lf", partial(lsp_format, bufnr), lsp_opts, "Format")
+    keymap("n", "<leader>lf", partial(util.lsp_format, bufnr), lsp_opts, "Format")
 
     keymap({ "n", "v" }, { "gn", "]d" }, next_diag, lsp_opts, "Next Diagnostic")
     keymap({ "n", "v" }, { "gN", "[d" }, prev_diag, lsp_opts, "Previous Diagnostic")

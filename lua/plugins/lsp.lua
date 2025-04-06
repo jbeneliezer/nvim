@@ -1,22 +1,17 @@
 local servers = {
+    ast_grep = {},
     lua_ls = {
-        Lua = {
-            runtime = {
-                -- Tell the language server which version of Lua you're using (most likely LuaJIT in the case of Neovim)
-                version = "LuaJIT",
-            },
-            diagnostics = {
-                -- Get the language server to recognize the `vim` global
-                globals = { "vim" },
-            },
-            workspace = {
-                -- Make the server aware of Neovim runtime files
-                library = vim.api.nvim_get_runtime_file("", true),
-                checkThirdParty = false,
-            },
-            -- Do not send telemetry data containing a randomized but unique identifier
-            telemetry = {
-                enable = false,
+        settings = {
+            Lua = {
+                runtime = { version = "LuaJIT" },
+                diagnostics = { globals = { "vim" } },
+                workspace = {
+                    -- Make the server aware of Neovim runtime files
+                    library = { vim.env.VIMRUNTIME },
+                    -- library = vim.api.nvim_get_runtime_file("", true)
+                    checkThirdParty = false,
+                },
+                telemetry = { enable = false },
             },
         },
     },
@@ -36,7 +31,7 @@ local servers = {
         settings = {
             pyright = {
                 disableLanguageServices = false,
-                disableOrganizeImports = false,
+                disableOrganizeImports = true,
             },
             python = {
                 analysis = {
@@ -49,34 +44,65 @@ local servers = {
             },
         },
     },
+    ruff = {
+        init_options = {
+            settings = {
+                configurationPreference = "filesystemFirst",
+                exclude = {
+                    "venv",
+                    ".venv",
+                    ".pytest_cache",
+                    ".mypy_cache",
+                    ".ruff_cache",
+                    "__pycache__",
+                    ".pyc$",
+                },
+                lineLength = 120,
+                showSyntaxErrors = false,
+                lint = {
+                    -- enable = false,
+                    ignore = { "F", "E741" },
+                },
+            },
+        },
+    },
 }
 
-local signs = {
-    { name = "DiagnosticSignError", text = "" },
-    { name = "DiagnosticSignWarn", text = "" },
-    { name = "DiagnosticSignHint", text = "" },
-    { name = "DiagnosticSignInfo", text = "" },
+local diag_icons = {
+    [vim.diagnostic.severity.ERROR] = "",
+    [vim.diagnostic.severity.WARN] = "",
+    [vim.diagnostic.severity.HINT] = "",
+    [vim.diagnostic.severity.INFO] = "",
 }
 
 local diag_config = {
-    virtual_text = true,
-    signs = {
-        active = signs,
-    },
-    update_in_insert = false,
     underline = true,
-    severity_sort = true,
+    virtual_text = {
+        prefix = function(diagnostic, i, total)
+            return i == total and diag_icons[diagnostic.severity] .. " " or ""
+        end,
+    },
+    virtual_lines = false,
+    signs = { text = diag_icons },
     float = {
-        focusable = false,
+        focusable = true,
         style = "minimal",
         border = "rounded",
         source = "always",
         header = "",
         prefix = "",
     },
+    update_in_insert = false,
+    severity_sort = true,
 }
 
 return {
+    {
+        "neovim/nvim-lspconfig",
+        config = function()
+            vim.diagnostic.config(diag_config)
+        end,
+    },
     {
         "williamboman/mason.nvim",
         opts = {
@@ -91,21 +117,25 @@ return {
                 automatic_installation = { exclude = { "rust_analyzer" } },
             })
 
-            local lsp_capabilities = vim.lsp.protocol.make_client_capabilities()
-            lsp_capabilities = require("cmp_nvim_lsp").default_capabilities(lsp_capabilities)
+            local capabilities = vim.tbl_deep_extend(
+                "force",
+                {},
+                vim.lsp.protocol.make_client_capabilities() or {},
+                require("cmp_nvim_lsp").default_capabilities() or {}
+            )
 
             require("mason-lspconfig").setup_handlers({
                 function(server_name)
                     if server_name == "rust_analyzer" then
-                        return
+                        return true
                     end
-                    require("lspconfig")[server_name].setup({
-                        capabilities = lsp_capabilities,
+                    local server_opts = vim.tbl_deep_extend("force", {
+                        capabilities = vim.deepcopy(capabilities),
                         on_attach = function(client, bufnr)
                             require("settings.keymaps").set_lsp_keymaps(client, bufnr)
                         end,
-                        settings = servers[server_name],
-                    })
+                    }, servers[server_name] or {})
+                    require("lspconfig")[server_name].setup(server_opts)
                 end,
             })
         end,
@@ -114,24 +144,6 @@ return {
         "WhoIsSethDaniel/toggle-lsp-diagnostics.nvim",
         config = function()
             require("toggle_lsp_diagnostics").init(vim.diagnostic.config())
-        end,
-    },
-    {
-        "neovim/nvim-lspconfig",
-        config = function()
-            for _, sign in ipairs(signs) do
-                vim.fn.sign_define(sign.name, { texthl = sign.name, text = sign.text, numhl = "" })
-            end
-
-            vim.diagnostic.config(diag_config)
-
-            vim.lsp.handlers["textDocument/hover"] = vim.lsp.with(vim.lsp.handlers.hover, {
-                border = "rounded",
-            })
-
-            vim.lsp.handlers["textDocument/signatureHelp"] = vim.lsp.with(vim.lsp.handlers.signature_help, {
-                border = "rounded",
-            })
         end,
     },
 }
