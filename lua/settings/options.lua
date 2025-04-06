@@ -11,6 +11,7 @@ local options = {
     ignorecase = true,
     laststatus = 0,
     mouse = "a",
+    mousemodel = "extend",
     pumheight = 10,
     showmode = false,
     showtabline = 2,
@@ -43,9 +44,9 @@ for k, v in pairs(options) do
     vim.opt[k] = v
 end
 
-vim.opt.shortmess:append("c")
-vim.cmd("set whichwrap+=<,>,[,],h,l")
-vim.cmd("set iskeyword+=-")
+vim.opt.shortmess:append("acI")
+vim.opt.whichwrap:append("<,>,[,]")
+vim.opt.iskeyword:append("-")
 
 -- clipboard
 vim.opt.clipboard:append("unnamedplus")
@@ -58,5 +59,19 @@ vim.g.maplocalleader = " "
 vim.g.loaded_netrw = 1
 vim.g.loaded_netrwPlugin = 1
 
--- disable python3_provider
-vim.g.loaded_python3_provider=0
+-- python3_provider
+vim.g.python3_host_prog = vim.fn.stdpath("config")
+    .. (OsCurrent == OS.WINDOWS and "\\.venv\\Scripts\\python.exe" or "/.venv/bin/python")
+-- vim.g.loaded_python3_provider=0
+
+-- neovide
+if vim.g.neovide then
+    vim.g.neovide_position_animation_length = 0
+    vim.g.neovide_scroll_animation_length = 0
+    vim.g.neovide_scroll_animation_far_lines = 0
+    vim.g.neovide_cursor_animation_length = 0
+    vim.g.neovide_hide_mouse_when_typing = true
+    vim.g.neovide_cursor_trail_size = 0
+    vim.g.neovide_cursor_animate_in_insert_mode = false
+    vim.g.neovide_cursor_animate_command_line = false
+end

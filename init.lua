@@ -1,6 +1,18 @@
+---@enum os
+OS = { LINUX = {}, WINDOWS = {} }
+
+---@type os
+OsCurrent = nil
+if vim.uv.os_uname().sysname == "Windows_NT" then
+    OsCurrent = OS.WINDOWS
+elseif vim.uv.os_uname().sysname == "Linux" then
+    OsCurrent = OS.LINUX
+end
+
+---@module "settings.options"
 require("settings.options")
 
--- get lazy.nvim
+-- Bootstrap lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.uv.fs_stat(lazypath) then
     vim.fn.system({
@@ -15,13 +27,28 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 local lazy_opts = {
+    install = { colorscheme = { "retrobox" } },
     ui = {
         border = "rounded",
     },
+    custom_keys = {
+        ["K"] = {
+            function(_)
+                vim.cmd.normal("<c-u>zz")
+            end,
+            desc = "<c-u>zz",
+        },
+    },
+    diff = { cmd = "diffview.nvim" },
     rocks = { enabled = false },
+    change_detection = {
+        notify = false,
+    },
 }
 
 require("lazy").setup("plugins", lazy_opts)
 
-require("settings.keymaps")
+---@module "settings.keymaps"
+require("settings.keymaps").set_basic_keymaps()
+---@module "settings.autocmds"
 require("settings.autocmds")

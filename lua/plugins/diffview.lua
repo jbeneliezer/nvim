@@ -1,4 +1,145 @@
 return {
     "sindrets/diffview.nvim",
-	event = "BufEnter",
+    event = "BufEnter",
+    config = function()
+        local util = require("settings.util")
+        local a = util.LZ.export_call("diffview.actions")
+        local cc = a.conflict_choose
+        local cca = a.conflict_choose_all
+        local next_file, prev_file = util.repeatable_pair(a.select_next_entry, a.select_prev_entry)
+        local next_conflict, prev_conflict = util.repeatable_pair(a.next_conflict, a.prev_conflict)
+
+        local diffview_keymaps = {
+            disable_defaults = true,
+            view = {
+                { "n", "<leader>J", next_file, { desc = "Next File" } },
+                { "n", "<tab>", next_file, { desc = "Next File" } },
+                { "n", "<leader>K", prev_file, { desc = "Previous File" } },
+                { "n", "<s-tab>", prev_file, { desc = "Previous File" } },
+                { "n", "<leader>ge", a.goto_file_edit, { desc = "Edit File" } },
+                { "n", "<leader>e", a.toggle_files, { desc = "Toggle File Panel" } },
+                { "n", "gL", a.cycle_layout, { desc = "Cycle Layout" } },
+                { "n", "<leader>j", next_conflict, { desc = "Previous Conflict" } },
+                { "n", "[x", next_conflict, { desc = "Previous Conflict" } },
+                { "n", "<leader>k", prev_conflict, { desc = "Next Conflict" } },
+                { "n", "]x", prev_conflict, { desc = "Next Conflict" } },
+                { { "n", "v", "x" }, "<leader>o", cc("ours"), { desc = "Choose OURS" } },
+                { { "n", "v", "x" }, "<leader>t", cc("theirs"), { desc = "Choose THEIRS" } },
+                { { "n", "v", "x" }, "<leader>b", cc("base"), { desc = "Choose BASE" } },
+                { { "n", "v", "x" }, "<leader>a", cc("all"), { desc = "Choose ALL" } },
+                { { "n", "v", "x" }, "<leader>n", cc("none"), { desc = "Choose NONE" } },
+                { { "n", "v", "x" }, "<leader>O", cca("ours"), { desc = "Choose OURS (File)" } },
+                { { "n", "v", "x" }, "<leader>T", cca("theirs"), { desc = "Choose THEIRS (File)" } },
+                { { "n", "v", "x" }, "<leader>B", cca("base"), { desc = "Choose BASE (File)" } },
+                { { "n", "v", "x" }, "<leader>A", cca("all"), { desc = "Choose ALL (File)" } },
+                { { "n", "v", "x" }, "<leader>N", cca("none"), { desc = "Choose NONE (File)" } },
+            },
+            diff1 = {
+                -- Mappings in single window diff layouts
+                { "n", "g?", a.help({ "view", "diff1" }), { desc = "Help" } },
+            },
+            diff2 = {
+                -- Mappings in 2-way diff layouts
+                { "n", "g?", a.help({ "view", "diff2" }), { desc = "Help" } },
+            },
+            diff3 = {
+                -- Mappings in 3-way diff layouts
+                { { "n", "v", "x" }, "<leader>o", a.diffget("ours"), { desc = "Choose OURS" } },
+                { { "n", "v", "x" }, "<leader>t", a.diffget("theirs"), { desc = "Choose THEIRS" } },
+                { "n", "g?", a.help({ "view", "diff3" }), { desc = "Open the help panel" } },
+            },
+            diff4 = {
+                -- Mappings in 4-way diff layouts
+                { { "n", "v", "x" }, "<leader>o", a.diffget("ours"), { desc = "Choose OURS" } },
+                { { "n", "v", "x" }, "<leader>t", a.diffget("theirs"), { desc = "Choose THEIRS" } },
+                { { "n", "v", "x" }, "<leader>b", a.diffget("base"), { desc = "Choose BASE" } },
+                { "n", "g?", a.help({ "view", "diff4" }), { desc = "Open the help panel" } },
+            },
+            file_panel = {
+                { "n", "j", next_file, { desc = "Next File" } },
+                { "n", "<down>", next_file, { desc = "Next File" } },
+                { "n", "<tab>", next_file, { desc = "Next File" } },
+                { "n", "k", prev_file, { desc = "Previous File" } },
+                { "n", "<up>", prev_file, { desc = "Previous File" } },
+                { "n", "<s-tab>", prev_file, { desc = "Previous File" } },
+                { "n", "<cr>", a.select_entry, { desc = "Open" } },
+                { "n", "<2-LeftMouse>", a.select_entry, { desc = "Open" } },
+                { "n", "-", a.toggle_stage_entry, { desc = "Toggle Stage" } },
+                { "n", "s", a.toggle_stage_entry, { desc = "Toggle Stage" } },
+                { "n", "S", a.stage_all, { desc = "Stage All" } },
+                { "n", "U", a.unstage_all, { desc = "Unstage All" } },
+                { "n", "X", a.restore_entry, { desc = "Restore" } },
+                { "n", "L", a.open_commit_log, { desc = "Show Log" } },
+                { "n", "zo", a.open_fold, { desc = "Expand Fold" } },
+                { "n", "h", a.close_fold, { desc = "Collapse Fold" } },
+                { "n", "zc", a.close_fold, { desc = "Collapse Fold" } },
+                { "n", "za", a.toggle_fold, { desc = "Toggle fold" } },
+                { "n", "zR", a.open_all_folds, { desc = "Expand All folds" } },
+                { "n", "zM", a.close_all_folds, { desc = "Collapse All folds" } },
+                { "n", "<c-b>", a.scroll_view(-0.25), { desc = "Scroll Up" } },
+                { "n", "<c-f>", a.scroll_view(0.25), { desc = "Scroll Down" } },
+                { "n", "ge", a.goto_file_edit, { desc = "Edit File" } },
+                { "n", "i", a.listing_style, { desc = "Toggle List/Tree" } },
+                { "n", "f", a.toggle_flatten_dirs, { desc = "Flatten" } },
+                { "n", "R", a.refresh_files, { desc = "Refresh" } },
+                { "n", "<leader>e", a.toggle_files, { desc = "Toggle File Panel" } },
+                { "n", "gL", a.cycle_layout, { desc = "Cycle Layout" } },
+                { "n", "<leader>j", next_conflict, { desc = "Next Conflict" } },
+                { "n", "]x", next_conflict, { desc = "Next Conflict" } },
+                { "n", "<leader>k", prev_conflict, { desc = "Previous Conflict" } },
+                { "n", "[x", prev_conflict, { desc = "Previous Conflict" } },
+                { "n", "g?", a.help("file_panel"), { desc = "Open the help panel" } },
+                { { "n", "v", "x" }, "<leader>O", cca("ours"), { desc = "Choose OURS (File)" } },
+                { { "n", "v", "x" }, "<leader>T", cca("theirs"), { desc = "Choose THEIRS (File)" } },
+                { { "n", "v", "x" }, "<leader>B", cca("base"), { desc = "Choose BASE (File)" } },
+                { { "n", "v", "x" }, "<leader>A", cca("all"), { desc = "Choose ALL (File)" } },
+                { { "n", "v", "x" }, "<leader>N", cca("none"), { desc = "Choose NONE (File)" } },
+            },
+            file_history_panel = {
+                { "n", "g!", a.options, { desc = "Options" } },
+                { "n", "<C-A-d>", a.open_in_diffview, { desc = "Open" } },
+                { "n", "y", a.copy_hash, { desc = "Copy Commit Hash" } },
+                { "n", "L", a.open_commit_log, { desc = "Show Log" } },
+                { "n", "X", a.restore_entry, { desc = "Restore File" } },
+                { "n", "zo", a.open_fold, { desc = "Expand Fold" } },
+                { "n", "zc", a.close_fold, { desc = "Collapse Fold" } },
+                { "n", "h", a.close_fold, { desc = "Collapse Fold" } },
+                { "n", "za", a.toggle_fold, { desc = "Toggle Fold" } },
+                { "n", "zR", a.open_all_folds, { desc = "Expand All Folds" } },
+                { "n", "zM", a.close_all_folds, { desc = "Collapse All Folds" } },
+                { "n", "j", next_file, { desc = "Next File" } },
+                { "n", "<down>", next_file, { desc = "Next File" } },
+                { "n", "<leader>J", next_file, { desc = "Next File" } },
+                { "n", "<tab>", next_file, { desc = "Next File" } },
+                { "n", "k", prev_file, { desc = "Previous File" } },
+                { "n", "<up>", prev_file, { desc = "Previous File" } },
+                { "n", "<leader>K", prev_file, { desc = "Previous File" } },
+                { "n", "<s-tab>", prev_file, { desc = "Previous File" } },
+                { "n", "<cr>", a.select_entry, { desc = "Open" } },
+                { "n", "<2-LeftMouse>", a.select_entry, { desc = "Open" } },
+                { "n", "<c-b>", a.scroll_view(-0.25), { desc = "Scroll Up" } },
+                { "n", "<c-f>", a.scroll_view(0.25), { desc = "Scroll Down" } },
+                { "n", "ge", a.goto_file_edit, { desc = "Edit File" } },
+                { "n", "<leader>e", a.toggle_files, { desc = "Toggle File Panel" } },
+                { "n", "gL", a.cycle_layout, { desc = "Cycle Layout" } },
+                { "n", "g?", a.help("file_history_panel"), { desc = "Help" } },
+            },
+            option_panel = {
+                { "n", "<tab>", a.select_entry, { desc = "Change Option" } },
+                { "n", "q", a.close, { desc = "Close Panel" } },
+                { "n", "g?", a.help("option_panel"), { desc = "Help" } },
+            },
+            help_panel = {
+                { "n", "q", a.close, { desc = "Close Help" } },
+                { "n", "<esc>", a.close, { desc = "Close Help" } },
+            },
+        }
+
+        require("diffview").setup({
+            diff_binaries = true,
+            enhanced_diff_hl = true,
+            git_cmd = { "git" },
+            keymaps = diffview_keymaps,
+        })
+    end,
 }

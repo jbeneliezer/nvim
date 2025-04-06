@@ -39,8 +39,12 @@ luac.out
 *.x86_64
 *.hex
 
-#undo
+# undo
 .undo*
+
+# venv
+venv*
+.venv*
 
 # lazy
 lazy-lock.json
@@ -48,3 +52,6 @@ package-lock.json
 
 # lua_ls
 .luarc.json
+
+# neovide
+neovide_backtraces.log

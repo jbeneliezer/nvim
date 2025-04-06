@@ -3,22 +3,20 @@ return {
     event = "VimEnter",
     dependencies = {
         "nvim-lua/plenary.nvim",
-        -- "nvim-telescope/telescope-project.nvim",
-        -- {
-        --     "nvim-telescope/telescope-fzf-native.nvim",
-        --     build = "cmake -S. -Bbuild -DCMAKE_BUILD_TYPE=Release && cmake --build build --config Release && cmake --install build --prefix build",
-        -- },
+        "nvim-telescope/telescope-ui-select.nvim",
         "gbrlsnchs/telescope-lsp-handlers.nvim",
         "debugloop/telescope-undo.nvim",
         "natecraddock/telescope-zf-native.nvim",
+        "Marskey/telescope-sg",
     },
     config = function()
         local actions = require("telescope.actions")
-        local open_with_trouble = require("trouble.sources.telescope").open
-        local add_to_trouble = require("trouble.sources.telescope").add
+        local open_with_trouble = function()
+            require("trouble.sources.telescope").open()
+        end
         require("telescope").setup({
             defaults = {
-                file_ignore_patterns = { ".svn", ".git", "site-packages", "__pycache__", "Listings", "venv" },
+                file_ignore_patterns = { "nvim/.undo", ".svn$", ".git$", "__pycache__", ".pyc$", ".d$", ".o$" },
                 prompt_prefix = " ",
                 selection_caret = " ",
                 path_display = { "truncate" },
@@ -35,7 +33,6 @@ return {
                         ["<CR>"] = actions.select_default,
                         ["<C-x>"] = actions.select_horizontal,
                         ["<C-v>"] = actions.select_vertical,
-                        -- ["<C-t>"] = actions.select_tab,
                         ["<C-u>"] = actions.preview_scrolling_up,
                         ["<C-d>"] = actions.preview_scrolling_down,
                         ["<PageUp>"] = actions.results_scrolling_up,
@@ -44,7 +41,6 @@ return {
                         ["<S-Tab>"] = actions.toggle_selection + actions.move_selection_better,
                         ["<C-q>"] = actions.send_to_qflist + actions.open_qflist,
                         ["<M-q>"] = actions.send_selected_to_qflist + actions.open_qflist,
-                        -- ["<C-l>"] = actions.complete_tag,
                         ["<C-_>"] = actions.which_key, -- keys from pressing <C-/>
                         ["<C-t>"] = open_with_trouble,
                         ["<C-h>"] = actions.move_to_top,
@@ -56,7 +52,6 @@ return {
                         ["<CR>"] = actions.select_default,
                         ["<C-x>"] = actions.select_horizontal,
                         ["<C-v>"] = actions.select_vertical,
-                        -- ["<C-t>"] = actions.select_tab,
                         ["<Tab>"] = actions.toggle_selection + actions.move_selection_worse,
                         ["<S-Tab>"] = actions.toggle_selection + actions.move_selection_better,
                         ["<C-q>"] = actions.send_to_qflist + actions.open_qflist,
@@ -80,7 +75,7 @@ return {
                 },
             },
             extensions = {
-                -- "fzf",
+                "ui-select",
                 "lsp_handlers",
                 "dap",
                 undo = {
@@ -106,14 +101,15 @@ return {
                         smart_case = true,
                     },
                 },
-                -- "projects",
+                ast_grep = {
+                    command = {
+                        "sg",
+                        "--json=stream",
+                    },
+                    grep_open_files = true,
+                },
             },
         })
-        -- require("telescope").load_extension("fzf")
-        require("telescope").load_extension("lsp_handlers")
-        require("telescope").load_extension("dap")
-        require("telescope").load_extension("undo")
-        require("telescope").load_extension("zf-native")
-        -- require("telescope").load_extension("projects")
+        require("telescope").load_extension("ui-select")
     end,
 }

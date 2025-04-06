@@ -5,13 +5,28 @@ return {
         "hrsh7th/cmp-buffer",
         "hrsh7th/cmp-path",
         "hrsh7th/cmp-cmdline",
-        "saadparwaiz1/cmp_luasnip",
+        "petertriho/cmp-git",
         "hrsh7th/cmp-nvim-lsp",
         "hrsh7th/cmp-nvim-lua",
-        "L3MON4D3/LuaSnip",
         "rafamadriz/friendly-snippets",
+        { "L3MON4D3/LuaSnip", version = "v2.*" },
+        "saadparwaiz1/cmp_luasnip",
+        {
+            "folke/lazydev.nvim",
+            ft = "lua",
+            opts = {
+                library = {
+                    "lazy.nvim",
+                    vim.fn.stdpath("config") .. "/lua/plugins",
+                    vim.fn.stdpath("config") .. "/lua/settings",
+                    { path = "${3rd}/luv/library", words = { "vim%.uv" } },
+                    "nvim-dap-ui",
+                },
+            },
+        },
         {
             "zbirenbaum/copilot-cmp",
+            enabled = false,
             config = function()
                 require("copilot_cmp").setup({
                     formatters = {
@@ -25,7 +40,7 @@ return {
         local cmp = require("cmp")
         local luasnip = require("luasnip")
 
-        require("luasnip/loaders/from_vscode").lazy_load()
+        require("luasnip.loaders.from_vscode").lazy_load()
 
         local check_backspace = function()
             local col = vim.fn.col(".") - 1
@@ -38,7 +53,7 @@ return {
             Function = "󰊕",
             Constructor = "",
             Field = "",
-            Variable = "󰫧",
+            Variable = "",
             Class = "",
             Interface = "",
             Module = "",
@@ -109,20 +124,23 @@ return {
                 format = function(entry, vim_item)
                     -- Kind icons
                     vim_item.kind = string.format("%s", kind_icons[vim_item.kind])
-                    -- vim_item.kind = string.format('%s %s', kind_icons[vim_item.kind], vim_item.kind) -- This concatonates the icons with the name of the item kind
+                    -- vim_item.kind = string.format('%s %s', kind_icons[vim_item.kind], vim_item.kind) -- This concatenates the icons with the name of the item kind
+                    local lsp_name = entry.source.source.client and entry.source.source.client.name or nil
                     vim_item.menu = ({
-                        copilot = "[Copilot]",
-                        nvim_lua = "[Nvim]",
-                        nvim_lsp = "[Lsp]",
-                        luasnip = "[Snip]",
-                        buffer = "[Buf]",
-                        path = "[Path]",
+                        lazydev = "[lazy_dev]",
+                        nvim_lsp = lsp_name and "[" .. lsp_name .. "]" or "[lsp]",
+                        nvim_lua = "[nvim]",
+                        luasnip = "[snip]",
+                        copilot = "[copilot]",
+                        buffer = "[buf]",
+                        path = "[path]",
+                        git = "[git]",
                     })[entry.source.name]
                     return vim_item
                 end,
             },
             sources = {
-                -- { name = "copilot" },
+                { name = "lazydev", group_index = 0 },
                 { name = "nvim_lua" },
                 { name = "nvim_lsp" },
                 { name = "luasnip" },
@@ -134,7 +152,7 @@ return {
                 select = false,
             },
             experimental = {
-                -- ghost_text = true,
+                ghost_text = true,
             },
             window = {
                 completion = {
@@ -146,6 +164,15 @@ return {
                 },
             },
         })
+
+        cmp.setup.filetype("gitcommit", {
+            sources = cmp.config.sources({
+                { name = "git" },
+            }, {
+                { name = "buffer" },
+            }),
+        })
+        require("cmp_git").setup()
 
         cmp.setup.cmdline("/", {
             mapping = cmp.mapping.preset.cmdline(),
@@ -161,6 +188,7 @@ return {
             }, {
                 { name = "cmdline" },
             }),
+            matching = { disallow_symbol_nonprefix_matching = false },
         })
     end,
 }
