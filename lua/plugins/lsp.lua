@@ -1,5 +1,4 @@
 local servers = {
-    ast_grep = {},
     lua_ls = {
         settings = {
             Lua = {
@@ -18,7 +17,6 @@ local servers = {
     clangd = {
         cmd = {
             "clangd",
-            "--compile_commands_dir=build",
             "--background-index",
             "--clang-tidy",
             "--completion-style=bundled",
@@ -60,8 +58,8 @@ local servers = {
                 lineLength = 120,
                 showSyntaxErrors = false,
                 lint = {
-                    -- enable = false,
                     ignore = { "F", "E741" },
+                    extendSelect = { "I" },
                 },
             },
         },
@@ -114,30 +112,20 @@ return {
         config = function()
             require("mason-lspconfig").setup({
                 ensure_installed = vim.tbl_keys(servers),
-                automatic_installation = { exclude = { "rust_analyzer" } },
+                automatic_enable = true,
             })
 
-            local capabilities = vim.tbl_deep_extend(
-                "force",
-                {},
-                vim.lsp.protocol.make_client_capabilities() or {},
-                require("cmp_nvim_lsp").default_capabilities() or {}
-            )
-
-            require("mason-lspconfig").setup_handlers({
-                function(server_name)
-                    if server_name == "rust_analyzer" then
-                        return true
-                    end
-                    local server_opts = vim.tbl_deep_extend("force", {
-                        capabilities = vim.deepcopy(capabilities),
-                        on_attach = function(client, bufnr)
-                            require("settings.keymaps").set_lsp_keymaps(client, bufnr)
-                        end,
-                    }, servers[server_name] or {})
-                    require("lspconfig")[server_name].setup(server_opts)
-                end,
+            vim.lsp.config("*", {
+                capabilities = vim.tbl_deep_extend(
+                    "force",
+                    vim.lsp.protocol.make_client_capabilities() or {},
+                    require("cmp_nvim_lsp").default_capabilities() or {}
+                ),
             })
+
+            for k, v in pairs(servers) do
+                vim.lsp.config(k, v)
+            end
         end,
     },
     {

@@ -2,6 +2,7 @@ vim.api.nvim_create_augroup("CustomHighlights", { clear = true })
 vim.api.nvim_create_augroup("TermKeymaps", { clear = true })
 vim.api.nvim_create_augroup("PythonKeymaps", { clear = true })
 vim.api.nvim_create_augroup("DiffviewKeymaps", { clear = true })
+vim.api.nvim_create_augroup("LspKeymaps", { clear = true })
 
 vim.api.nvim_create_autocmd({ "VimEnter", "Colorscheme" }, {
     desc = "link Pmenu to Normal",
@@ -156,4 +157,24 @@ vim.api.nvim_create_autocmd("User", {
         vim.api.nvim_set_hl(ns, "DiffText", { bg = darken(hl_text, pct) })
     end,
     group = "CustomHighlights",
+})
+
+vim.api.nvim_create_autocmd("LspAttach", {
+    desc = "Disable hover for ruff",
+    group = "LspKeymaps",
+    callback = function(args)
+        local client = vim.lsp.get_client_by_id(args.data.client_id)
+        if client ~= nil and client.name == "ruff" then
+            client.server_capabilities.hoverProvider = false
+        end
+    end,
+})
+
+vim.api.nvim_create_autocmd("LspAttach", {
+    desc = "Set LSP Keymaps",
+    group = "LspKeymaps",
+    callback = function(args)
+        local client = vim.lsp.get_client_by_id(args.data.client_id)
+        require("settings.keymaps").set_lsp_keymaps(client, args.buf)
+    end,
 })

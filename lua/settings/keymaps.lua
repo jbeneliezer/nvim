@@ -1,4 +1,3 @@
----@module "util"
 -- -@source ./util.lua
 local util = require("settings.util")
 
@@ -13,25 +12,15 @@ local repeatable = util.repeatable
 ---@type LZ
 local LZ = util.LZ
 
----@module "telescope.builtin"
 local telescope_builtin = LZ.export_call("telescope.builtin")
----@module "dap"
 local dap = LZ.export_call("dap")
----@module "dap.repl"
 local dap_repl = LZ.export_call("dap.repl")
----@module "dapui"
 local dapui = LZ.export_call("dapui")
----@module "goto-breakpoints"
 local goto_breakpoints = LZ.export_call("goto-breakpoints")
----@module "neogen"
 local neogen = LZ.export_call("neogen")
----@module "trouble"
 local trouble = LZ.export_call("trouble")
----@module "auto-session.session-lens"
 local session_lens = LZ.export_call("auto-session.session-lens")
----@module "gitsigns"
 local gs = LZ.export_call("gitsigns")
----@module "toggleterm"
 local toggleterm = LZ.export_call("toggleterm")
 
 local M = {}
@@ -401,17 +390,17 @@ M.del_molten_keymaps = function()
 end
 
 local dap_keymaps = {
-    { { "n", "v" }, "<leader>de", dapui.eval, default_opts, "Evaluate" },
-    { "n", "<leader>dp", dap.pause, default_opts, "Pause" },
-    { "n", "<leader>dq", dap.terminate, default_opts, "Quit" },
-    { "n", "<leader>dsi", repeatable(dap.step_into), default_opts, "Into" },
-    { "n", "<leader>dso", repeatable(dap.step_over), default_opts, "Over" },
-    { "n", "<leader>dsu", repeatable(dap.step_out), default_opts, "Out" },
-    { "n", "<F5>", repeatable(dap.continue) },
-    { "n", "<F8>", repeatable(dap.step_over) },
-    { "n", "<F9>", repeatable(dap.step_into) },
-    { "n", "<F10>", repeatable(dap.step_out) },
-    { "n", "<leader>d<leader>", repeatable(dap.run_to_cursor), default_opts, "Run to Cursor" },
+    { { "n", "v" }, "<leader>de",        dapui.eval,                    default_opts, "Evaluate" },
+    { "n",          "<leader>dp",        dap.pause,                     default_opts, "Pause" },
+    { "n",          "<leader>dq",        dap.terminate,                 default_opts, "Quit" },
+    { "n",          "<leader>dsi",       repeatable(dap.step_into),     default_opts, "Into" },
+    { "n",          "<leader>dso",       repeatable(dap.step_over),     default_opts, "Over" },
+    { "n",          "<leader>dsu",       repeatable(dap.step_out),      default_opts, "Out" },
+    { "n",          "<F5>",              repeatable(dap.continue) },
+    { "n",          "<F8>",              repeatable(dap.step_over) },
+    { "n",          "<F9>",              repeatable(dap.step_into) },
+    { "n",          "<F10>",             repeatable(dap.step_out) },
+    { "n",          "<leader>d<leader>", repeatable(dap.run_to_cursor), default_opts, "Run to Cursor" },
 }
 
 M.set_dap_keymaps = function()
