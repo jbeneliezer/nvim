@@ -175,6 +175,10 @@ vim.api.nvim_create_autocmd("LspAttach", {
     group = "LspKeymaps",
     callback = function(args)
         local client = vim.lsp.get_client_by_id(args.data.client_id)
-        require("settings.keymaps").set_lsp_keymaps(client, args.buf)
+        if client ~= nil and client.name == "rust-analyzer" then
+            require("settings.keymaps").set_rust_keymaps(client, args.buf)
+        else
+            require("settings.keymaps").set_lsp_keymaps(client, args.buf)
+        end
     end,
 })

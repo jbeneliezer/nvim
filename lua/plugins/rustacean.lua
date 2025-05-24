@@ -1,6 +1,6 @@
 return {
     "mrcjkb/rustaceanvim",
-    version = "^5",
+    version = "^6",
     lazy = false,
     config = function()
         local data_path = vim.fn.stdpath("data")
@@ -16,16 +16,14 @@ return {
         end
         vim.g.rustaceanvim = {
             server = {
-                on_attach = function(client, bufnr)
-                    require("settings.keymaps").set_rust_keymaps(client, bufnr)
-                end,
                 cmd = function()
                     local mason_registry = require("mason-registry")
                     if mason_registry.is_installed("rust-analyzer") then
                         -- This may need to be tweaked depending on the operating system.
                         local ra = mason_registry.get_package("rust-analyzer")
                         local ra_filename = ra:get_receipt():get().links.bin["rust-analyzer"]
-                        return { ("%s/%s"):format(ra:get_install_path(), ra_filename or "rust-analyzer") }
+                        local p = vim.fn.expand("$MASON/packages/rust-analyzer")
+                        return { ("%s/%s"):format(p, ra_filename or "rust-analyzer") }
                     else
                         -- global installation
                         return { "rust-analyzer" }

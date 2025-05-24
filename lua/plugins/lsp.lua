@@ -64,6 +64,7 @@ local servers = {
             },
         },
     },
+    rust_analyzer = {},
 }
 
 local diag_icons = {
@@ -112,7 +113,7 @@ return {
         config = function()
             require("mason-lspconfig").setup({
                 ensure_installed = vim.tbl_keys(servers),
-                automatic_enable = true,
+                automatic_enable = { exclude = { "rust_analyzer" } },
             })
 
             vim.lsp.config("*", {
@@ -124,7 +125,9 @@ return {
             })
 
             for k, v in pairs(servers) do
-                vim.lsp.config(k, v)
+                if k ~= "rust_analyzer" then
+                    vim.lsp.config(k, v)
+                end
             end
         end,
     },
