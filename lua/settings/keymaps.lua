@@ -424,17 +424,17 @@ M.del_molten_keymaps = function()
 end
 
 local dap_keymaps = {
-    { { "n", "v" }, "<leader>de", dapui.eval, default_opts, "Evaluate" },
-    { "n", "<leader>dp", dap.pause, default_opts, "Pause" },
-    { "n", "<leader>dq", dap.terminate, default_opts, "Quit" },
-    { "n", "<leader>dsi", repeatable(dap.step_into), default_opts, "Into" },
-    { "n", "<leader>dso", repeatable(dap.step_over), default_opts, "Over" },
-    { "n", "<leader>dsu", repeatable(dap.step_out), default_opts, "Out" },
-    { "n", "<F5>", repeatable(dap.continue) },
-    { "n", "<F8>", repeatable(dap.step_over) },
-    { "n", "<F9>", repeatable(dap.step_into) },
-    { "n", "<F10>", repeatable(dap.step_out) },
-    { "n", "<leader>d<leader>", repeatable(dap.run_to_cursor), default_opts, "Run to Cursor" },
+    { { "n", "v" }, "<leader>de",        dapui.eval,                    default_opts, "Evaluate" },
+    { "n",          "<leader>dp",        dap.pause,                     default_opts, "Pause" },
+    { "n",          "<leader>dq",        dap.terminate,                 default_opts, "Quit" },
+    { "n",          "<leader>dsi",       repeatable(dap.step_into),     default_opts, "Into" },
+    { "n",          "<leader>dso",       repeatable(dap.step_over),     default_opts, "Over" },
+    { "n",          "<leader>dsu",       repeatable(dap.step_out),      default_opts, "Out" },
+    { "n",          "<F5>",              repeatable(dap.continue) },
+    { "n",          "<F8>",              repeatable(dap.step_over) },
+    { "n",          "<F9>",              repeatable(dap.step_into) },
+    { "n",          "<F10>",             repeatable(dap.step_out) },
+    { "n",          "<leader>d<leader>", repeatable(dap.run_to_cursor), default_opts, "Run to Cursor" },
 }
 
 M.set_dap_keymaps = function()

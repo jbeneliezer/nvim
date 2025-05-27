@@ -14,11 +14,18 @@ return {
                 -- formatters
                 null_ls.builtins.formatting.stylua,
                 null_ls.builtins.formatting.clang_format.with({
-                    extra_args = clang_format_args,
+                    args = clang_format_args,
                 }),
                 -- diagnostics
                 null_ls.builtins.diagnostics.cppcheck.with({
-                    extra_args = { "--enable=warning,performance,portability", "$FILENAME" },
+                    -- args = { "--enable=warning,performance,portability,information,unusedFunction", "--template=gcc", "$FILENAME" },
+                    args = {
+                        "--enable=warning,performance,portability,information",
+                        "--std=c99",
+                        "--template=gcc",
+                        -- "--project=compile_commands.json",
+                        "$FILENAME",
+                    },
                 }),
                 -- code actions
                 null_ls.builtins.code_actions.gitsigns,

@@ -91,6 +91,10 @@ M.toggle_cmp_source = function(source)
     local toggle = false
     local sources = cmp.get_config().sources
 
+    if sources == nil then
+        return
+    end
+
     for i = #sources, 1, -1 do
         if sources[i].name == source then
             table.remove(sources, i)

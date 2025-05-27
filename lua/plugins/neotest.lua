@@ -37,7 +37,7 @@ return {
                         justMyCode = false,
                         console = "integratedTerminal",
                     },
-                    args = { "--log-level", "DEBUG", "--quiet" },
+                    args = { "--log-level", "DEBUG", "--quiet", "--capture", "no" },
                     runner = "pytest",
                     python = get_python,
                 }),

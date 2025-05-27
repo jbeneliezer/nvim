@@ -152,6 +152,7 @@ local dap_configurations = {
             default_confs.python,
             { name = "Current Package", program = "${workspaceFolderBasename}/${workspaceFolderBasename}/__init__.py" }
         ),
+        vim.tbl_extend("force", default_confs.python, { name = "SVCP", program = "${workspaceFolder}/svcp/__init__.py" }),
         vim.tbl_extend("force", default_confs.python, {
             name = "Custom",
             program = get_program({ prompt = "Path to script: " }),

@@ -21,6 +21,9 @@ local servers = {
             "--clang-tidy",
             "--completion-style=bundled",
             "--enable-config",
+            "--fallback-style=file:"
+            .. vim.fn.stdpath("config")
+            .. (OsCurrent == OS.WINDOWS and "\\.clang-format" or "/.clang-format"),
         },
         single_file_support = true,
     },
@@ -56,11 +59,13 @@ local servers = {
                     ".pyc$",
                 },
                 lineLength = 120,
-                showSyntaxErrors = false,
                 lint = {
-                    ignore = { "F", "E741" },
+                    enable = true,
                     extendSelect = { "I" },
+                    ignore = { "F", "E741" },
                 },
+                organizeImports = true,
+                showSyntaxErrors = false,
             },
         },
     },
@@ -110,6 +115,10 @@ return {
     },
     {
         "williamboman/mason-lspconfig.nvim",
+        dependencies = {
+            "williamboman/mason.nvim",
+            "neovim/nvim-lspconfig",
+        },
         config = function()
             require("mason-lspconfig").setup({
                 ensure_installed = vim.tbl_keys(servers),

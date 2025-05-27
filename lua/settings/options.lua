@@ -38,6 +38,7 @@ local options = {
     scrolloff = 8,
     sidescrolloff = 8,
     ruler = false,
+    fileformat = "unix",
 }
 
 for k, v in pairs(options) do
