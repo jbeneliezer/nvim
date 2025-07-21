@@ -11,12 +11,22 @@ return {
     },
     config = function()
         local actions = require("telescope.actions")
-        local open_with_trouble = function()
-            require("trouble.sources.telescope").open()
+        local open_with_trouble = function(bufnr)
+            require("trouble.sources.telescope").open(bufnr)
         end
         require("telescope").setup({
             defaults = {
-                file_ignore_patterns = { "nvim/.undo", ".svn$", ".git$", "__pycache__", ".pyc$", ".d$", ".o$" },
+                file_ignore_patterns = {
+                    "nvim/.undo",
+                    "%.svn$",
+                    "%.git$",
+                    "%.d$",
+                    "%.o$",
+                    "__pycache__",
+                    "%.pyc$",
+                    "%.egg%-info",
+                    "%.?venv/.*[^%.p][^py][^yi]$",
+                },
                 prompt_prefix = " ",
                 selection_caret = " ",
                 path_display = { "truncate" },

@@ -62,7 +62,7 @@ local servers = {
                 lint = {
                     enable = true,
                     extendSelect = { "I" },
-                    ignore = { "F", "E741" },
+                    -- ignore = { "F", "E741" },
                 },
                 organizeImports = true,
                 showSyntaxErrors = false,

@@ -151,7 +151,7 @@ M.set_basic_keymaps = function()
     keymap("n", "<leader>fa", require("telescope").extensions.ast_grep.ast_grep, default_opts, "Ast Grep")
     keymap("n", "<leader>fA", telescope_builtin.autocommand, default_opts, "Autocommands")
     keymap("n", "<leader>fc", telescope_builtin.commands, default_opts, "Commands")
-    keymap("n", "<leader>ff", telescope_builtin.find_files, default_opts, "Files")
+    keymap("n", "<leader>ff", partial(telescope_builtin.find_files, { hidden = true }), default_opts, "Files")
     keymap("n", "<leader>fr", telescope_builtin.oldfiles, default_opts, "Recent Files")
     keymap("n", "<leader>fC", telescope_builtin.command_history, default_opts, "Recent Commands")
     keymap("n", "<leader>fR", telescope_builtin.registers, default_opts, "Registers")
@@ -160,7 +160,7 @@ M.set_basic_keymaps = function()
     keymap("n", "<leader>fH", telescope_builtin.highlights, default_opts, "Highlights")
     keymap("n", "<leader>fk", telescope_builtin.keymaps, default_opts, "Keymaps")
     keymap("n", "<leader>fu", require("telescope").extensions.undo.undo, default_opts, "Undo")
-    keymap("n", "<leader>fs", telescope_builtin.grep_string, default_opts, "Grep String")
+    keymap({ "n", "v" }, "<leader>fs", telescope_builtin.grep_string, default_opts, "Grep String")
     keymap("n", "<leader>fS", session_lens.search_session, default_opts, "Sessions")
     keymap("n", "<leader>fj", telescope_builtin.jumplist, default_opts, "Jump List")
     keymap("n", "<leader>f/", telescope_builtin.current_buffer_fuzzy_find, default_opts, "Buffer Grep")
@@ -446,7 +446,7 @@ end
 M.del_dap_keymaps = function()
     M.set_dap_keymaps()
     for _, v in ipairs(dap_keymaps) do
-        del_keymap(v[1], v[2], "a")
+        del_keymap(v[1], v[2])
     end
 end
 

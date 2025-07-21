@@ -61,7 +61,7 @@ local get_program = function(opts)
             prompt = "Path to executable: ",
             default = vim.fn.getcwd() .. "/",
             completion = "file",
-        }, opts))
+        }, opts or {}))
     end
 end
 
@@ -152,7 +152,11 @@ local dap_configurations = {
             default_confs.python,
             { name = "Current Package", program = "${workspaceFolderBasename}/${workspaceFolderBasename}/__init__.py" }
         ),
-        vim.tbl_extend("force", default_confs.python, { name = "SVCP", program = "${workspaceFolder}/svcp/__init__.py" }),
+        vim.tbl_extend(
+            "force",
+            default_confs.python,
+            { name = "SVCP", program = "${workspaceFolder}/svcp/__init__.py" }
+        ),
         vim.tbl_extend("force", default_confs.python, {
             name = "Custom",
             program = get_program({ prompt = "Path to script: " }),
@@ -164,7 +168,6 @@ return {
     "mfussenegger/nvim-dap",
     dependencies = {
         "nvim-telescope/telescope-dap.nvim",
-        "Joakker/lua-json5",
         "jbyuki/one-small-step-for-vimkind",
         "mfussenegger/nvim-dap-python",
         "ofirgall/goto-breakpoints.nvim",
@@ -184,7 +187,7 @@ return {
         local dap = require("dap")
 
         dap.defaults.fallback.terminal_win_cmd = "tabnew"
-        dap.set_log_level("TRACE")
+        -- dap.set_log_level("TRACE")
 
         dap.listeners.before.attach["dap_keymaps"] = require("settings.keymaps").set_dap_keymaps
         dap.listeners.before.launch["dap_keymaps"] = require("settings.keymaps").set_dap_keymaps
@@ -193,8 +196,8 @@ return {
 
         require("dap-python").setup(
             vim.fn.stdpath("data")
-                .. "/mason/packages/debugpy/venv/"
-                .. (OsCurrent == OS.WINDOWS and "Scripts/python" or "bin/python"),
+            .. "/mason/packages/debugpy/venv/"
+            .. (OsCurrent == OS.WINDOWS and "Scripts/python" or "bin/python"),
             {
                 console = "integratedTerminal",
             }
