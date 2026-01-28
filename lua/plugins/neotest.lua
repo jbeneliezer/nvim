@@ -3,7 +3,7 @@
 local function get_python()
     local venv = vim.fn.getenv("VIRTUAL_ENV")
     if venv ~= vim.NIL then
-        local p = venv .. (OsCurrent == OS.WINDOWS and "/Scripts/python" or "/bin/python")
+        local p = venv .. (OsCurrent == OS.WINDOWS and "\\Scripts\\python.exe" or "/bin/python")
         if vim.fn.executable(p) then
             return p
         elseif vim.fn.executable("python3") then
@@ -43,6 +43,10 @@ return {
                 }),
                 require("neotest-rust")({ args = { "--no-capture" }, dap_adapter = "lldb" }),
             },
+            discovery = {
+                enabled = false,
+                concurrent = 1,
+            }
         })
     end,
 }

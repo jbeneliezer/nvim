@@ -80,5 +80,7 @@ return {
         vim.treesitter.language.register("glsl", "vert")
         vim.treesitter.language.register("glsl", "frag")
         vim.treesitter.language.register("verilog", "v")
+        vim.treesitter.language.register("asm", "s")
+        vim.treesitter.language.register("asm", "S")
     end,
 }
