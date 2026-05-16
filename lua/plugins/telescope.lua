@@ -11,8 +11,8 @@ return {
     },
     config = function()
         local actions = require("telescope.actions")
-        local open_with_trouble = function()
-            require("trouble.sources.telescope").open()
+        local open_with_trouble = function(bufnr)
+            require("trouble.sources.telescope").open(bufnr)
         end
         require("telescope").setup({
             defaults = {

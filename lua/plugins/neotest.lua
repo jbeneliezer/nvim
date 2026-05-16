@@ -26,7 +26,8 @@ return {
         "antoinemadec/FixCursorHold.nvim",
         "nvim-treesitter/nvim-treesitter",
         "nvim-neotest/neotest-python",
-        "rouge8/neotest-rust",
+        "mrcjkb/rustaceanvim",
+        -- "rouge8/neotest-rust",
     },
     ft = { "python", "rust" },
     config = function()
@@ -41,7 +42,8 @@ return {
                     runner = "pytest",
                     python = get_python,
                 }),
-                require("neotest-rust")({ args = { "--no-capture" }, dap_adapter = "lldb" }),
+                -- require("neotest-rust")({ args = { "--no-capture" }, dap_adapter = "lldb" }),
+                require("rustaceanvim.neotest"),
             },
         })
     end,

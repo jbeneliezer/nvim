@@ -99,9 +99,9 @@ BraceWrapping:
   BeforeLambdaBody: false
   BeforeWhile:     false
   IndentBraces:    false
-  SplitEmptyFunction: true
-  SplitEmptyRecord: true
-  SplitEmptyNamespace: true
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: false
 BreakAdjacentStringLiterals: true
 BreakAfterAttributes: Leave
 BreakAfterJavaFieldAnnotations: false
@@ -152,12 +152,12 @@ IncludeCategories:
 IncludeIsMainRegex: '(Test)?$'
 IncludeIsMainSourceRegex: ''
 IndentAccessModifiers: false
-IndentCaseBlocks: false
-IndentCaseLabels: false
+IndentCaseBlocks: true
+IndentCaseLabels: true
 IndentExternBlock: AfterExternBlock
 IndentGotoLabels: true
 IndentPPDirectives: None
-IndentRequiresClause: true
+IndentRequiresClause: false
 IndentWidth:     4
 IndentWrappedFunctionNames: false
 InsertBraces:    false
@@ -271,4 +271,3 @@ WhitespaceSensitiveMacros:
   - NS_SWIFT_NAME
   - PP_STRINGIZE
   - STRINGIZE
-...

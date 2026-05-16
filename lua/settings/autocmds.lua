@@ -1,6 +1,8 @@
 vim.api.nvim_create_augroup("CustomHighlights", { clear = true })
 vim.api.nvim_create_augroup("TermKeymaps", { clear = true })
-vim.api.nvim_create_augroup("PythonKeymaps", { clear = true })
+vim.api.nvim_create_augroup("IPythonKeymaps", { clear = true })
+vim.api.nvim_create_augroup("MoltenKeymaps", { clear = true })
+vim.api.nvim_create_augroup("NeotestKeymaps", { clear = true })
 vim.api.nvim_create_augroup("DiffviewKeymaps", { clear = true })
 vim.api.nvim_create_augroup("LspKeymaps", { clear = true })
 
@@ -53,18 +55,18 @@ vim.api.nvim_create_autocmd("FileType", {
             require("settings.keymaps").set_ipy_keymaps()
         end
     end,
-    group = "PythonKeymaps",
+    group = "IPythonKeymaps",
 })
 
 vim.api.nvim_create_autocmd("FileType", {
     desc = "Set Neotest Keymaps",
     pattern = "*",
     callback = function()
-        if vim.bo.filetype == "python" then
+        if vim.bo.filetype == "python" or vim.bo.filetype == "rust" then
             require("settings.keymaps").set_neotest_keymaps()
         end
     end,
-    group = "PythonKeymaps",
+    group = "NeotestKeymaps",
 })
 
 vim.api.nvim_create_autocmd("User", {
@@ -73,7 +75,7 @@ vim.api.nvim_create_autocmd("User", {
     callback = function()
         require("settings.keymaps").set_molten_keymaps()
     end,
-    group = "PythonKeymaps",
+    group = "MoltenKeymaps",
 })
 
 vim.api.nvim_create_autocmd("User", {
@@ -82,7 +84,7 @@ vim.api.nvim_create_autocmd("User", {
     callback = function()
         require("settings.keymaps").del_molten_keymaps()
     end,
-    group = "PythonKeymaps",
+    group = "MoltenKeymaps",
 })
 
 vim.api.nvim_create_autocmd("User", {

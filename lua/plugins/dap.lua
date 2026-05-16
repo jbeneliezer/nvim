@@ -61,7 +61,7 @@ local get_program = function(opts)
             prompt = "Path to executable: ",
             default = vim.fn.getcwd() .. "/",
             completion = "file",
-        }, opts))
+        }, opts or {}))
     end
 end
 
@@ -152,7 +152,11 @@ local dap_configurations = {
             default_confs.python,
             { name = "Current Package", program = "${workspaceFolderBasename}/${workspaceFolderBasename}/__init__.py" }
         ),
-        vim.tbl_extend("force", default_confs.python, { name = "SVCP", program = "${workspaceFolder}/svcp/__init__.py" }),
+        vim.tbl_extend(
+            "force",
+            default_confs.python,
+            { name = "SVCP", program = "${workspaceFolder}/svcp/__init__.py" }
+        ),
         vim.tbl_extend("force", default_confs.python, {
             name = "Custom",
             program = get_program({ prompt = "Path to script: " }),
@@ -193,8 +197,8 @@ return {
 
         require("dap-python").setup(
             vim.fn.stdpath("data")
-                .. "/mason/packages/debugpy/venv/"
-                .. (OsCurrent == OS.WINDOWS and "Scripts/python" or "bin/python"),
+            .. "/mason/packages/debugpy/venv/"
+            .. (OsCurrent == OS.WINDOWS and "Scripts/python" or "bin/python"),
             {
                 console = "integratedTerminal",
             }
