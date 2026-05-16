@@ -168,7 +168,6 @@ return {
     "mfussenegger/nvim-dap",
     dependencies = {
         "nvim-telescope/telescope-dap.nvim",
-        "Joakker/lua-json5",
         "jbyuki/one-small-step-for-vimkind",
         "mfussenegger/nvim-dap-python",
         "ofirgall/goto-breakpoints.nvim",
@@ -188,7 +187,7 @@ return {
         local dap = require("dap")
 
         dap.defaults.fallback.terminal_win_cmd = "tabnew"
-        dap.set_log_level("TRACE")
+        -- dap.set_log_level("TRACE")
 
         dap.listeners.before.attach["dap_keymaps"] = require("settings.keymaps").set_dap_keymaps
         dap.listeners.before.launch["dap_keymaps"] = require("settings.keymaps").set_dap_keymaps

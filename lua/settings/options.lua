@@ -48,6 +48,7 @@ end
 vim.opt.shortmess:append("acI")
 vim.opt.whichwrap:append("<,>,[,]")
 vim.opt.iskeyword:append("-")
+vim.o.cdpath = ",,/,C:/,~/," .. (vim.env.CDPATH or "")
 
 -- clipboard
 vim.opt.clipboard:append("unnamedplus")
